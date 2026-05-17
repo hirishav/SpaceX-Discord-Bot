@@ -9,11 +9,18 @@ class ModBan(commands.Cog):
     @commands.command(name="ban")
     @commands.has_permissions(ban_members=True)
     async def ban(self, ctx, member: discord.Member, *, reason: str = "No reason provided"):
-        """Kisi member ko server se permanent ban karne ke liye."""
+        """Kisi member ko server se permanent ban karne ke liye (Role Check & DM Bug Fixed)."""
+        
+        # FIX: Agar target ka role bada ya barabar hai, toh 'return' lagakar code ko yahi rok do!
         if member.top_role >= ctx.author.top_role and ctx.author.id != ctx.guild.owner_id:
             return await ctx.send("❌ Aap apne se unche ya barabar ke role waale member ko ban nahi kar sakte!")
 
+        # Extra safety check: Bot khud se unche role wale ko ban nahi kar sakta
+        if member.top_role >= ctx.guild.me.top_role:
+            return await ctx.send("❌ Mera role is member se niche hai, main ise ban nahi kar sakta!")
+
         try:
+            # Ab DM sirf tabhi jayega jab upar ke saare role check pass ho chuke honge!
             try:
                 dm_embed = discord.Embed(
                     title=f"🔨 You have been PERMANENTLY BANNED from {ctx.guild.name}!",
@@ -24,6 +31,7 @@ class ModBan(commands.Cog):
             except Exception:
                 pass
 
+            # Member ban karna
             await member.ban(reason=f"Banned by {ctx.author.name} | Reason: {reason}", delete_message_days=1)
 
             embed = discord.Embed(
@@ -42,7 +50,7 @@ class ModBan(commands.Cog):
                 pass
 
         except discord.Forbidden:
-            await ctx.send("❌ Main is member ko ban nahi kar sakta! Mera role is member se upar hona chahiye.")
+            await ctx.send("❌ Main is member ko ban nahi kar sakta! Kripya check karein ki mera role upar ho.")
 
     @ban.error
     async def ban_error(self, ctx, error):
