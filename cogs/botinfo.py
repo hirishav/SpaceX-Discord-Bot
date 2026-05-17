@@ -9,22 +9,37 @@ class BotInfo(commands.Cog):
         self.bot = bot
         self.start_time = datetime.datetime.now(datetime.timezone.utc)
 
-    # BADAL DIYA: hybrid_command banaya
-    @commands.hybrid_command(name="botinfo", description="Bot ki live statistics dekhne ke liye.")
+    @commands.command(name="botinfo", aliases=["bi", "info"])
     async def botinfo(self, ctx):
+        """Bot ki saari jankari dekhne ke liye (Command text delete nahi hoga)."""
+        
         total_servers = len(self.bot.guilds)
         total_members = sum(guild.member_count for guild in self.bot.guilds)
         
         current_time = datetime.datetime.now(datetime.timezone.utc)
         uptime_duration = current_time - self.start_time
-        uptime_str = f"{uptime_duration.days}d {uptime_duration.seconds // 3600}h {(uptime_duration.seconds % 3600) // 60}m"
+        
+        days = uptime_duration.days
+        hours, remainder = divmod(uptime_duration.seconds, 3600)
+        minutes, _ = divmod(remainder, 60)
+        uptime_str = f"{days}d {hours}h {minutes}m"
 
-        embed = discord.Embed(title=f"📊 {self.bot.user.name} Statistics", color=discord.Color.purple())
+        embed = discord.Embed(
+            title=f"📊 {self.bot.user.name} Live Statistics",
+            color=discord.Color.purple()
+        )
+        embed.set_thumbnail(url=self.bot.user.display_avatar.url)
+        
         embed.add_field(name="👑 Bot Creator", value="<@727718500663033897>", inline=True)
         embed.add_field(name="⏱️ Uptime", value=f"`{uptime_str}`", inline=True)
-        embed.add_field(name="🌐 Total Servers", value=f"**{total_servers}**", inline=True)
-        embed.add_field(name="👥 Total Members", value=f"**{total_members}**", inline=True)
+        embed.add_field(name="🌐 Total Servers", value=f"**{total_servers}** Servers", inline=True)
+        embed.add_field(name="👥 Total Members", value=f"**{total_members}** Users", inline=True)
+        embed.add_field(name="⚡ Library", value=f"Discord.py v{discord.__version__}", inline=True)
+        embed.add_field(name="🐍 Python Version", value=f"v{platform.python_version()}", inline=True)
         
+        embed.set_footer(text=f"Requested by {ctx.author.name}", icon_url=ctx.author.display_avatar.url)
+        
+        # BADAL DIYA: `ctx.message.delete()` wala block yahan se permanent hata diya hai!
         await ctx.send(embed=embed)
 
 async def setup(bot):
