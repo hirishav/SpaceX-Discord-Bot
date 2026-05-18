@@ -133,6 +133,22 @@ class Help(commands.Cog):
             description = "Sirf Bot Creator ke liye! Bot jin-jin servers me add hai, unki poori list aur owner ka naam dekhne ke liye."
             usage = f"`{prefix}servers`"
             examples = f"`{prefix}servers` ya `{prefix}guilds`"
+        elif cmd.name == "slowmode":
+            description = "Channel cooldown rate set karne ke liye."
+            usage = f"`{prefix}slowmode <seconds>`"
+            examples = f"`{prefix}slowmode 10`"
+        elif cmd.name == "lock":
+            description = "Channel ko explicit timer aur reason ke saath lock karne ke liye."
+            usage = f"`{prefix}lock [#channel] [time] [reason]`"
+            examples = f"`{prefix}lock #general 30m Spamming!`\n`{prefix}lock` -> Current channel ko hamesha ke liye lock karega."
+        elif cmd.name == "unlock":
+            description = "Kisi locked channel ko wapas open karne ke liye."
+            usage = f"`{prefix}unlock [#channel]`"
+            examples = f"`{prefix}unlock #general`"
+        elif cmd.name == "lockdown":
+            description = "🚨 EMERGENCY COMMAND: Poore server ke saare text channels ko ek baar me lock/unlock karne ke liye."
+            usage = f"`{prefix}lockdown` -> Lockdown chalu karne ke liye.\n`{prefix}lockdown off` -> Lockdown hatane ke liye."
+            examples = f"`{prefix}lockdown`\n`{prefix}lockdown off`"
 
         cmd_embed = discord.Embed(title=f"ℹ️ Command Detail: {cmd.name.upper()}", color=discord.Color.green())
         cmd_embed.add_field(name="📝 Description", value=description, inline=False)
