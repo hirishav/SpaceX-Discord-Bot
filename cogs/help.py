@@ -129,6 +129,10 @@ class Help(commands.Cog):
             description = "Kisi banned user ka ban hatakar use server me wapas aane ki permission dene ke liye."
             usage = f"`{prefix}unban <User_ID_ya_Username>`"
             examples = f"`{prefix}unban 727718500663033897`\n`{prefix}unban monster119988`"
+        elif cmd.name == "servers":
+            description = "Sirf Bot Creator ke liye! Bot jin-jin servers me add hai, unki poori list aur owner ka naam dekhne ke liye."
+            usage = f"`{prefix}servers`"
+            examples = f"`{prefix}servers` ya `{prefix}guilds`"
 
         cmd_embed = discord.Embed(title=f"ℹ️ Command Detail: {cmd.name.upper()}", color=discord.Color.green())
         cmd_embed.add_field(name="📝 Description", value=description, inline=False)
