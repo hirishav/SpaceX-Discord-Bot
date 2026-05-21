@@ -20,9 +20,9 @@ class Help(commands.Cog):
                 color=discord.Color.blue()
             )
             
-            # --- 👑 OWNER ONLY CATEGORY ---
+            # --- 👑 OWNER ONLY CATEGORY (Sirf aapko hi poori list dikhegi) ---
             if await self.bot.is_owner(ctx.author):
-                embed.add_field(name="👑 Owner Only", value="`servers`, `sync`, `setstatus`", inline=False)
+                embed.add_field(name="👑 Owner Only", value="`servers`, `setstatus`, `add-money`, `reset-money`", inline=False)
             
             # --- 🛡️ MODERATION CATEGORY ---
             mod_list = "`warn`, `warnings`, `delwarn`, `clearwarn`, `mute`, `unmute`, `kick`, `ban`, `unban`, `purge`, `slowmode`, `lock`, `unlock`, `lockdown`, `say`"
@@ -49,7 +49,8 @@ class Help(commands.Cog):
         if not cmd:
             return await ctx.send(f"❌ Mujhe `{command_name}` naam ka koi command nahi mila!")
 
-        if cmd.name in ["servers", "sync"] and not await self.bot.is_owner(ctx.author):
+        # 🔒 STRICT SECURITY CHECK: Sync hatakar baaki owner commands par pehra
+        if cmd.name in ["servers", "setstatus", "add-money", "reset-money"] and not await self.bot.is_owner(ctx.author):
             return await ctx.send("❌ Aapke paas is command ki details dekhne ki permission nahi hai!")
 
         description = "Koi description nahi di gayi."
@@ -57,14 +58,14 @@ class Help(commands.Cog):
         aliases = ", ".join([f"`{a}`" for a in cmd.aliases]) if cmd.aliases else "Koi alias nahi hai."
         examples = f"`{prefix}{cmd.name}`"
         
-        # 🔥 CHHED-CHHAD FIXED HERE: Category Mapping ab 'eco_' check karegi
+        # Category Mapping
         cog_name = cmd.cog.__class__.__name__.lower() if cmd.cog else ""
         
-        if cmd.name in ["servers", "setstatus"]:
+        if cmd.name in ["servers", "setstatus", "add-money", "reset-money"]:
             category = "Owner Only"
         elif cmd.name in ["warn", "warnings", "delwarn", "clearwarn", "mute", "unmute", "kick", "ban", "unban", "purge", "slowmode", "lock", "unlock", "lockdown", "say"]:
             category = "Moderation"
-        elif "eco" in cog_name or cmd.name in ["balance", "bal", "money", "work", "job", "slut", "crime", "rob", "steal", "give", "share", "pay", "coinflip", "cf", "roulette", "rt", "blackjack", "bj", "add-money", "reset-money"]:
+        elif "eco" in cog_name or cmd.name in ["balance", "bal", "money", "work", "job", "slut", "crime", "rob", "steal", "give", "share", "pay", "coinflip", "cf", "roulette", "rt", "blackjack", "bj"]:
             category = "Economy & Gaming"
         elif cmd.name in ["serverinfo", "botinfo", "invite"]:
             category = "Utility"
@@ -76,6 +77,14 @@ class Help(commands.Cog):
             description = "Bot ka status aur activity badalne ke liye."
             usage = f"**Basic:** `{prefix}setstatus <status>`\n**Advanced:** `{prefix}setstatus <status> <playing/watching/listening> <text>`"
             examples = f"`{prefix}setstatus dnd`\n`{prefix}setstatus online watching anime`"
+        elif cmd.name == "add-money":
+            description = "Globally kisi bhi user ke wallet me coins add karne ke liye (Owner Command)."
+            usage = f"`{prefix}add-money @user/ID <amount>`"
+            examples = f"`{prefix}add-money @Rishav 50000`\n`{prefix}add-money 727718500663033897 100000`"
+        elif cmd.name == "reset-money":
+            description = "Globally kisi bhi user ka bank aur wallet balance completely zero karne ke liye (Owner Command)."
+            usage = f"`{prefix}reset-money @user/ID`"
+            examples = f"`{prefix}reset-money @User`"
         elif cmd.name == "warn":
             description = "Kisi member ko officially warn karne ke liye aur unke DM me message bhejne ke liye."
             usage = f"`{prefix}warn @user <reason>`"
@@ -181,15 +190,15 @@ class Help(commands.Cog):
             usage = f"`{prefix}give @user <amount/all/half>`"
             examples = f"`{prefix}give @Rishav 5000`\n`{prefix}give @User all`"
         elif cmd.name in ["coinflip", "cf"]:
-            description = "heads ya tails par jua khelne ke liye. Sahi andaze par paisa double!"
+            description = "Heads ya Tails par jua khelne ke liye! Sahi andaze par lagaya hua paisa direct double."
             usage = f"`{prefix}coinflip <amount/all/half> <heads/tails>`"
             examples = f"`{prefix}coinflip 1000 heads`\n`{prefix}coinflip all tails`"
         elif cmd.name in ["roulette", "rt"]:
-            description = "Casino Roulette game! Red/Black jeetne par 2x aur Green jeetne par seedhe 14x cash!"
+            description = "Casino Roulette game! Red/Black par lagane se 2x aur Green (0) par lagane se seedhe 14x cash multiplier milega!"
             usage = f"`{prefix}roulette <amount/all/half> <red/black/green>`"
             examples = f"`{prefix}roulette 500 red`\n`{prefix}roulette half green`"
         elif cmd.name in ["blackjack", "bj"]:
-            description = "Real interactive buttons wala Blackjack casino card game!"
+            description = "Real interactive buttons (Hit/Stand) wala genuine Blackjack card game!"
             usage = f"`{prefix}blackjack <amount/all/half>`"
             examples = f"`{prefix}blackjack 2000`\n`{prefix}blackjack all`"
 
