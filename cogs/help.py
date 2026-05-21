@@ -29,7 +29,7 @@ class Help(commands.Cog):
             embed.add_field(name="🛡️ Moderation", value=mod_list, inline=False)
             
             # --- 💰 ECONOMY & GAMING (OwO Global Style) ---
-            eco_list = "`bal`, `work`, `slut`, `crime`, `rob`, `give`, `coinflip`, `roulette`, `blackjack`, `dep`, `with`"
+            eco_list = "`balance`, `work`, `slut`, `crime`, `rob`, `give`, `coinflip`, `roulette`, `blackjack`, `deposit`, `withdraw`"
             embed.add_field(name="💰 Economy & Gaming", value=eco_list, inline=False)
             
             # --- ⚙️ UTILITY CATEGORY ---
