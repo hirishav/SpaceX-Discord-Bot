@@ -29,7 +29,7 @@ class Help(commands.Cog):
             embed.add_field(name="🛡️ Moderation", value=mod_list, inline=False)
             
             # --- 💰 ECONOMY & GAMING (OwO Global Style) ---
-            eco_list = "`bal`, `work`, `slut`, `crime`, `rob`, `give`, `coinflip`, `roulette`, `blackjack`"
+            eco_list = "`bal`, `work`, `slut`, `crime`, `rob`, `give`, `coinflip`, `roulette`, `blackjack`, `dep`, `with`"
             embed.add_field(name="💰 Economy & Gaming", value=eco_list, inline=False)
             
             # --- ⚙️ UTILITY CATEGORY ---
@@ -49,7 +49,7 @@ class Help(commands.Cog):
         if not cmd:
             return await ctx.send(f"❌ Mujhe `{command_name}` naam ka koi command nahi mila!")
 
-        # 🔒 STRICT SECURITY CHECK: Sync hatakar baaki owner commands par pehra
+        # 🔒 STRICT SECURITY CHECK: Owner commands par strict pehra
         if cmd.name in ["servers", "setstatus", "add-money", "reset-money"] and not await self.bot.is_owner(ctx.author):
             return await ctx.send("❌ Aapke paas is command ki details dekhne ki permission nahi hai!")
 
@@ -65,7 +65,7 @@ class Help(commands.Cog):
             category = "Owner Only"
         elif cmd.name in ["warn", "warnings", "delwarn", "clearwarn", "mute", "unmute", "kick", "ban", "unban", "purge", "slowmode", "lock", "unlock", "lockdown", "say"]:
             category = "Moderation"
-        elif "eco" in cog_name or cmd.name in ["balance", "bal", "money", "work", "job", "slut", "crime", "rob", "steal", "give", "share", "pay", "coinflip", "cf", "roulette", "rt", "blackjack", "bj"]:
+        elif "eco" in cog_name or cmd.name in ["balance", "bal", "money", "work", "job", "slut", "crime", "rob", "steal", "give", "share", "pay", "coinflip", "cf", "roulette", "rt", "blackjack", "bj", "deposit", "dep", "withdraw", "with"]:
             category = "Economy & Gaming"
         elif cmd.name in ["serverinfo", "botinfo", "invite"]:
             category = "Utility"
@@ -170,19 +170,19 @@ class Help(commands.Cog):
             usage = f"`{prefix}bal`\n`{prefix}bal @user`"
             examples = f"`{prefix}bal`\n`{prefix}bal @Rishav`"
         elif cmd.name == "work":
-            description = "Mehnat ka kaam karke bina kisi risk ke safe coins kamane ke liye. (Cooldown: 10m)"
+            description = "Mehnat ka kaam karke bina kisi risk ke safe coins kamane ke liye. (Cooldown: 30s Countdown)"
             usage = f"`{prefix}work`"
             examples = f"`{prefix}work`"
         elif cmd.name == "slut":
-            description = "Risky tareeqon se paise kamane ke liye! Jeetne ka chance zyada hai par harne par fine lagega. (Cooldown: 15m)"
+            description = "Risky tareeqon se paise kamane ke liye! Jeetne ka chance zyada hai par harne par fine lagega. (Cooldown: 30s Countdown)"
             usage = f"`{prefix}slut`"
             examples = f"`{prefix}slut`"
         elif cmd.name == "crime":
-            description = "High-risk, High-reward illegal kaam! Jeetne par mota paisa, pakde jaane par bhaari fine. (Cooldown: 20m)"
+            description = "High-risk, High-reward illegal kaam! Jeetne par mota paisa, pakde jaane par bhaari fine. (Cooldown: 30s Countdown)"
             usage = f"`{prefix}crime`"
             examples = f"`{prefix}crime`"
         elif cmd.name == "rob":
-            description = "Kisi doosre user ke wallet (cash) se chori karne ke liye. Target ke paas jitna zyada cash hoga, fail hone ka chance utna hi badhega! (Cooldown: 30m)"
+            description = "Kisi doosre user ke wallet (cash) se chori karne ke liye. Target ke paas jitna zyada cash hoga, fail hone ka chance utna hi badhega! (Cooldown: 30s Countdown)"
             usage = f"`{prefix}rob @user`"
             examples = f"`{prefix}rob @Rishav`"
         elif cmd.name == "give":
@@ -201,6 +201,14 @@ class Help(commands.Cog):
             description = "Real interactive buttons (Hit/Stand) wala genuine Blackjack card game!"
             usage = f"`{prefix}blackjack <amount/all/half>`"
             examples = f"`{prefix}blackjack 2000`\n`{prefix}blackjack all`"
+        elif cmd.name in ["deposit", "dep"]:
+            description = "Wallet se cash nikal kar safe bank me deposit karne ke liye taaki koi rob na kar paye."
+            usage = f"`{prefix}dep <amount/all/half>`"
+            examples = f"`{prefix}dep 2000`\n`{prefix}dep all`"
+        elif cmd.name in ["withdraw", "with"]:
+            description = "Bank account se paise nikal kar wapas cash wallet me lane ke liye."
+            usage = f"`{prefix}with <amount/all/half>`"
+            examples = f"`{prefix}with 5000`\n`{prefix}with half`"
 
         cmd_embed = discord.Embed(title=f"ℹ️ Command Detail: {cmd.name.upper()}", color=discord.Color.green())
         cmd_embed.add_field(name="📝 Description", value=description, inline=False)
