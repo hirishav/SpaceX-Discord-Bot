@@ -1,3 +1,5 @@
 discord.py
 Flask
-wavelink==2.6.4
+yt-dlp
+PyNaCl
+async-timeout
