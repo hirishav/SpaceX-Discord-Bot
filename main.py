@@ -149,16 +149,11 @@ async def on_message(message):
     is_owner = message.author.id in bot.owner_ids
     if bot.maintenance_mode and not is_owner:
         if int(time.time()) >= bot.maintenance_end:
-            # Loop check safety filter background check failsafe trigger
             bot.maintenance_mode = False
         else:
-            # User ko alert list queue me safe karo ping ke liye
             bot.interrupted_users[message.author.id] = message.channel.id
-            
-            # Dynamic countdown calculations
             time_left = get_remaining_time_str(bot.maintenance_end)
             
-            # Check agar command register tha tabhi error popup dein
             if message.content.startswith('!!'):
                 embed = discord.Embed(
                     title="⚙️ Bot Under Maintenance",

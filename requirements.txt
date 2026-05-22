@@ -1,5 +1,2 @@
 discord.py
 Flask
-yt-dlp
-PyNaCl
-async-timeout
