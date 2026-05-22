@@ -11,7 +11,7 @@ class Invite(commands.Cog):
         """Bot ko apne server me add karne ke liye invite link deta hai (No Delete Fix)."""
         
         bot_id = self.bot.user.id
-        invite_link = f"https://discord.com/api/oauth2/authorize?client_id={bot_id}&permissions=8&scope=bot%20applications.commands"
+        invite_link = f"https://discord.com/oauth2/authorize?client_id=1505527456155570196&permissions=7707175400501110&integration_type=0&scope=bot+applications.commands"
 
         embed = discord.Embed(
             title=f"🤝 Invite {self.bot.user.name} to Your Server!",
