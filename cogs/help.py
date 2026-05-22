@@ -25,7 +25,7 @@ class Help(commands.Cog):
                 embed.add_field(name="👑 Owner Only", value="`servers`, `setstatus`, `add-money`, `reset-money`, `maintenance`, `blacklist`", inline=False)
             
             # --- 🛡️ MODERATION CATEGORY (Poll Added, Blacklist Removed!) ---
-            mod_list = "`warn`, `warnings`, `delwarn`, `clearwarn`, `mute`, `unmute`, `kick`, `ban`, `unban`, `purge`, `slowmode`, `lock`, `unlock`, `lockdown`, `say`, `modlogs`, `poll`"
+            mod_list = "`warn`, `warnings`, `delwarn`, `clearwarn`, `mute`, `unmute`, `kick`, `ban`, `unban`, `purge`, `slowmode`, `lock`, `unlock`, `lockdown`, `say`, `modlogs`, `poll`, `pin`"
             embed.add_field(name="🛡️ Moderation", value=mod_list, inline=False)
             
             # --- 💰 ECONOMY & GAMING ---
@@ -63,7 +63,7 @@ class Help(commands.Cog):
         
         if cmd.name in ["servers", "setstatus", "add-money", "reset-money", "maintenance", "blacklist"]:
             category = "Owner Only"
-        elif "modpoll" in cog_name or cmd.name in ["warn", "warnings", "delwarn", "clearwarn", "mute", "unmute", "kick", "ban", "unban", "purge", "slowmode", "lock", "unlock", "lockdown", "say", "modlogs", "poll"]:
+        elif "modpoll" in cog_name or cmd.name in ["warn", "warnings", "delwarn", "clearwarn", "mute", "unmute", "kick", "ban", "unban", "purge", "slowmode", "lock", "unlock", "lockdown", "say", "modlogs", "poll", "pin"]:
             category = "Moderation"
         elif "eco" in cog_name or cmd.name in ["balance", "bal", "money", "work", "job", "slut", "crime", "rob", "steal", "give", "share", "pay", "coinflip", "cf", "roulette", "rt", "blackjack", "bj", "deposit", "dep", "withdraw", "with"]:
             category = "Economy & Gaming"
@@ -195,6 +195,10 @@ class Help(commands.Cog):
         elif cmd.name == "servers":
             description = "Sirf Bot Creator ke liye servers ki list dekhne ke liye (Owner Command)."
             usage = f"`{prefix}servers`"
+        elif cmd.name == "pin":
+         description = "📌 Server ke kisi bhi message ko ID ke zariye channel ke pinned messages me add karne ke liye."
+         usage = f"`{prefix}pin <message_id>`"
+         examples = f"`{prefix}pin 124357285194729481`"
 
         cmd_embed = discord.Embed(title=f"ℹ️ Command Detail: {cmd.name.upper()}", color=discord.Color.green())
         cmd_embed.add_field(name="📝 Description", value=description, inline=False)
