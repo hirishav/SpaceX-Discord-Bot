@@ -20,23 +20,18 @@ class Help(commands.Cog):
                 color=discord.Color.blue()
             )
             
-            # --- 👑 OWNER ONLY CATEGORY (Blacklist Ab Safe Hai) ---
             if await self.bot.is_owner(ctx.author):
                 embed.add_field(name="👑 Owner Only", value="`servers`, `setstatus`, `add-money`, `reset-money`, `maintenance`, `blacklist`", inline=False)
             
-            # --- 🛡️ MODERATION CATEGORY (Poll Added, Blacklist Removed!) ---
-            mod_list = "`warn`, `warnings`, `delwarn`, `clearwarn`, `mute`, `unmute`, `kick`, `ban`, `unban`, `purge`, `slowmode`, `lock`, `unlock`, `lockdown`, `say`, `modlogs`, `poll`, `pin`"
+            mod_list = "`warn`, `warnings`, `delwarn`, `clearwarn`, `mute`, `unmute`, `kick`, `ban`, `unban`, `purge`, `slowmode`, `lock`, `unlock`, `lockdown`, `say`, `modlogs`, `poll`, `pin`, `unpin`"
             embed.add_field(name="🛡️ Moderation", value=mod_list, inline=False)
             
-            # --- 💰 ECONOMY & GAMING ---
             eco_list = "`bal`, `work`, `slut`, `crime`, `rob`, `give`, `coinflip`, `roulette`, `blackjack`, `deposit`, `withdraw`"
             embed.add_field(name="💰 Economy & Gaming", value=eco_list, inline=False)
             
-            # --- ⚙️ UTILITY CATEGORY ---
             util_list = "`serverinfo`, `botinfo`, `invite`"
             embed.add_field(name="⚙️ Utility", value=util_list, inline=False)
             
-            # --- ✨ GENERAL CATEGORY ---
             general_list = "`afk`, `remindme`"
             embed.add_field(name="✨ General", value=general_list, inline=False)
 
@@ -49,7 +44,6 @@ class Help(commands.Cog):
         if not cmd:
             return await ctx.send(f"❌ Mujhe `{command_name}` naam ka koi command nahi mila!")
 
-        # 🔒 OWNER COMMAND SECURITY CHECK
         if cmd.name in ["servers", "setstatus", "add-money", "reset-money", "maintenance", "blacklist"] and not await self.bot.is_owner(ctx.author):
             return await ctx.send("❌ Aapke paas is command ki details dekhne ki permission nahi hai!")
 
@@ -58,12 +52,11 @@ class Help(commands.Cog):
         aliases = ", ".join([f"`{a}`" for a in cmd.aliases]) if cmd.aliases else "Koi alias nahi hai."
         examples = f"`{prefix}{cmd.name}`"
         
-        # Category Mapping Matrix
         cog_name = cmd.cog.__class__.__name__.lower() if cmd.cog else ""
         
         if cmd.name in ["servers", "setstatus", "add-money", "reset-money", "maintenance", "blacklist"]:
             category = "Owner Only"
-        elif "modpoll" in cog_name or cmd.name in ["warn", "warnings", "delwarn", "clearwarn", "mute", "unmute", "kick", "ban", "unban", "purge", "slowmode", "lock", "unlock", "lockdown", "say", "modlogs", "poll", "pin"]:
+        elif "modpoll" in cog_name or "modpin" in cog_name or cmd.name in ["warn", "warnings", "delwarn", "clearwarn", "mute", "unmute", "kick", "ban", "unban", "purge", "slowmode", "lock", "unlock", "lockdown", "say", "modlogs", "poll", "pin", "unpin"]:
             category = "Moderation"
         elif "eco" in cog_name or cmd.name in ["balance", "bal", "money", "work", "job", "slut", "crime", "rob", "steal", "give", "share", "pay", "coinflip", "cf", "roulette", "rt", "blackjack", "bj", "deposit", "dep", "withdraw", "with"]:
             category = "Economy & Gaming"
@@ -74,15 +67,23 @@ class Help(commands.Cog):
         else:
             category = "General"
 
-        # Custom details mapping cache
+        # ---- 📦 SAARE CUSTOM DESCRIPTIONS KA BACCHAFULL DATABASE ----
         if cmd.name == "blacklist":
             description = "🚨 Strictly for Bot Owner! Rules todne par kisi user ko globally bot se block karne ke liye."
             usage = f"`{prefix}blacklist @user/ID <duration> [reason]`\n👉 Blacklist hatane ke liye duration `0` daalein."
             examples = f"`{prefix}blacklist @User 30s Rules bypass`"
         elif cmd.name == "poll":
             description = "📊 Server me custom options ke sath official voting poll start karne ke liye (Requires Manage Messages Permission)."
-            usage = f'`{prefix}poll "Question" "Option 1" "Option 2"`'
+            usage = f'`{prefix}poll "Question" "Option 1" "Option 2" ...`'
             examples = f'`{prefix}poll "SMR KTR or Home?" "SRM Chennai" "Ghar Jaana Hai"`'
+        elif cmd.name == "pin":
+            description = "📌 Server ke kisi bhi message ko ID ke zariye channel ke pinned messages me add karne ke liye."
+            usage = f"`{prefix}pin <message_id>`"
+            examples = f"`{prefix}pin 124357285194729481`"
+        elif cmd.name == "unpin":
+            description = "🔓 Channel ke kisi bhi pinned message ka pin hatane ke liye."
+            usage = f"`{prefix}unpin <message_id>`"
+            examples = f"`{prefix}unpin 124357285194729481`"
         elif cmd.name == "setstatus":
             description = "Bot ka status aur activity badalne ke liye."
             usage = f"**Basic:** `{prefix}setstatus <status>`\n**Advanced:** `{prefix}setstatus <status> <playing/watching/listening> <text>`"
@@ -99,6 +100,7 @@ class Help(commands.Cog):
         elif cmd.name == "warn":
             description = "Kisi member ko officially warn karne ke liye aur unke DM me message bhejne ke liye."
             usage = f"`{prefix}warn @user <reason>`"
+            examples = f"`{prefix}warn @User Rules Bypass`"
         elif cmd.name == "warnings":
             description = "Kisi member ki purani saari warnings ki list dekhne ke liye."
             usage = f"`{prefix}warnings @user`"
@@ -111,6 +113,7 @@ class Help(commands.Cog):
         elif cmd.name == "mute":
             description = "Kisi member ko specific samay ke liye timeout (mute) karne ke liye."
             usage = f"`{prefix}mute @user <duration><s/m/h/d> <reason>`"
+            examples = f"`{prefix}mute @User 10m Spamming`"
         elif cmd.name == "unmute":
             description = "Kisi member ka timeout samay se pehle hatane ke liye."
             usage = f"`{prefix}unmute @user <reason>`"
@@ -151,10 +154,10 @@ class Help(commands.Cog):
             description = "Mehnat ka kaam karke safe coins kamane ke liye. (30s Cooldown)"
             usage = f"`{prefix}work`"
         elif cmd.name == "slut":
-            description = "Risky tareeqon se paise kamane ke liye! Harne par fine lag sakta hai."
+            description = "Risky tareeqon se paise kamane ke liye!"
             usage = f"`{prefix}slut`"
         elif cmd.name == "crime":
-            description = "High-risk, High-reward illegal kaam! (30s Cooldown)"
+            description = "High-risk, High-reward illegal kaam!"
             usage = f"`{prefix}crime`"
         elif cmd.name == "rob":
             description = "Kisi doosre user ke wallet se cash churaane ke liye."
@@ -163,42 +166,38 @@ class Help(commands.Cog):
             description = "Apne wallet se kisi doosre user ko coins transfer karne ke liye."
             usage = f"`{prefix}give @user <amount>`"
         elif cmd.name in ["coinflip", "cf"]:
-            description = "Heads ya Tails par jua khelne ke liye! Double cash jackpot."
+            description = "Heads ya Tails par jua khelne ke liye!"
             usage = f"`{prefix}coinflip <amount> <heads/tails>`"
         elif cmd.name in ["roulette", "rt"]:
-            description = "Casino Roulette game! Red/Black par 2x aur Green par direct 14x cash!"
+            description = "Casino Roulette game!"
             usage = f"`{prefix}roulette <amount> <red/black/green>`"
         elif cmd.name in ["blackjack", "bj"]:
-            description = "Real interactive buttons (Hit/Stand) wala genuine Blackjack card game!"
+            description = "Real interactive buttons wala genuine Blackjack card game!"
             usage = f"`{prefix}blackjack <amount>`"
         elif cmd.name in ["deposit", "dep"]:
             description = "Wallet se cash nikal kar safe bank me deposit karne ke liye."
-            usage = f"`{prefix}deposit <amount/all/half>`"
+            usage = f"`{prefix}deposit <amount>`"
         elif cmd.name in ["withdraw", "with"]:
             description = "Bank account se paise nikal kar wapas cash wallet me lane ke liye."
-            usage = f"`{prefix}withdraw <amount/all/half>`"
+            usage = f"`{prefix}withdraw <amount>`"
         elif cmd.name == "invite":
-            description = "Bot ko apne khud ke kisi server me add karne ke liye official invite link nikalne ke liye."
+            description = "Bot ka official invite link nikalne ke liye."
             usage = f"`{prefix}invite`"
         elif cmd.name == "serverinfo":
-            description = "Jis server me aap hain uski poori details dekhne ke liye."
+            description = "Server ki poori details dekhne ke liye."
             usage = f"`{prefix}serverinfo`"
         elif cmd.name == "botinfo":
             description = "Bot ki live statistics dekhne ke liye."
             usage = f"`{prefix}botinfo`"
         elif cmd.name == "afk":
-            description = "Aapko AFK status par dalne ke liye taaki jab koi aapko ping kare toh bot use reason bataye."
+            description = "Aapko AFK status par dalne ke liye."
             usage = f"`{prefix}afk <reason>`"
         elif cmd.name == "remindme":
-            description = "⏰ Aapko aur baki users ko specific time ke baad kisi kaam ke liye ping karke yaad dilane ke liye."
-            usage = f"`{prefix}remindme <time><s/m/h> <work>`"
+            description = "Specific time ke baad kisi kaam ke liye ping karke yaad dilane ke liye."
+            usage = f"`{prefix}remindme <time> <work>`"
         elif cmd.name == "servers":
-            description = "Sirf Bot Creator ke liye servers ki list dekhne ke liye (Owner Command)."
+            description = "Sirf Bot Creator ke liye servers ki list (Owner Command)."
             usage = f"`{prefix}servers`"
-        elif cmd.name == "pin":
-         description = "📌 Server ke kisi bhi message ko ID ke zariye channel ke pinned messages me add karne ke liye."
-         usage = f"`{prefix}pin <message_id>`"
-         examples = f"`{prefix}pin 124357285194729481`"
 
         cmd_embed = discord.Embed(title=f"ℹ️ Command Detail: {cmd.name.upper()}", color=discord.Color.green())
         cmd_embed.add_field(name="📝 Description", value=description, inline=False)
