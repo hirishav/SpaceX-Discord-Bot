@@ -4,6 +4,7 @@ from discord.ext import commands
 import os
 import sqlite3
 import time
+import asyncio
 
 # Environment Variable aur Config setup
 try:
@@ -43,6 +44,11 @@ def get_prefix(bot, message):
 bot = commands.Bot(command_prefix=get_prefix, intents=intents, owner_ids={OWNER_ID})
 bot.remove_command('help')
 
+# 🔥 MAINTENANCE GLOBALS
+bot.maintenance_mode = False
+bot.maintenance_end = 0
+bot.interrupted_users = {} # Format: {user_id: channel_id}
+
 @bot.event
 async def on_ready():
     print("---------------------------------------")
@@ -52,7 +58,7 @@ async def on_ready():
     conn = sqlite3.connect("warnings.db")
     cursor = conn.cursor()
 
-    # 🔥 CENTRAL MODERATION LOGS TABLE
+    # CENTRAL MODERATION LOGS TABLE
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS mod_logs (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -95,15 +101,7 @@ async def on_ready():
     )
     """)
     
-    # DJ ROLE TABLE FOR MUSIC SYSTEM
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS dj_roles (
-        server_id TEXT PRIMARY KEY, 
-        role_id TEXT
-    )
-    """)
-    
-    # 🔥 NAYA JADU: GLOBAL BLACKLIST TABLE
+    # GLOBAL BLACKLIST TABLE
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS blacklist (
         user_id TEXT PRIMARY KEY,
@@ -114,7 +112,7 @@ async def on_ready():
     
     conn.commit()
     conn.close()
-    print("-> Database Connected & All Tables (Economy + DJ + Blacklist) Ready!")
+    print("-> Database Connected & All Clean Tables Ready!")
     
     print('Modules load ho rahe hain...')
     for filename in os.listdir('./cogs'):
@@ -125,12 +123,52 @@ async def on_ready():
     print('Bot successfully online aa gaya hai! 🎉')
     print("---------------------------------------")
 
+def get_remaining_time_str(expires_at):
+    remaining = expires_at - int(time.time())
+    if remaining <= 0:
+        return "kuch hi seconds"
+    
+    hours = remaining // 3600
+    minutes = (remaining % 3600) // 60
+    seconds = remaining % 60
+    
+    time_str = ""
+    if hours > 0:
+        time_str += f"{hours}h "
+    if minutes > 0:
+        time_str += f"{minutes}m "
+    time_str += f"{seconds}s"
+    return time_str.strip()
+
 @bot.event
 async def on_message(message):
     if message.author.bot:
         return
 
-    # 🔥 CHAT CHECKER: Blacklist check karne ke liye
+    # 1. 🔥 MAINTENANCE SYSTEM PEHRA
+    is_owner = message.author.id in bot.owner_ids
+    if bot.maintenance_mode and not is_owner:
+        if int(time.time()) >= bot.maintenance_end:
+            # Loop check safety filter background check failsafe trigger
+            bot.maintenance_mode = False
+        else:
+            # User ko alert list queue me safe karo ping ke liye
+            bot.interrupted_users[message.author.id] = message.channel.id
+            
+            # Dynamic countdown calculations
+            time_left = get_remaining_time_str(bot.maintenance_end)
+            
+            # Check agar command register tha tabhi error popup dein
+            if message.content.startswith('!!'):
+                embed = discord.Embed(
+                    title="⚙️ Bot Under Maintenance",
+                    description=f"🤖 Sorry buddy, I am under maintenance right now.\n\n⏳ **I will be back just after:** `{time_left}`",
+                    color=discord.Color.red()
+                )
+                return await message.channel.send(embed=embed)
+            return
+
+    # 2. 🚨 GLOBAL BLACKLIST CHECKER
     current_time = int(time.time())
     conn = sqlite3.connect("warnings.db")
     cursor = conn.cursor()
@@ -140,17 +178,11 @@ async def on_message(message):
 
     if row:
         expires_at, reason = row[0], row[1]
-        
-        # Agar permanent block hai (-1) ya time bacha hai
         if expires_at == -1 or current_time < expires_at:
-            # Agar blacklisted user khud !!blacklist chalaye, toh message aage jaane do (taki troll dialog chale)
             if message.content.startswith("!!blacklist") or message.content.startswith("!!bl"):
                 pass
             else:
-                # Baki saare commands silently block ho jayenge
                 return
-
-        # Agar blacklist ka time khatam ho gaya hai, toh database se saaf kar do
         elif current_time >= expires_at:
             conn = sqlite3.connect("warnings.db")
             cursor = conn.cursor()

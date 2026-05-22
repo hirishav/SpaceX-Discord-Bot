@@ -22,9 +22,9 @@ class Help(commands.Cog):
             
             # --- 👑 OWNER ONLY CATEGORY ---
             if await self.bot.is_owner(ctx.author):
-                embed.add_field(name="👑 Owner Only", value="`servers`, `setstatus`, `add-money`, `reset-money`", inline=False)
+                embed.add_field(name="👑 Owner Only", value="`servers`, `setstatus`, `add-money`, `reset-money`, `maintenance`", inline=False)
             
-            # --- 🛡️ MODERATION CATEGORY (Sahi Sequence Me modlogs Set Hai!) ---
+            # --- 🛡️ MODERATION CATEGORY ---
             mod_list = "`warn`, `warnings`, `delwarn`, `clearwarn`, `mute`, `unmute`, `kick`, `ban`, `unban`, `purge`, `slowmode`, `lock`, `unlock`, `lockdown`, `say`, `modlogs`, `blacklist`"
             embed.add_field(name="🛡️ Moderation", value=mod_list, inline=False)
             
@@ -50,7 +50,7 @@ class Help(commands.Cog):
             return await ctx.send(f"❌ Mujhe `{command_name}` naam ka koi command nahi mila!")
 
         # 🔒 OWNER COMMAND SECURITY CHECK
-        if cmd.name in ["servers", "setstatus", "add-money", "reset-money"] and not await self.bot.is_owner(ctx.author):
+        if cmd.name in ["servers", "setstatus", "add-money", "reset-money", "maintenance"] and not await self.bot.is_owner(ctx.author):
             return await ctx.send("❌ Aapke paas is command ki details dekhne ki permission nahi hai!")
 
         description = "Koi description nahi di gayi."
@@ -58,10 +58,10 @@ class Help(commands.Cog):
         aliases = ", ".join([f"`{a}`" for a in cmd.aliases]) if cmd.aliases else "Koi alias nahi hai."
         examples = f"`{prefix}{cmd.name}`"
         
-        # Category Mapping
+        # Category Mapping Matrix
         cog_name = cmd.cog.__class__.__name__.lower() if cmd.cog else ""
         
-        if cmd.name in ["servers", "setstatus", "add-money", "reset-money"]:
+        if cmd.name in ["servers", "setstatus", "add-money", "reset-money", "maintenance"]:
             category = "Owner Only"
         elif cmd.name in ["warn", "warnings", "delwarn", "clearwarn", "mute", "unmute", "kick", "ban", "unban", "purge", "slowmode", "lock", "unlock", "lockdown", "say", "modlogs", "blacklist"]:
             category = "Moderation"
@@ -72,7 +72,7 @@ class Help(commands.Cog):
         else:
             category = "General"
 
-        # Custom details mapping (POORA BACKUP RE-ALIGNED HERE)
+        # Custom details mapping database cache registry
         if cmd.name == "setstatus":
             description = "Bot ka status aur activity badalne ke liye."
             usage = f"**Basic:** `{prefix}setstatus <status>`\n**Advanced:** `{prefix}setstatus <status> <playing/watching/listening> <text>`"
@@ -85,6 +85,10 @@ class Help(commands.Cog):
             description = "Globally kisi bhi user ka bank aur wallet balance completely zero karne ke liye (Owner Command)."
             usage = f"`{prefix}reset-money @user/ID`"
             examples = f"`{prefix}reset-money @User`"
+        elif cmd.name == "maintenance":
+            description = "🚨 Global Bot Locking Engine! Pure bot commands block karne ke liye (Owner Only)."
+            usage = f"`{prefix}maintenance <duration>`\n👉 Unlock karne ke liye: `{prefix}maintenance off`"
+            examples = f"`{prefix}maintenance 30m` -> 30 minutes offline lock\n`{prefix}maintenance off` -> Force recovery online"
         elif cmd.name == "warn":
             description = "Kisi member ko officially warn karne ke liye aur unke DM me message bhejne ke liye."
             usage = f"`{prefix}warn @user <reason>`"
@@ -126,7 +130,7 @@ class Help(commands.Cog):
             usage = f"`{prefix}purge <amount>`"
             examples = f"`{prefix}purge 20`"
         elif cmd.name == "slowmode":
-            description = "Channel cooldown rate set karne ke liye taaki log ruk kar chat karein."
+            description = "Channel cooldown rate set karne ke liye."
             usage = f"`{prefix}slowmode <seconds>`"
             examples = f"`{prefix}slowmode 10`"
         elif cmd.name == "lock":
@@ -148,11 +152,11 @@ class Help(commands.Cog):
         elif cmd.name == "modlogs":
             description = "📊 Server me kisi user ke upar chalaaye gaye saare moderation action stats aur history dekhne ke liye."
             usage = f"`{prefix}modlogs @user/ID`"
-            examples = f"`{prefix}modlogs @Rishav`\n`{prefix}modlogs 727718500663033897`"
+            examples = f"`{prefix}modlogs @Rishav`"
         elif cmd.name == "blacklist":
             description = "🚨 Strictly for Bot Owner! Rules todne par kisi user ko globally bot se block karne ke liye."
             usage = f"`{prefix}blacklist @user/ID <duration> [reason]`\n👉 Blacklist hatane ke liye duration `0` daalein."
-            examples = f"`{prefix}blacklist @User 30s Rules bypass`\n`{prefix}blacklist @User 0`"
+            examples = f"`{prefix}blacklist @User 30s Rules bypass`"
         elif cmd.name in ["balance", "bal"]:
             description = "Aapka wallet aur bank balance check karne ke liye."
             usage = f"`{prefix}bal`"
