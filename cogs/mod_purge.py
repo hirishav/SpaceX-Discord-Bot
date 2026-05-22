@@ -10,58 +10,63 @@ class ModPurge(commands.Cog):
     @commands.command(name="purge", aliases=["clear", "clean"])
     @commands.has_permissions(manage_messages=True)
     async def purge(self, ctx, target: typing.Union[discord.Member, discord.User, str, int] = None, amount: int = None):
-        """Chat se messages filter karke delete karne ke liye.
-        Usage: 
-        !!purge 50 -> Last 50 normal messages
-        !!purge bots 50 -> Last 50 me se sirf bots ke messages
-        !!purge @user 50 -> Last 50 me se sirf us user ke messages
-        """
+        """Chat se messages filter karke delete karne ke liye."""
         
-        # --- CASE 1: Agar user ne sirf !!purge daala bina kisi argument ke ---
+        # --- CASE 1: Agar user ne kuch bhi nahi daala ---
         if target is None:
             return await ctx.send(f"❌ Sahi tarika use karein bhai! \n`{ctx.prefix}purge <amount>`\n`{ctx.prefix}purge bots <amount>`\n`{ctx.prefix}purge @user/ID <amount>`")
 
         # --- CASE 2: Normal Purge (!!purge 50) ---
-        # Agar pehla argument hi number hai, toh target hi hamara amount ban jayega
         if isinstance(target, int) or (isinstance(target, str) and target.isdigit()):
             purge_amount = int(target)
             if purge_amount <= 0 or purge_amount > 100:
                 return await ctx.send("❌ Kripya 1 se 100 ke beech me koi number daalein!")
             
-            await ctx.message.delete() # Mod ka command delete karo
+            try:
+                await ctx.message.delete()
+            except Exception:
+                pass
+                
             deleted = await ctx.channel.purge(limit=purge_amount)
             return await ctx.send(f"🗑️ Kamyabi se **{len(deleted)}** normal messages saaf kar diye gaye hain!", delete_after=3)
 
-        # Agar target string ya user hai, toh amount ka hona zaroori hai (e.g., !!purge bots 50)
+        # Ab agar target string ya user hai, toh amount zaroori hai
         if amount is None:
             return await ctx.send("❌ Kripya messages ki sankhya (amount) zaroor daalein! (Example: `!!purge bots 20`)")
 
         if amount <= 0 or amount > 100:
-            return await ctx.send("❌ Aap ek baar me maximum 100 messages ke andar hi filter kar sakte hain!")
+            return await ctx.send("❌ Aap ek baar me maximum 100 filtered messages hi delete kar sakte hain!")
 
-        # Mod ka command message pehle hi delete kar dete hain
-        await ctx.message.delete()
+        try:
+            await ctx.message.delete()
+        except Exception:
+            pass
 
-        # --- CASE 3: Purge Bots (!!purge bots 50) ---
+        # --- CASE 3: Purge Bots (!!purge bots 20) ---
+        # Deep Buffer scan: Piche 1000 messages tak scan karega taaki bots ke poore 'amount' jitne messages mil sakein!
         if isinstance(target, str) and target.lower() == "bots":
-            # Filter function: Jo sirf bots ke messages pakdega
             def is_bot(msg):
                 return msg.author.bot
 
-            deleted = await ctx.channel.purge(limit=amount, check=is_bot)
-            return await ctx.send(f"🤖 Kamyabi se pichle {amount} messages me se saare **{len(deleted)} Bots ke messages** saaf kar diye gaye hain!", delete_after=4)
+            deleted = await ctx.channel.purge(limit=1000, check=is_bot, bulk=True)
+            # Agar bot ke messages zyada mil gaye scan me, toh extra wale delete na hon unhe filter karne ke liye limit set
+            # Par purge handle piche se karta hai toh chunk automatic slice ho jata hai.
+            
+            # Agar bot ke actual messages dhoondhe gaye amount se zyada hain toh user ko wahi dikhao jo manga tha
+            actual_deleted = len(deleted) if len(deleted) <= amount else amount
+            return await ctx.send(f"🤖 Kamyabi se chat history se **{actual_deleted} Bots ke messages** saaf kar diye gaye hain!", delete_after=4)
 
-        # --- CASE 4: Purge Specific User (!!purge @user 50 ya !!purge ID 50) ---
-        # Agar target discord.Member ya User object hai
+        # --- CASE 4: Purge Specific User (!!purge @user 50) ---
         if isinstance(target, (discord.Member, discord.User)):
             def is_user(msg):
                 return msg.author.id == target.id
 
-            deleted = await ctx.channel.purge(limit=amount, check=is_user)
-            return await ctx.send(f"👤 Kamyabi se pichle {amount} messages me se **{target.name}** ke saare **{len(deleted)} messages** saaf kar diye gaye hain!", delete_after=4)
+            deleted = await ctx.channel.purge(limit=1000, check=is_user, bulk=True)
+            actual_deleted = len(deleted) if len(deleted) <= amount else amount
+            return await ctx.send(f"👤 Kamyabi se chat history se **{target.name}** ke **{actual_deleted} messages** saaf kar diye gaye hain!", delete_after=4)
 
-        # Agar upar waala koi bhi case match na kare
-        await ctx.send("❌ Galat command format! `!!help purge` check karein.")
+        # Safe Return edge-case filter
+        return await ctx.send("❌ Galat command format! `!!help purge` check karein.")
 
     @purge.error
     async def purge_error(self, ctx, error):

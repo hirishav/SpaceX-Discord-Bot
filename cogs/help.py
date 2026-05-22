@@ -23,7 +23,7 @@ class Help(commands.Cog):
             if await self.bot.is_owner(ctx.author):
                 embed.add_field(name="👑 Owner Only", value="`servers`, `setstatus`, `add-money`, `reset-money`, `maintenance`, `blacklist`", inline=False)
             
-            mod_list = "`warn`, `warnings`, `delwarn`, `clearwarn`, `mute`, `unmute`, `kick`, `ban`, `unban`, `purge`, `slowmode`, `lock`, `unlock`, `lockdown`, `say`, `modlogs`, `poll`, `pin`, `unpin`"
+            mod_list = "`warn`, `warnings`, `delwarn`, `clearwarn`, `mute`, `unmute`, `kick`, `ban`, `unban`, `purge`, `slowmode`, `lock`, `unlock`, `lockdown`, `say`, `modlogs`, `poll`, `pin`, `unpin`, `setprefix`"
             embed.add_field(name="🛡️ Moderation", value=mod_list, inline=False)
             
             eco_list = "`bal`, `work`, `slut`, `crime`, `rob`, `give`, `coinflip`, `roulette`, `blackjack`, `deposit`, `withdraw`"
@@ -56,7 +56,7 @@ class Help(commands.Cog):
         
         if cmd.name in ["servers", "setstatus", "add-money", "reset-money", "maintenance", "blacklist"]:
             category = "Owner Only"
-        elif "modpoll" in cog_name or "modpin" in cog_name or cmd.name in ["warn", "warnings", "delwarn", "clearwarn", "mute", "unmute", "kick", "ban", "unban", "purge", "slowmode", "lock", "unlock", "lockdown", "say", "modlogs", "poll", "pin", "unpin"]:
+        elif "modpoll" in cog_name or "modpin" in cog_name or cmd.name in ["warn", "warnings", "delwarn", "clearwarn", "mute", "unmute", "kick", "ban", "unban", "purge", "slowmode", "lock", "unlock", "lockdown", "say", "modlogs", "poll", "pin", "unpin", "setprefix"]:
             category = "Moderation"
         elif "eco" in cog_name or cmd.name in ["balance", "bal", "money", "work", "job", "slut", "crime", "rob", "steal", "give", "share", "pay", "coinflip", "cf", "roulette", "rt", "blackjack", "bj", "deposit", "dep", "withdraw", "with"]:
             category = "Economy & Gaming"
@@ -198,6 +198,10 @@ class Help(commands.Cog):
         elif cmd.name == "servers":
             description = "Sirf Bot Creator ke liye servers ki list (Owner Command)."
             usage = f"`{prefix}servers`"
+        elif cmd.name == "setprefix":
+         description = "⚙️ Server ka default custom bot prefix badalne ke liye (Requires Manage Server Permission)."
+         usage = f"`{prefix}setprefix <new_prefix>`"
+         examples = f"`{prefix}setprefix $`\n`{prefix}setprefix !!`"
 
         cmd_embed = discord.Embed(title=f"ℹ️ Command Detail: {cmd.name.upper()}", color=discord.Color.green())
         cmd_embed.add_field(name="📝 Description", value=description, inline=False)

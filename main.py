@@ -32,14 +32,29 @@ def keep_alive():
     t = Thread(target=run_server)
     t.start()
 
+# ⚙️ DYNAMIC CUSTOM PREFIX FETCH ENGINE
+def get_prefix(bot, message):
+    if not message.guild:
+        return '!!' # DMs me default prefix hamesha !! rahega
+    
+    try:
+        conn = sqlite3.connect("warnings.db")
+        cursor = conn.cursor()
+        cursor.execute("SELECT prefix FROM server_prefixes WHERE server_id = ?", (str(message.guild.id),))
+        row = cursor.fetchone()
+        conn.close()
+        
+        if row:
+            return row[0] # Agar server ka custom prefix mila toh wo return karo
+    except Exception as e:
+        print(f"Prefix Fetch Error: {e}")
+    
+    return '!!' # Kuch na mile ya error aaye toh default prefix "!!" chalega
+
 # Discord Bot Setup
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True 
-
-def get_prefix(bot, message):
-    prefixes = ['!!']
-    return commands.when_mentioned_or(*prefixes)(bot, message)
 
 bot = commands.Bot(command_prefix=get_prefix, intents=intents, owner_ids={OWNER_ID})
 bot.remove_command('help')
@@ -57,6 +72,14 @@ async def on_ready():
     # DATABASE SETUP
     conn = sqlite3.connect("warnings.db")
     cursor = conn.cursor()
+
+    # SERVER CUSTOM PREFIX TABLE
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS server_prefixes (
+        server_id TEXT PRIMARY KEY,
+        prefix TEXT
+    )
+    """)
 
     # CENTRAL MODERATION LOGS TABLE
     cursor.execute("""
@@ -145,6 +168,9 @@ async def on_message(message):
     if message.author.bot:
         return
 
+    # Dynamic prefix check current message context ke liye
+    current_prefix = get_prefix(bot, message)
+
     # 1. 🔥 MAINTENANCE SYSTEM PEHRA
     is_owner = message.author.id in bot.owner_ids
     if bot.maintenance_mode and not is_owner:
@@ -154,7 +180,7 @@ async def on_message(message):
             bot.interrupted_users[message.author.id] = message.channel.id
             time_left = get_remaining_time_str(bot.maintenance_end)
             
-            if message.content.startswith('!!'):
+            if message.content.startswith(current_prefix):
                 embed = discord.Embed(
                     title="⚙️ Bot Under Maintenance",
                     description=f"🤖 Sorry buddy, I am under maintenance right now.\n\n⏳ **I will be back just after:** `{time_left}`",
@@ -174,7 +200,7 @@ async def on_message(message):
     if row:
         expires_at, reason = row[0], row[1]
         if expires_at == -1 or current_time < expires_at:
-            if message.content.startswith("!!blacklist") or message.content.startswith("!!bl"):
+            if message.content.startswith(f"{current_prefix}blacklist") or message.content.startswith(f"{current_prefix}bl"):
                 pass
             else:
                 return
@@ -185,10 +211,11 @@ async def on_message(message):
             conn.commit()
             conn.close()
 
+    # Dynamic ping response handler using current prefix
     if bot.user.mentioned_in(message) and len(message.content.strip().split()) == 1:
         embed = discord.Embed(
             title=f"Hello {message.author.name}! 👋",
-            description=f"Mera current prefix **``!!``** hai.\nAap commands ko **`!!help`** tarike se use kar sakte hain!",
+            description=f"Is server me mera current prefix **``{current_prefix}``** hai.\nAap commands ko **`{current_prefix}help`** tarike se use kar sakte hain!",
             color=discord.Color.blue()
         )
         return await message.channel.send(embed=embed)
