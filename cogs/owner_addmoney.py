@@ -21,22 +21,19 @@ class OwnerAddMoney(commands.Cog):
                 return None, None
 
     def parse_amount(self, amount_str: str):
-        # Scientific notation handler (e.g., 3e3, 4e5)
         if re.match(r"^\d+(\.\d+)?e\d+$", amount_str.lower()):
             try:
                 return int(float(amount_str.lower()))
             except ValueError:
                 return None
-        # Normal digits handler
         if amount_str.isdigit():
             return int(amount_str)
         return None
 
-    @commands.command(name="add-money", aliases=["addmoney", "am"], hidden=True)
+    @commands.command(name="addmoney", aliases=["am"], hidden=True)
     @commands.is_owner()
     async def add_money(self, ctx, user_str: str = None, type_str: str = None, amount_str: str = None):
         """Sirf Rishav bhai ke liye - Kisi ke wallet ya bank me globally paise add karne ke liye."""
-        
         if not user_str or not type_str or not amount_str:
             return await ctx.send(f"❌ Sahi tarika: `{ctx.prefix}addmoney @user/ID <wallet/bank> <amount>`\n👉 Example: `{ctx.prefix}am @User bank 3e3`")
 
@@ -46,7 +43,7 @@ class OwnerAddMoney(commands.Cog):
 
         amount = self.parse_amount(amount_str)
         if amount is None or amount <= 0:
-            return await ctx.send("❌ Kripya sahi amount daalein! (Normal number ya scientific format jaise `3e3` allowed hai)")
+            return await ctx.send("❌ Kripya sahi amount daalein! (Jaise `50000` ya `3e3`)")
 
         user_id, username = await self.fetch_user(ctx, user_str)
         if not user_id:

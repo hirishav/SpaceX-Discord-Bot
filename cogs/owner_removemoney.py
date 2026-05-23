@@ -29,7 +29,6 @@ class OwnerRemoveMoney(commands.Cog):
         if amount_str == "half":
             return "half", total_balance // 2
 
-        # Scientific notation evaluation
         if re.match(r"^\d+(\.\d+)?e\d+$", amount_str):
             try:
                 val = int(float(amount_str))
@@ -42,11 +41,10 @@ class OwnerRemoveMoney(commands.Cog):
             
         return None, None
 
-    @commands.command(name="remove-money", aliases=["removemoney", "rm"], hidden=True)
+    @commands.command(name="removemoney", aliases=["rm"], hidden=True)
     @commands.is_owner()
     async def remove_money(self, ctx, user_str: str = None, amount_input: str = None):
         """Sirf Rishav bhai ke liye - Kisi ke account se globally coins remove/fine karne ke liye."""
-        
         if not user_str or not amount_input:
             return await ctx.send(f"❌ Sahi tarika: `{ctx.prefix}removemoney @user/ID <amount/all/half>`\n👉 Example: `{ctx.prefix}rm @User 4e5`")
 
@@ -54,7 +52,6 @@ class OwnerRemoveMoney(commands.Cog):
         if not user_id:
             return await ctx.send("❌ User nahi mila!")
 
-        # Current balance verify karna database filter se
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         cursor.execute("SELECT wallet, bank FROM economy WHERE user_id = ?", (user_id,))
@@ -74,12 +71,10 @@ class OwnerRemoveMoney(commands.Cog):
         if mode == "all":
             cursor.execute("UPDATE economy SET wallet = 0, bank = 0 WHERE user_id = ?", (user_id,))
         elif mode == "half":
-            # Naya loop set jisme wallet pehle khali hoga fir bank
             rem_wallet = current_wallet // 2
             rem_bank = current_bank // 2
             cursor.execute("UPDATE economy SET wallet = ?, bank = ? WHERE user_id = ?", (rem_wallet, rem_bank, user_id))
         else:
-            # Fixed number remove handling logic: Pehle wallet se kato, bacha hua bank se
             if amount_to_remove <= current_wallet:
                 cursor.execute("UPDATE economy SET wallet = wallet - ? WHERE user_id = ?", (amount_to_remove, user_id))
             else:
