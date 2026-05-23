@@ -40,7 +40,8 @@ class OwnerRemoveMoney(commands.Cog):
             
         return None, None
 
-    @commands.command(name="removemoney", aliases=["rm"], hidden=True)
+    # 🔥 FIX: Isme se duplicate alias "rm" hatakar "delmoney" aur "clearcoins" kar diya hai
+    @commands.command(name="removemoney", aliases=["delmoney", "clearcoins"], hidden=True)
     @commands.is_owner()
     async def remove_money(self, ctx, user_str: str = None, amount_input: str = None):
         """Sirf Rishav bhai ke liye - Globally coins remove karne ke liye."""
