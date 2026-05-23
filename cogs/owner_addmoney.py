@@ -7,7 +7,6 @@ import re
 class OwnerAddMoney(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.db_path = "warnings.db"
 
     async def fetch_user(self, ctx, user_str):
         try:
@@ -33,23 +32,23 @@ class OwnerAddMoney(commands.Cog):
     @commands.command(name="addmoney", aliases=["am"], hidden=True)
     @commands.is_owner()
     async def add_money(self, ctx, user_str: str = None, type_str: str = None, amount_str: str = None):
-        """Sirf Rishav bhai ke liye - Kisi ke wallet ya bank me globally paise add karne ke liye."""
+        """Sirf Rishav bhai ke liye - Globally paise add karne ke liye."""
         if not user_str or not type_str or not amount_str:
-            return await ctx.send(f"❌ Sahi tarika: `{ctx.prefix}addmoney @user/ID <wallet/bank> <amount>`\n👉 Example: `{ctx.prefix}am @User bank 3e3`")
+            return await ctx.send(f"❌ Sahi tarika: `{ctx.prefix}addmoney @user/ID <wallet/bank> <amount>`")
 
         target_type = type_str.lower()
         if target_type not in ["wallet", "bank"]:
-            return await ctx.send("❌ Kripya batayein ki paise kahan add karne hain: `wallet` ya `bank`?")
+            return await ctx.send("❌ Kripya batayein: `wallet` ya `bank`?")
 
         amount = self.parse_amount(amount_str)
         if amount is None or amount <= 0:
-            return await ctx.send("❌ Kripya sahi amount daalein! (Jaise `50000` ya `3e3`)")
+            return await ctx.send("❌ Kripya sahi amount daalein!")
 
         user_id, username = await self.fetch_user(ctx, user_str)
         if not user_id:
-            return await ctx.send("❌ User nahi mila! Sahi tag ya valid ID daalein.")
+            return await ctx.send("❌ User nahi mila!")
 
-        conn = sqlite3.connect(self.db_path)
+        conn = sqlite3.connect("warnings.db")
         cursor = conn.cursor()
         cursor.execute("INSERT OR IGNORE INTO economy (user_id, wallet, bank) VALUES (?, 0, 0)", (user_id,))
         
@@ -61,7 +60,7 @@ class OwnerAddMoney(commands.Cog):
         conn.commit()
         conn.close()
 
-        await ctx.send(f"👑 **Owner Action:** Kamyabi se **{username}** ke **{target_type.upper()}** me 🪙 `{amount:,}` coins add kar diye gaye!")
+        await ctx.send(f"👑 **Owner Action:** **{username}** ke **{target_type.upper()}** me 🪙 `{amount:,}` coins add ho gaye!")
 
 async def setup(bot):
     await bot.add_cog(OwnerAddMoney(bot))

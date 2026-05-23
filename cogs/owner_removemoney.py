@@ -7,7 +7,6 @@ import re
 class OwnerRemoveMoney(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.db_path = "warnings.db"
 
     async def fetch_user(self, ctx, user_str):
         try:
@@ -44,29 +43,29 @@ class OwnerRemoveMoney(commands.Cog):
     @commands.command(name="removemoney", aliases=["rm"], hidden=True)
     @commands.is_owner()
     async def remove_money(self, ctx, user_str: str = None, amount_input: str = None):
-        """Sirf Rishav bhai ke liye - Kisi ke account se globally coins remove/fine karne ke liye."""
+        """Sirf Rishav bhai ke liye - Globally coins remove karne ke liye."""
         if not user_str or not amount_input:
-            return await ctx.send(f"❌ Sahi tarika: `{ctx.prefix}removemoney @user/ID <amount/all/half>`\n👉 Example: `{ctx.prefix}rm @User 4e5`")
+            return await ctx.send(f"❌ Sahi tarika: `{ctx.prefix}removemoney @user/ID <amount/all/half>`")
 
         user_id, username = await self.fetch_user(ctx, user_str)
         if not user_id:
             return await ctx.send("❌ User nahi mila!")
 
-        conn = sqlite3.connect(self.db_path)
+        conn = sqlite3.connect("warnings.db")
         cursor = conn.cursor()
         cursor.execute("SELECT wallet, bank FROM economy WHERE user_id = ?", (user_id,))
         row = cursor.fetchone()
         
         if not row:
             conn.close()
-            return await ctx.send("❌ Is user ka economy database me koi bahi-khata hi nahi mila!")
+            return await ctx.send("❌ Is user ka database me koi bahi-khata nahi mila!")
 
         current_wallet, current_bank = row[0], row[1]
         mode, amount_to_remove = self.parse_amount(amount_input, current_wallet, current_bank)
 
         if amount_to_remove is None or amount_to_remove <= 0:
             conn.close()
-            return await ctx.send("❌ Invalid amount format! Use normal digits, scientific text (`4e5`), `all`, ya `half`.")
+            return await ctx.send("❌ Invalid amount format!")
 
         if mode == "all":
             cursor.execute("UPDATE economy SET wallet = 0, bank = 0 WHERE user_id = ?", (user_id,))
@@ -86,7 +85,7 @@ class OwnerRemoveMoney(commands.Cog):
         conn.close()
 
         display_amt = f"Pura Account (Reset)" if mode == "all" else f"🪙 `{amount_to_remove:,}` coins"
-        await ctx.send(f"👑 **Owner Action:** **{username}** (ID: `{user_id}`) ke account se kamyabi se **{display_amt}** remove kar diye gaye hain!")
+        await ctx.send(f"👑 **Owner Action:** **{username}** ke account se **{display_amt}** remove kar diye gaye!")
 
 async def setup(bot):
     await bot.add_cog(OwnerRemoveMoney(bot))
