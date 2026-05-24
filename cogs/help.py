@@ -277,7 +277,7 @@ class Help(commands.Cog):
             examples = f"`{prefix}remindme 10m Exams Ki Taiyari`"
             
         elif cmd.name == "servers":
-            description = "Sirf Bot Creator ke liye active servers ki list tracking map (Owner Only)."
+            description = "Sirf Bot Creator ke liye active servers ki list tracking map (Owner Command)."
             usage = f"`{prefix}servers`"
             examples = f"`{prefix}servers`"
             
