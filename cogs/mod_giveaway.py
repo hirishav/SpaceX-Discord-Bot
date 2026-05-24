@@ -14,48 +14,47 @@ class GiveawayView(discord.ui.View):
     def __init__(self, required_role=None):
         super().__init__(timeout=None)
         self.entrants = set()
-        # Agar argument string context me 'none' hai ya empty hai, toh use None set karo
         self.required_role = None if str(required_role).lower() == "none" else required_role
 
     @discord.ui.button(label="Join Giveaway! 🎉", style=discord.ButtonStyle.green, custom_id="join_giveaway_btn")
     async def join_button(self, interaction: discord.Interaction):
-        # 🔥 CRITICAL FIX: Pehle response defer kar do taaki Discord interaction failed na dikhaye!
-        await interaction.response.defer(ephemeral=True)
-        
         user = interaction.user
         
         # 🛡️ ROLE REQUIREMENT CHECK (AIRTIGHT FILTER)
         if self.required_role:
             if isinstance(self.required_role, discord.Role):
                 if self.required_role not in user.roles:
-                    return await interaction.followup.send(f"❌ **Entry Denied:** Is giveaway me part lene ke liye aapke paas {self.required_role.mention} role hona zaroori hai bhai!", ephemeral=True)
+                    return await interaction.response.send_message(f"❌ **Entry Denied:** Is giveaway me part lene ke liye aapke paas {self.required_role.mention} role hona zaroori hai bhai!", ephemeral=True)
             else:
-                # Agar text base ID fallback hai
                 try:
                     role_id = int(self.required_role)
                     role_obj = interaction.guild.get_role(role_id)
                     if not role_obj or role_obj not in user.roles:
                         raise Exception
                 except Exception:
-                    # Agar role matrix valid nahi hai toh custom check bypass trigger
                     role_obj = discord.utils.get(user.roles, name=str(self.required_role))
                     if not role_obj:
-                        return await interaction.followup.send(f"❌ **Entry Denied:** Aapke paas required role (`{self.required_role}`) nahi hai!", ephemeral=True)
+                        return await interaction.response.send_message(f"❌ **Entry Denied:** Aapke paas required role (`{self.required_role}`) nahi hai!", ephemeral=True)
 
         if user.id in self.entrants:
-            return await interaction.followup.send("❌ Bhai, tum pehle se hi is giveaway me joined ho!", ephemeral=True)
+            return await interaction.response.send_message("❌ Bhai, tum pehle se hi is giveaway me joined ho!", ephemeral=True)
         
         self.entrants.add(user.id)
         
-        # Counter refresh metrics animation visualizer
+        # 🔥 FIX: Embed counter update aur instant ephemeral reply ek sath single hit me delivery matrix
         try:
             embed = interaction.message.embeds[0]
             embed.set_field_at(2, name="📊 Total Entries", value=f"`{len(self.entrants)}` Players", inline=True)
-            await interaction.message.edit(embed=embed)
-        except Exception:
-            pass
             
-        await interaction.followup.send("🎉 **Mubarak ho!** Tumne giveaway kamyabi se join kar liya hai.", ephemeral=True)
+            # Instant respond with update and text combined to eliminate delay
+            await interaction.response.edit_message(embed=embed)
+            await interaction.followup.send("🎉 **Mubarak ho!** Tumne giveaway kamyabi se join kar liya hai.", ephemeral=True)
+        except Exception:
+            # Fallback agar message update block ho jaye
+            try:
+                await interaction.response.send_message("🎉 **Mubarak ho!** Tumne giveaway kamyabi se join kar liya hai.", ephemeral=True)
+            except Exception:
+                pass
 
 
 class ModGiveaway(commands.Cog):
@@ -96,7 +95,6 @@ class ModGiveaway(commands.Cog):
         if not seconds:
             return await ctx.send("❌ Galat time format! Use `s`, `m`, `h`, ya `d`.")
 
-        # Converters for structural roles parsing framework
         parsed_role = role_req
         if role_req.lower() != "none":
             try:
@@ -125,7 +123,6 @@ class ModGiveaway(commands.Cog):
         view = GiveawayView(required_role=parsed_role)
         g_msg = await ctx.send(content="🎉 **GIVEAWAY LIVE** 🎉", embed=embed, view=view)
 
-        # Background automation background loop management framework registry
         loop_task = asyncio.create_task(self.giveaway_countdown_waiter(seconds, current_g_id, ctx.channel))
 
         ACTIVE_GIVEAWAYS[current_g_id] = {
@@ -152,7 +149,6 @@ class ModGiveaway(commands.Cog):
         data = ACTIVE_GIVEAWAYS[giveaway_id]
         data["ended"] = True
         
-        # Background sleep tasks clear trigger framework cancel sequence
         if not data["task"].done():
             data["task"].cancel()
         
@@ -191,7 +187,7 @@ class ModGiveaway(commands.Cog):
     async def giveaway_end(self, ctx, giveaway_id: int = None):
         """Chal rahe kisi bhi giveaway ko uski ID ke zariye instantly end karne ke liye."""
         if not giveaway_id:
-            return await ctx.send(f"❌ Sahi tarika: `{ctx.prefix}gend <giveaway_no_integer>`\n👉 Example: `{ctx.prefix}gend 1`")
+            return await ctx.send(f"❌ Sahi tarika: `{ctx.prefix}gend <giveaway_no_integer>`")
 
         if giveaway_id not in ACTIVE_GIVEAWAYS:
             return await ctx.send(f"❌ Mujhe ID `#{giveaway_id}` ka koi active giveaway nahi mila!")
@@ -207,7 +203,7 @@ class ModGiveaway(commands.Cog):
     async def greroll(self, ctx, giveaway_id: int = None):
         """Khatam hue giveaway me se instantly naya winner roll karne ke liye."""
         if not giveaway_id:
-            return await ctx.send(f"❌ Sahi tarika: `{ctx.prefix}reroll <giveaway_id_no>`\n👉 Example: `{ctx.prefix}reroll 1`")
+            return await ctx.send(f"❌ Sahi tarika: `{ctx.prefix}reroll <giveaway_id_no>`")
 
         if giveaway_id not in ACTIVE_GIVEAWAYS:
             return await ctx.send("❌ Is giveaway ID ka cache data memory me nahi hai!")
