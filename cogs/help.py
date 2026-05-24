@@ -22,7 +22,7 @@ class Help(commands.Cog):
             
             # --- 👑 OWNER ONLY CATEGORY ---
             if await self.bot.is_owner(ctx.author):
-                embed.add_field(name="👑 Owner Only", value="`servers`, `setstatus`, `addmoney`, `removemoney`, `maintenance`, `blacklist`", inline=False)
+                embed.add_field(name="👑 Owner Only", value="`servers`, `setstatus`, `addmoney`, `removemoney`, `seeconfess`, `maintenance`, `blacklist`", inline=False)
             
             # --- 🛡️ MODERATION CATEGORY ---
             mod_list = "`warn`, `warnings`, `delwarn`, `clearwarn`, `mute`, `unmute`, `kick`, `ban`, `unban`, `purge`, `slowmode`, `lock`, `unlock`, `lockdown`, `say`, `modlogs`, `poll`, `pin`, `unpin`, `setprefix`, `giveaway`"
@@ -31,6 +31,10 @@ class Help(commands.Cog):
             # --- 💰 ECONOMY & GAMING ---
             eco_list = "`bal`, `work`, `slut`, `crime`, `rob`, `give`, `coinflip`, `roulette`, `blackjack`, `deposit`, `withdraw`, `leaderboard`"
             embed.add_field(name="💰 Economy & Gaming", value=eco_list, inline=False)
+
+            # --- 🎭 FUN CATEGORY (THEEK NEECHE INJECTED) ---
+            fun_list = "`roast`, `confess`, `match`, `dm`"
+            embed.add_field(name="🎭 Fun", value=fun_list, inline=False)
             
             # --- ⚙️ UTILITY CATEGORY ---
             util_list = "`serverinfo`, `botinfo`, `invite`, `avatar`"
@@ -53,7 +57,7 @@ class Help(commands.Cog):
             return await ctx.send(f"❌ Mujhe `{command_name}` naam ka koi command nahi mila!")
 
         # 🔒 Security firewall on owner parameters
-        if cmd.name in ["servers", "setstatus", "addmoney", "removemoney", "maintenance", "blacklist"] and not await self.bot.is_owner(ctx.author):
+        if cmd.name in ["servers", "setstatus", "addmoney", "removemoney", "seeconfess", "maintenance", "blacklist"] and not await self.bot.is_owner(ctx.author):
             return await ctx.send("❌ Aapke paas is command ki details dekhne ki permission nahi hai!")
 
         # Raw declarations parameters template
@@ -64,12 +68,14 @@ class Help(commands.Cog):
         category = "General"
 
         # Explicit hardcoded manual categories structure blocks
-        if cmd.name in ["servers", "setstatus", "addmoney", "removemoney", "maintenance", "blacklist"]:
+        if cmd.name in ["servers", "setstatus", "addmoney", "removemoney", "seeconfess", "maintenance", "blacklist"]:
             category = "Owner Only"
         elif cmd.name in ["warn", "warnings", "delwarn", "clearwarn", "mute", "unmute", "kick", "ban", "unban", "purge", "slowmode", "lock", "unlock", "lockdown", "say", "modlogs", "poll", "pin", "unpin", "setprefix", "giveaway"]:
             category = "Moderation"
         elif cmd.name in ["balance", "bal", "money", "work", "job", "slut", "crime", "rob", "steal", "give", "share", "pay", "coinflip", "cf", "roulette", "rt", "blackjack", "bj", "deposit", "dep", "withdraw", "with", "leaderboard", "lb"]:
             category = "Economy & Gaming"
+        elif cmd.name in ["roast", "confess", "match", "dm"]:
+            category = "Fun"
         elif cmd.name in ["serverinfo", "botinfo", "invite", "avatar", "pfp", "av"]:
             category = "Utility"
         elif cmd.name in ["afk", "remindme"]:
@@ -277,7 +283,7 @@ class Help(commands.Cog):
             examples = f"`{prefix}remindme 10m Exams Ki Taiyari`"
             
         elif cmd.name == "servers":
-            description = "Sirf Bot Creator ke liye active servers ki list tracking map (Owner Command)."
+            description = "Sirf Bot Creator ke liye active servers ki list tracking map (Owner Only)."
             usage = f"`{prefix}servers`"
             examples = f"`{prefix}servers`"
             
@@ -300,6 +306,30 @@ class Help(commands.Cog):
             description = "🖼️ Kisi bhi member ki high-resolution display picture fetch karke show karne ke liye."
             usage = f"`{prefix}avatar [@user/ID]`"
             examples = f"`{prefix}avatar @Rishav`"
+
+        elif cmd.name == "roast":
+            description = "🔥 Kisi member ki dosto ke beech shandaar witty roasts ke sath taang kheenchna."
+            usage = f"`{prefix}roast [@user]`"
+            examples = f"`{prefix}roast @User`"
+
+        elif cmd.name == "confess":
+            description = "🤫 Mentioned channel me anonymous embed message bhejta hai aur back-end tracking table me save karta hai."
+            usage = f"`{prefix}confess <#channel> <message>`"
+            examples = f"`{prefix}confess #confessions I Love You Kriti`"
+
+        elif cmd.name == "match":
+            description = "❤️ Do logo ke beech ka fun love/friendship percentage matrix calculator."
+            usage = f"`{prefix}match @user1 @user2`"
+            examples = f"`{prefix}match @User1 @User2`"
+
+        elif cmd.name == "dm":
+            description = "📩 Bot ke zariye kisi user ko private DM bhejkar logs embed screen par dikhana."
+            usage = f"`{prefix}dm @user/ID <message>`"
+            examples = f"`{prefix}dm @User Kaise ho bhai?`"
+
+        elif cmd.name == "seeconfess":
+            description = "👑 Sirf Rishav bhai ke liye - Saare anonymous confessions track karne ya kisi specific user ka data nikalne ke liye."
+            usage = f"`{prefix}seeconfess`\n`{prefix}seeconfess @user/ID`"
 
         cmd_embed = discord.Embed(title=f"ℹ️ Command Detail: {cmd.name.upper()}", color=discord.Color.green())
         cmd_embed.add_field(name="📝 Description", value=description, inline=False)
