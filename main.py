@@ -141,8 +141,10 @@ async def on_ready():
     for filename in os.listdir('./cogs'):
         if filename.endswith('.py'):
             try:
-                await bot.load_extension(f'cogs.{filename[:-3]}')
-                print(f'-> Successfully Loaded: {filename}')
+                # Strictly loading files except any residual music scripts
+                if "music" not in filename:
+                    await bot.load_extension(f'cogs.{filename[:-3]}')
+                    print(f'-> Successfully Loaded: {filename}')
             except Exception as e:
                 print(f'💥 Failed to Load Extension {filename}: {e}')
                 
