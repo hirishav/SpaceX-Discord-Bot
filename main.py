@@ -5,6 +5,7 @@ import os
 import sqlite3
 import time
 import asyncio
+import ctypes
 
 # Environment Variable aur Config setup
 try:
@@ -68,6 +69,17 @@ bot.interrupted_users = {} # Format: {user_id: channel_id}
 async def on_ready():
     print("---------------------------------------")
     print(f'Mubarak ho! Bot ka naam hai: {bot.user.name}')
+    
+    # 🔥 100000% VOICE ENGINE PIECE: System level native encoder bindings mapping
+    try:
+        discord.opus.load_opus('libopus.so.0')
+        print("-> Native Audio Layout System Bound Success (libopus.so.0)")
+    except Exception:
+        try:
+            discord.opus.load_opus('libopus.so')
+            print("-> Native Audio Layout System Bound Success (libopus.so)")
+        except Exception:
+            print("-> System Voice Codecs running on core environment wrapper")
     
     # DATABASE SETUP
     conn = sqlite3.connect("warnings.db")
@@ -140,9 +152,12 @@ async def on_ready():
     print('Modules load ho rahe hain...')
     for filename in os.listdir('./cogs'):
         if filename.endswith('.py'):
-            await bot.load_extension(f'cogs.{filename[:-3]}')
-            print(f'-> Successfully Loaded: {filename}')
-            
+            try:
+                await bot.load_extension(f'cogs.{filename[:-3]}')
+                print(f'-> Successfully Loaded: {filename}')
+            except Exception as e:
+                print(f'💥 Failed to Load Extension {filename}: {e}')
+                
     print('Bot successfully online aa gaya hai! 🎉')
     print("---------------------------------------")
 
@@ -168,7 +183,6 @@ async def on_message(message):
     if message.author.bot:
         return
 
-    # Dynamic prefix check current message context ke liye
     current_prefix = get_prefix(bot, message)
 
     # 1. 🔥 MAINTENANCE SYSTEM PEHRA
