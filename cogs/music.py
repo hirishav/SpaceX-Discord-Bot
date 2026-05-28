@@ -3,8 +3,8 @@ import discord
 from discord.ext import commands
 import yt_dlp
 import asyncio
+import os
 
-# Airtight operational streaming array matrices
 YTDL_OPTIONS = {
     'format': 'bestaudio/best',
     'noplaylist': True,
@@ -14,16 +14,13 @@ YTDL_OPTIONS = {
     'quiet': True,
     'no_warnings': True,
     'default_search': 'auto',
-    'source_address': '0.0.0.0',
-    'extract_flat': False
+    'source_address': '0.0.0.0'
 }
 
 FFMPEG_OPTIONS = {
     'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
     'options': '-vn'
 }
-
-ytdl = yt_dlp.YoutubeDL(YTDL_OPTIONS)
 
 class Music(commands.Cog):
     def __init__(self, bot):
@@ -40,10 +37,11 @@ class Music(commands.Cog):
         if len(queue) > 0:
             next_song = queue.pop(0)
             
-            # Reconnect client verification logic
             if ctx.voice_client and ctx.voice_client.is_connected():
-                # 🔥 FIX: Added executable_path for custom Render internal storage
-                audio_source = discord.FFmpegPCMAudio(next_song['url'], executable_path='./ffmpeg/ffmpeg', **FFMPEG_OPTIONS)
+                # Absolute check for binary file path setup
+                exe_path = './ffmpeg/ffmpeg' if os.path.exists('./ffmpeg/ffmpeg') else 'ffmpeg'
+                audio_source = discord.FFmpegPCMAudio(next_song['url'], executable_path=exe_path, **FFMPEG_OPTIONS)
+                
                 ctx.voice_client.play(audio_source, after=lambda e: self.play_next(ctx))
                 
                 embed = discord.Embed(
@@ -51,19 +49,18 @@ class Music(commands.Cog):
                     description=f"▶️ **[{next_song['title']}]({next_song['webpage_url']})**",
                     color=discord.Color.green()
                 )
-                coro = ctx.send(embed=embed)
-                asyncio.run_coroutine_threadsafe(coro, self.bot.loop)
+                self.bot.loop.create_task(ctx.send(embed=embed))
 
     @commands.command(name="play", aliases=["p"])
     async def play(self, ctx, *, search: str = None):
-        """Voice Channel me gaana bajane ke liye."""
+        """Voice Channel me koi bhi gaana stream karne ke liye."""
         if not search:
-            return await ctx.send(f"❌ Sahi tarika: `{ctx.prefix}play <Song Name / Link>`")
+            return await ctx.send(f"❌ Sahi tarika: `{ctx.prefix}play <Gaane ka naam ya YouTube Link>`")
 
         if ctx.author.voice is None:
-            return await ctx.send("❌ Bhai, pehle kisi Voice Channel me aao!")
+            return await ctx.send("❌ Bhai, pehle kisi Voice Channel me aao tabhi toh gaana bajega!")
 
-        # Join or move configuration framework
+        # Dynamic channel routing pipeline connection connection matrix
         if ctx.voice_client is None:
             await ctx.author.voice.channel.connect()
         elif ctx.voice_client.channel != ctx.author.voice.channel:
@@ -71,22 +68,22 @@ class Music(commands.Cog):
 
         async with ctx.typing():
             try:
-                # Threadpool routing map parser loop execution
-                loop = self.bot.loop or asyncio.get_event_loop()
-                data = await loop.run_in_executor(None, lambda: ytdl.extract_info(search, download=False))
+                # Airtight synchronous fallback to avoid loop deadlocks
+                with yt_dlp.YoutubeDL(YTDL_OPTIONS) as ytdl:
+                    data = await self.bot.loop.run_in_executor(None, lambda: ytdl.extract_info(search, download=False))
+                
+                if 'entries' in data:
+                    video = data['entries'][0]
+                else:
+                    video = data
+
+                song_info = {
+                    'url': video['url'],
+                    'title': video['title'],
+                    'webpage_url': video['webpage_url']
+                }
             except Exception as e:
-                return await ctx.send(f"❌ Stream process load nahi ho paya: `{e}`")
-
-            if 'entries' in data:
-                video = data['entries'][0]
-            else:
-                video = data
-
-            song_info = {
-                'url': video['url'],
-                'title': video['title'],
-                'webpage_url': video['webpage_url']
-            }
+                return await ctx.send(f"❌ YouTube se gaana dhoondne me dikkat hui bhai! Error: `{e}`")
 
             queue = self.get_queue(ctx.guild.id)
 
@@ -99,16 +96,20 @@ class Music(commands.Cog):
                 )
                 await ctx.send(embed=embed)
             else:
-                # 🔥 FIX: Added executable_path here as well for single direct stream hit
-                audio_source = discord.FFmpegPCMAudio(song_info['url'], executable_path='./ffmpeg/ffmpeg', **FFMPEG_OPTIONS)
-                ctx.voice_client.play(audio_source, after=lambda e: self.play_next(ctx))
-                
-                embed = discord.Embed(
-                    title="🎶 Now Playing",
-                    description=f"▶️ **[{song_info['title']}]({song_info['webpage_url']})**",
-                    color=discord.Color.green()
-                )
-                await ctx.send(embed=embed)
+                try:
+                    exe_path = './ffmpeg/ffmpeg' if os.path.exists('./ffmpeg/ffmpeg') else 'ffmpeg'
+                    audio_source = discord.FFmpegPCMAudio(song_info['url'], executable_path=exe_path, **FFMPEG_OPTIONS)
+                    
+                    ctx.voice_client.play(audio_source, after=lambda e: self.play_next(ctx))
+                    
+                    embed = discord.Embed(
+                        title="🎶 Now Playing",
+                        description=f"▶️ **[{song_info['title']}]({song_info['webpage_url']})**",
+                        color=discord.Color.green()
+                    )
+                    await ctx.send(embed=embed)
+                except Exception as e:
+                    await ctx.send(f"❌ Audio streaming play karne me internal system crash hua: `{e}`")
 
     @commands.command(name="skip", aliases=["s"])
     async def skip(self, ctx):
@@ -126,7 +127,7 @@ class Music(commands.Cog):
             if ctx.guild.id in self.queues:
                 self.queues[ctx.guild.id].clear()
             await ctx.voice_client.disconnect()
-            await ctx.send("🛑 Music stopped aur bot channel se leave kar gaya.")
+            await ctx.send("🛑 Party khatam! Bot voice channel se leave kar gaya.")
         else:
             await ctx.send("❌ Main kisi voice channel me nahi hun bhai!")
 
