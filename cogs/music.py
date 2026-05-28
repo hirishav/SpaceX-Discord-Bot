@@ -38,7 +38,6 @@ class Music(commands.Cog):
             next_song = queue.pop(0)
             
             if ctx.voice_client and ctx.voice_client.is_connected():
-                # Absolute check for binary file path setup
                 exe_path = './ffmpeg/ffmpeg' if os.path.exists('./ffmpeg/ffmpeg') else 'ffmpeg'
                 audio_source = discord.FFmpegPCMAudio(next_song['url'], executable_path=exe_path, **FFMPEG_OPTIONS)
                 
@@ -55,20 +54,23 @@ class Music(commands.Cog):
     async def play(self, ctx, *, search: str = None):
         """Voice Channel me koi bhi gaana stream karne ke liye."""
         if not search:
-            return await ctx.send(f"❌ Sahi tarika: `{ctx.prefix}play <Gaane ka naam ya YouTube Link>`")
+            return await ctx.send(f"❌ Sahi tarika: `{ctx.prefix}play <Gaane ka naam ya Link>`")
 
         if ctx.author.voice is None:
-            return await ctx.send("❌ Bhai, pehle kisi Voice Channel me aao tabhi toh gaana bajega!")
+            return await ctx.send("❌ Bhai, pehle kisi Voice Channel me aao!")
 
-        # Dynamic channel routing pipeline connection connection matrix
+        # Connect ya Move hone ka airtight structure
         if ctx.voice_client is None:
-            await ctx.author.voice.channel.connect()
+            try:
+                await ctx.author.voice.channel.connect(timeout=20.0, reconnect=True)
+            except Exception as e:
+                return await ctx.send(f"❌ Voice channel se connect nahi ho paya: `{e}`")
         elif ctx.voice_client.channel != ctx.author.voice.channel:
             await ctx.voice_client.move_to(ctx.author.voice.channel)
 
         async with ctx.typing():
             try:
-                # Airtight synchronous fallback to avoid loop deadlocks
+                # Loop run wrapper without blocking main thread pool
                 with yt_dlp.YoutubeDL(YTDL_OPTIONS) as ytdl:
                     data = await self.bot.loop.run_in_executor(None, lambda: ytdl.extract_info(search, download=False))
                 
@@ -83,7 +85,7 @@ class Music(commands.Cog):
                     'webpage_url': video['webpage_url']
                 }
             except Exception as e:
-                return await ctx.send(f"❌ YouTube se gaana dhoondne me dikkat hui bhai! Error: `{e}`")
+                return await ctx.send(f"❌ YouTube se data extract karne me galti hui: `{e}`")
 
             queue = self.get_queue(ctx.guild.id)
 
@@ -109,14 +111,14 @@ class Music(commands.Cog):
                     )
                     await ctx.send(embed=embed)
                 except Exception as e:
-                    await ctx.send(f"❌ Audio streaming play karne me internal system crash hua: `{e}`")
+                    await ctx.send(f"❌ Audio stream run nahi ho paya: `{e}`")
 
     @commands.command(name="skip", aliases=["s"])
     async def skip(self, ctx):
         """Current chal rahe gaane ko skip karne ke liye."""
         if ctx.voice_client and ctx.voice_client.is_playing():
             ctx.voice_client.stop()
-            await ctx.send("⏭️ Gaana skip kar diya, agla track aa raha hai!")
+            await ctx.send("⏭️ Gaana skip kar diya!")
         else:
             await ctx.send("❌ Abhi koi gaana chal hi nahi raha hai!")
 
@@ -127,7 +129,7 @@ class Music(commands.Cog):
             if ctx.guild.id in self.queues:
                 self.queues[ctx.guild.id].clear()
             await ctx.voice_client.disconnect()
-            await ctx.send("🛑 Party khatam! Bot voice channel se leave kar gaya.")
+            await ctx.send("🛑 Bot voice channel se leave kar gaya.")
         else:
             await ctx.send("❌ Main kisi voice channel me nahi hun bhai!")
 
@@ -136,16 +138,12 @@ class Music(commands.Cog):
         """Gaano ki dynamic queue dekhne ke liye."""
         queue = self.get_queue(ctx.guild.id)
         if not queue:
-            return await ctx.send("🎵 Queue ekdum khali hai! `!!play` se gaane jodo.")
+            return await ctx.send("🎵 Queue ekdum khali hai!")
 
         embed = discord.Embed(title="📋 Upcoming Tracks Queue", color=discord.Color.orange())
         text = ""
         for idx, song in enumerate(queue[:10], start=1):
             text += f"`{idx}.` **[{song['title']}]({song['webpage_url']})**\n"
-        
-        if len(queue) > 10:
-            text += f"\n*...aur {len(queue) - 10} gaane queue me hain!*"
-
         embed.description = text
         await ctx.send(embed=embed)
 
