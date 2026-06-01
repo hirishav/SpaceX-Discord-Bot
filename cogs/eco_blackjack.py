@@ -21,31 +21,62 @@ class BlackjackView(discord.ui.View):
 
     def calculate_score(self, hand):
         score = sum(hand)
-        if score > 21 and 11 in hand: # Ace fallback rule
-            hand[hand.index(11)] = 1
-            score = sum(hand)
+        # Dynamic Ace compression check array framework
+        temp_hand = hand.copy()
+        while score > 21 and 11 in temp_hand:
+            temp_hand[temp_hand.index(11)] = 1
+            score = sum(temp_hand)
         return score
 
     async def get_embed(self, show_dealer_all=False):
         p_score = self.calculate_score(self.player_hand)
         d_score = self.calculate_score(self.dealer_hand)
 
-        embed = discord.Embed(title="🃏 Blackjack Table", color=discord.Color.blurple())
-        embed.add_field(name=f"👤 Your Hand (Score: {p_score})", value=f"Cards: {self.player_hand}", inline=True)
-        
+        # Dynamic Soft/Hard calculations wrapper template
+        p_soft = "Soft " if (11 in self.player_hand and p_score <= 21) else ""
+
+        embed = discord.Embed(
+            title="🃏 Blackjack Table", 
+            description="Neeche diye gaye buttons use karke khelein:\n🟢 **Hit:** Naya card lene ke liye\n🔴 **Stand:** Apne cards lock karne ke liye",
+            color=discord.Color.dark_gray() # SpaceX original background layout color mapping
+        )
+        embed.set_author(name=f"{self.ctx.author.name}'s Game", icon_url=self.ctx.author.display_avatar.url)
+
+        # 👤 USER HAND COLUMN DESIGN (UnbelievaBoat Clone Structure)
+        p_cards_str = " ".join([f"`{c}`" for c in self.player_hand])
+        embed.add_field(
+            name="**Your Hand**",
+            value=f"{p_cards_str}\n\nValue: {p_soft}{p_score}",
+            inline=True
+        )
+
+        # 🤖 DEALER HAND COLUMN DESIGN WITH LIVE VARIABLE VALUE COUNTERS
         if show_dealer_all:
-            embed.add_field(name=f"🤖 Dealer Hand (Score: {d_score})", value=f"Cards: {self.dealer_hand}", inline=True)
+            d_soft = "Soft " if (11 in self.dealer_hand and d_score <= 21) else ""
+            d_cards_str = " ".join([f"`{c}`" for c in self.dealer_hand])
+            embed.add_field(
+                name="**Dealer Hand**",
+                value=f"{d_cards_str}\n\nValue: {d_soft}{d_score}",
+                inline=True
+            )
         else:
-            embed.add_field(name="🤖 Dealer Hand", value=f"Cards: [{self.dealer_hand[0]}, ?]", inline=True)
+            # 🔥 100000% UNBELIEVABOAT CLONE LAYER: First card score shown, hidden asset mapped
+            first_card = self.dealer_hand[0]
+            d_cards_str = f"`{first_card}` `?`"
+            embed.add_field(
+                name="**Dealer Hand**",
+                value=f"{d_cards_str}\n\nValue: {first_card}",
+                inline=True
+            )
             
-        embed.set_footer(text=f"Bet: 🪙 {self.amount}")
+        embed.add_field(name="💰 Bet Amount", value=f"**🪙 {self.amount} Coins**", inline=False)
         return embed
 
     async def end_game(self, interaction, result_text, color, final_change):
         self.is_over = True
-        self.clear_items() # Disable buttons
+        self.clear_items() # Disable buttons matrix pipeline
         
-        # Database transaction
+        # Database transactional update loops
         conn = sqlite3.connect(self.cog.db_path)
         cursor = conn.cursor()
         cursor.execute("UPDATE economy SET wallet = wallet + ? WHERE user_id = ?", (final_change, str(self.ctx.author.id)))
@@ -78,7 +109,7 @@ class BlackjackView(discord.ui.View):
         p_score = self.calculate_score(self.player_hand)
         d_score = self.calculate_score(self.dealer_hand)
 
-        # Dealer rules: Dealer hits until 17 or higher
+        # Dealer mechanics sequence loops
         while d_score < 17:
             self.dealer_hand.append(self.draw_card())
             d_score = self.calculate_score(self.dealer_hand)
@@ -94,7 +125,6 @@ class BlackjackView(discord.ui.View):
 
     async def on_timeout(self):
         if not self.is_over:
-            # Automatic fold if inactive
             conn = sqlite3.connect(self.cog.db_path)
             cursor = conn.cursor()
             cursor.execute("UPDATE economy SET wallet = wallet - ? WHERE user_id = ?", (self.amount, str(self.ctx.author.id)))
@@ -134,7 +164,6 @@ class EcoBlackjack(commands.Cog):
 
         view = BlackjackView(ctx, amount, self, wallet)
         embed = await view.get_embed()
-        embed.description = "Neeche diye gaye buttons use karke khelein:\n🟢 **Hit:** Naya card lene ke liye\n🔴 **Stand:** Apne cards lock karne ke liye"
         
         await ctx.send(embed=embed, view=view)
 
