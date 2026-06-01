@@ -10,14 +10,14 @@ ACTIVE_GIVEAWAYS = {}
 GIVEAWAY_COUNTER = 0
 
 class GiveawayView(discord.ui.View):
-    def __init__(self, required_role=None):
-        super().__init__(timeout=None) # Persistent token locked parameters
+    def __init__(self, required_role=None, prize_name="Something Sexy"):
+        super().__init__(timeout=None) 
         self.entrants = set()
         self.required_role = None if str(required_role).lower() == "none" else required_role
+        self.prize_name = prize_name
 
     @discord.ui.button(label="Join Giveaway! 🎉", style=discord.ButtonStyle.green, custom_id="join_giveaway_btn")
     async def join_button(self, interaction: discord.Interaction, button: discord.ui.Button):
-        # 🤝 ABSOLUTE FIX: Pehle interaction response flow trigger parameters sync karo
         user = interaction.user
         
         # Role requirement checker array matrix
@@ -40,9 +40,20 @@ class GiveawayView(discord.ui.View):
         
         self.entrants.add(user.id)
         
-        # Direct immediate acknowledgement back to discord gateway prevents timeout crashes
-        await interaction.response.send_message("🎉 **Mubarak ho!** Tumne giveaway kamyabi se join kar liya hai.", ephemeral=True)
+        # Target immediate acknowledgment to bypass gateways locks
+        await interaction.response.send_message("🎉 **Mubarak ho!** Tumne giveaway kamyabi se join kar liya hai. Ek baar apna DM check karo!", ephemeral=True)
         
+        # 🔥 FIX 1: Direct DM Notification to the Participant
+        try:
+            dm_embed = discord.Embed(
+                title="🎟️ Giveaway Entry Confirmed!",
+                description=f"Hey {user.name}, aapne **{interaction.guild.name}** me **{self.prize_name}** ke giveaway me successfully participate kar liya hai! Good luck! 🌟",
+                color=discord.Color.green()
+            )
+            await user.send(embed=dm_embed)
+        except discord.Forbidden:
+            pass # User ka DM closed hai toh error silent handle hoga
+
         try:
             embed = interaction.message.embeds[0]
             embed.set_field_at(2, name="📊 Total Entries", value=f"`{len(self.entrants)}` Players", inline=True)
@@ -105,7 +116,8 @@ class ModGiveaway(commands.Cog):
         embed.add_field(name="👑 Host", value=ctx.author.mention, inline=False)
         embed.set_footer(text="Niche diye gaye button par click karke join karein!")
 
-        view = GiveawayView(required_role=parsed_role)
+        # Prize name dynamically injected to view for direct DM references
+        view = GiveawayView(required_role=parsed_role, prize_name=prize)
         g_msg = await ctx.send(content="🎉 **GIVEAWAY LIVE** 🎉", embed=embed, view=view)
 
         loop_task = asyncio.create_task(self.giveaway_countdown_waiter(seconds, current_g_id, ctx.channel))
@@ -148,15 +160,40 @@ class ModGiveaway(commands.Cog):
             return
 
         winner_id = random.choice(list(view.entrants))
+        
+        # 🔥 FIX 2: Strict fetch loop architecture fallback for guaranteed winner tracking & alerts
         winner = channel.guild.get_member(winner_id)
+        if not winner:
+            try:
+                winner = await channel.guild.fetch_member(winner_id)
+            except Exception:
+                winner = self.bot.get_user(winner_id)
+
+        winner_mention = winner.mention if winner else f"<@{winner_id}>"
 
         embed_win = discord.Embed(
             title="🎉 GIVEAWAY WINNER! 🎉",
-            description=f"### 🏆 Prize: **{prize}**\n\n👑 Winner: {winner.mention if winner else f'ID: {winner_id}'}\n📊 Total Participants: `{len(view.entrants)}`",
+            description=f"### 🏆 Prize: **{prize}**\n\n👑 Winner: {winner_mention}\n📊 Total Participants: `{len(view.entrants)}`",
             color=discord.Color.green()
         )
+        embed_win.set_footer(text="Mubarak ho bhai!")
+        
         await g_msg.edit(content="🎉 **GIVEAWAY ENDED** 🎉", embed=embed_win, view=None)
-        if winner: await channel.send(f"🥳 **Mubarak ho {winner.mention}!** Tumne **{prize}** ka giveaway jeet liya hai! {g_msg.jump_url}")
+        
+        # 🔥 FIX 3: Guaranteed Public Ping Channel Announcement Alert Matrix
+        await channel.send(f"🥳 **Mubarak ho {winner_mention}!** Tumne **{prize}** ka giveaway jeet liya hai! {g_msg.jump_url}")
+        
+        # 🔥 FIX 4: Explicit Direct DM to Winner Alert Profile
+        if winner:
+            try:
+                win_dm = discord.Embed(
+                    title="👑 YOU WON THE GIVEAWAY! 👑",
+                    description=f"Congratulations! Aapne **{channel.guild.name}** me **{prize}** ka giveaway jeet liya hai! \n\n🔗 [Giveaway Message Link]({g_msg.jump_url})\n👉 Host se contact karke apna reward claim karein!",
+                    color=discord.Color.gold()
+                )
+                await winner.send(embed=win_dm)
+            except Exception:
+                pass
 
     @commands.command(name="giveawayend", aliases=["gend"])
     @commands.has_permissions(manage_messages=True)
@@ -175,8 +212,14 @@ class ModGiveaway(commands.Cog):
         prize = ACTIVE_GIVEAWAYS[giveaway_id]["prize"]
         if not view.entrants: return await ctx.send("❌ No entrants!")
         winner_id = random.choice(list(view.entrants))
+        
         winner = ctx.guild.get_member(winner_id)
-        if winner: await ctx.send(f"🎲 **Reroll Action:** {winner.mention} naye winner chune gaye hain **{prize}** ke liye! 🎉")
+        if not winner:
+            try: winner = await ctx.guild.fetch_member(winner_id)
+            except Exception: winner = self.bot.get_user(winner_id)
+            
+        winner_mention = winner.mention if winner else f"<@{winner_id}>"
+        await ctx.send(f"🎲 **Reroll Action:** {winner_mention} naye winner chune gaye hain **{prize}** ke liye! 🎉")
 
 async def setup(bot):
     await bot.add_cog(ModGiveaway(bot))
