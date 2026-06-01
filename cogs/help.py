@@ -22,17 +22,20 @@ class Help(commands.Cog):
             
             # --- 👑 OWNER ONLY CATEGORY ---
             if await self.bot.is_owner(ctx.author):
-                embed.add_field(name="👑 Owner Only", value="`servers`, `setstatus`, `addmoney`, `removemoney`, `seeconfess`, `maintenance`, `blacklist`", inline=False)
+                embed.add_field(name="👑 Owner Only", value="`servers`, `setstatus`, `addmoney`, `removemoney`, `seeconfess`, `maintenance`, `blacklist`, `ownerportfolio`, `addstock`, `setshares`", inline=False)
             
             # --- 🛡️ MODERATION CATEGORY ---
             mod_list = "`warn`, `warnings`, `delwarn`, `clearwarn`, `mute`, `unmute`, `kick`, `ban`, `unban`, `purge`, `slowmode`, `lock`, `unlock`, `lockdown`, `say`, `modlogs`, `poll`, `pin`, `unpin`, `setprefix`, `giveaway`"
             embed.add_field(name="🛡️ Moderation", value=mod_list, inline=False)
             
-            # --- 💰 ECONOMY & GAMING ---
-            eco_list = "`bal`, `work`, `slut`, `crime`, `rob`, `give`, `coinflip`, `roulette`, `blackjack`, `deposit`, `withdraw`, `leaderboard`"
-            embed.add_field(name="💰 Economy & Gaming", value=eco_list, inline=False)
+            # --- 💰 ECONOMY, CASINO & STOCKS Subcategory Matrix ---
+            eco_list = "**💵 Routine Wallet Cash Engine**\n`bal`, `work`, `slut`, `crime`, `rob`, `give`, `deposit`, `withdraw`, `leaderboard`"
+            game_list = "**🎲 Casino Gambling Hub Channels**\n`coinflip`, `roulette`, `blackjack`"
+            stock_list = "**📈 Stocks & Market (200 Top Tickers Pool)**\n`stocks`, `buystock`, `sellstock`, `portfolio`"
+            
+            embed.add_field(name="💰 Economy & Gaming", value=f"{eco_list}\n\n{game_list}\n\n{stock_list}", inline=False)
 
-            # --- 🎭 FUN CATEGORY (THEEK NEECHE INJECTED) ---
+            # --- 🎭 FUN CATEGORY ---
             fun_list = "`roast`, `confess`, `match`, `dm`"
             embed.add_field(name="🎭 Fun", value=fun_list, inline=False)
             
@@ -57,7 +60,8 @@ class Help(commands.Cog):
             return await ctx.send(f"❌ Mujhe `{command_name}` naam ka koi command nahi mila!")
 
         # 🔒 Security firewall on owner parameters
-        if cmd.name in ["servers", "setstatus", "addmoney", "removemoney", "seeconfess", "maintenance", "blacklist"] and not await self.bot.is_owner(ctx.author):
+        owner_cmds = ["servers", "setstatus", "addmoney", "removemoney", "seeconfess", "maintenance", "blacklist", "ownerportfolio", "addstock", "setshares"]
+        if cmd.name in owner_cmds and not await self.bot.is_owner(ctx.author):
             return await ctx.send("❌ Aapke paas is command ki details dekhne ki permission nahi hai!")
 
         # Raw declarations parameters template
@@ -68,11 +72,11 @@ class Help(commands.Cog):
         category = "General"
 
         # Explicit hardcoded manual categories structure blocks
-        if cmd.name in ["servers", "setstatus", "addmoney", "removemoney", "seeconfess", "maintenance", "blacklist"]:
+        if cmd.name in owner_cmds:
             category = "Owner Only"
         elif cmd.name in ["warn", "warnings", "delwarn", "clearwarn", "mute", "unmute", "kick", "ban", "unban", "purge", "slowmode", "lock", "unlock", "lockdown", "say", "modlogs", "poll", "pin", "unpin", "setprefix", "giveaway"]:
             category = "Moderation"
-        elif cmd.name in ["balance", "bal", "money", "work", "job", "slut", "crime", "rob", "steal", "give", "share", "pay", "coinflip", "cf", "roulette", "rt", "blackjack", "bj", "deposit", "dep", "withdraw", "with", "leaderboard", "lb"]:
+        elif cmd.name in ["balance", "bal", "money", "work", "job", "slut", "crime", "rob", "steal", "give", "share", "pay", "coinflip", "cf", "roulette", "rt", "blackjack", "bj", "deposit", "dep", "withdraw", "with", "leaderboard", "lb", "stocks", "buystock", "sellstock", "portfolio"]:
             category = "Economy & Gaming"
         elif cmd.name in ["roast", "confess", "match", "dm"]:
             category = "Fun"
@@ -299,8 +303,8 @@ class Help(commands.Cog):
             
         elif cmd.name in ["giveaway", "gstart"]:
             description = "🎉 Advance Interactive Button wala automatic giveaway engine framework toggle karne ke liye."
-            usage = f"`{prefix}giveaway <time><s/m/h/d> <prize>`"
-            examples = f"`{prefix}giveaway 10m Spotify Premium`"
+            usage = f'`{prefix}gstart <time> "<requirements_text>" <@role/none> <prize>`'
+            examples = f'`{prefix}gstart 10m "Must have Fans role" @Fans Spotify`'
             
         elif cmd.name in ["avatar", "av", "pfp"]:
             description = "🖼️ Kisi bhi member ki high-resolution display picture fetch karke show karne ke liye."
@@ -330,6 +334,41 @@ class Help(commands.Cog):
         elif cmd.name == "seeconfess":
             description = "👑 Sirf Rishav bhai ke liye - Saare anonymous confessions track karne ya kisi specific user ka data nikalne ke liye."
             usage = f"`{prefix}seeconfess`\n`{prefix}seeconfess @user/ID`"
+
+        # 🔥 --- NAYE EXTENDED STOCKS PARAMETERS KA DETAILED BACKEND DATA ---
+        elif cmd.name == "stocks":
+            description = "📈 Live Top 200 Real-life Stocks (Samsung, NIFTY 50, SilverBees) ke rates aur remaining available limits page-wise check karne ke liye."
+            usage = f"`{prefix}stocks [page_number]`"
+            examples = f"`{prefix}stocks 2`"
+            
+        elif cmd.name == "buystock":
+            description = "🛒 Wallet coins ko use karke 10,000 limited share inventory pool se real assets instantly purchase karne ke liye."
+            usage = f"`{prefix}buystock <TICKER> <quantity>`"
+            examples = f"`{prefix}buystock NIFTY 5`"
+            
+        elif cmd.name == "sellstock":
+            description = "💰 Owned portfolio shares ko current live market value pricing par profit ya loss ke sath instant wallet liquid cash me swap karne ke liye."
+            usage = f"`{prefix}sellstock <TICKER> <quantity>`"
+            examples = f"`{prefix}sellstock SMSNG 2`"
+            
+        elif cmd.name == "portfolio":
+            description = "💼 Aapka dynamic holdings asset value show karta hai. Isme aap security visibility status controls manage kar sakte ho."
+            usage = f"`{prefix}portfolio [@user]`\n`{prefix}portfolio set <public/private>`"
+            examples = f"`{prefix}portfolio set private`\n`{prefix}portfolio @User`"
+            
+        elif cmd.name == "ownerportfolio":
+            description = "👑 (Admin Override Command) Server ke kisi bhi private account ka portfolio securely bypass karke analytics dekhne ke liye."
+            usage = f"`{prefix}ownerportfolio @user`"
+            
+        elif cmd.name == "addstock":
+            description = "👑 Live market database registries me instantly manually custom real ticker inject karne ke liye."
+            usage = f"`{prefix}addstock <TICKER> <Full Name> <Initial Cost Price>`"
+            examples = f"`{prefix}addstock COFFEE \"Starbucks Capital\" 250`"
+            
+        elif cmd.name == "setshares":
+            description = "👑 Kisi active ticker ke total 10,000 baseline pool bache hue available inventory shares force-rewrite karne ke liye."
+            usage = f"`{prefix}setshares <TICKER> <quantity>`"
+            examples = f"`{prefix}setshares RELI 5000`"
 
         cmd_embed = discord.Embed(title=f"ℹ️ Command Detail: {cmd.name.upper()}", color=discord.Color.green())
         cmd_embed.add_field(name="📝 Description", value=description, inline=False)
