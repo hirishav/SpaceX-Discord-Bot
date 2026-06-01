@@ -31,7 +31,7 @@ class Help(commands.Cog):
             # --- 💰 ECONOMY, CASINO & STOCKS Subcategory Matrix ---
             eco_list = "**💵 Routine Wallet Cash Engine**\n`bal`, `work`, `slut`, `crime`, `rob`, `give`, `deposit`, `withdraw`, `leaderboard`"
             game_list = "**🎲 Casino Gambling Hub Channels**\n`coinflip`, `roulette`, `blackjack`"
-            stock_list = "**📈 Stocks & Market (200 Top Tickers Pool)**\n`stocks`, `buystock`, `sellstock`, `portfolio`"
+            stock_list = "**📈 Stocks & Market (200 Top Tickers Pool)**\n`stocks`, `buystock`, `sellstock`, `portfolio`, `marketnews`"
             
             embed.add_field(name="💰 Economy & Gaming", value=f"{eco_list}\n\n{game_list}\n\n{stock_list}", inline=False)
 
@@ -76,7 +76,7 @@ class Help(commands.Cog):
             category = "Owner Only"
         elif cmd.name in ["warn", "warnings", "delwarn", "clearwarn", "mute", "unmute", "kick", "ban", "unban", "purge", "slowmode", "lock", "unlock", "lockdown", "say", "modlogs", "poll", "pin", "unpin", "setprefix", "giveaway"]:
             category = "Moderation"
-        elif cmd.name in ["balance", "bal", "money", "work", "job", "slut", "crime", "rob", "steal", "give", "share", "pay", "coinflip", "cf", "roulette", "rt", "blackjack", "bj", "deposit", "dep", "withdraw", "with", "leaderboard", "lb", "stocks", "buystock", "sellstock", "portfolio"]:
+        elif cmd.name in ["balance", "bal", "money", "work", "job", "slut", "crime", "rob", "steal", "give", "share", "pay", "coinflip", "cf", "roulette", "rt", "blackjack", "bj", "deposit", "dep", "withdraw", "with", "leaderboard", "lb", "stocks", "buystock", "sellstock", "portfolio", "marketnews"]:
             category = "Economy & Gaming"
         elif cmd.name in ["roast", "confess", "match", "dm"]:
             category = "Fun"
@@ -335,7 +335,7 @@ class Help(commands.Cog):
             description = "👑 Sirf Rishav bhai ke liye - Saare anonymous confessions track karne ya kisi specific user ka data nikalne ke liye."
             usage = f"`{prefix}seeconfess`\n`{prefix}seeconfess @user/ID`"
 
-        # 🔥 --- NAYE EXTENDED STOCKS PARAMETERS KA DETAILED BACKEND DATA ---
+        # --- NAYE EXTENDED STOCKS PARAMETERS KA DETAILED BACKEND DATA ---
         elif cmd.name == "stocks":
             description = "📈 Live Top 200 Real-life Stocks (Samsung, NIFTY 50, SilverBees) ke rates aur remaining available limits page-wise check karne ke liye."
             usage = f"`{prefix}stocks [page_number]`"
@@ -369,6 +369,11 @@ class Help(commands.Cog):
             description = "👑 Kisi active ticker ke total 10,000 baseline pool bache hue available inventory shares force-rewrite karne ke liye."
             usage = f"`{prefix}setshares <TICKER> <quantity>`"
             examples = f"`{prefix}setshares RELI 5000`"
+
+        elif cmd.name in ["marketnews", "news"]:
+            description = "📻 Live share market me dynamic global sectors (Tech, Bluechips, Crypto) ke boom aur crash alerts check karne ke liye."
+            usage = f"`{prefix}marketnews`"
+            examples = f"`{prefix}marketnews`"
 
         cmd_embed = discord.Embed(title=f"ℹ️ Command Detail: {cmd.name.upper()}", color=discord.Color.green())
         cmd_embed.add_field(name="📝 Description", value=description, inline=False)

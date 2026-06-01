@@ -3,7 +3,6 @@ import discord
 from discord.ext import commands, tasks
 import sqlite3
 import random
-from cogs.stocks_core import get_db
 
 class StocksNews(commands.Cog):
     def __init__(self, bot):
@@ -13,67 +12,91 @@ class StocksNews(commands.Cog):
     def cog_unload(self):
         self.flash_market_news.cancel()
 
-    # 📻 AUTOMATIC NEWS LOOP: Shuffles every 15 minutes trigger metrics
     @tasks.loop(minutes=15.0)
     async def flash_market_news(self):
-        # 📢 Real-life simulation flash breaking scenarios matrix arrays
-        news_database = [
-            {"ticker": "SMSNG", "type": "good", "text": "🔥 BREAKING NEWS: Samsung ne ek naya futuristic AI foldable chip launch kiya! Stock me boom aane ki sambhavna!"},
-            {"ticker": "SMSNG", "type": "bad", "text": "💥 ALARMING: Samsung ke lithium battery warehouse me heavy short-circuit, production lines halt par!"},
-            {"ticker": "NIFTY", "type": "good", "text": "📈 MARKET ALERT: Indian economy ne 9.2% GDP growth hit kiya! NIFTY 50 skyrocket hone ke liye taiyar!"},
-            {"ticker": "NIFTY", "type": "bad", "text": "📉 MARKET CRASH ALERT: Global inflation reports aane ke baad NIFTY 50 indices heavy sell-off ki taraf!"},
-            {"ticker": "APPL", "type": "good", "text": "🍏 GLOBAL UPDATE: Apple Car ke internal blueprints leak hue, investors heavily buy orders laga rahe hain!"},
-            {"ticker": "APPL", "type": "bad", "text": "⚠️ TECH NEWS: Apple ke naye iPhone updates me massive security exploit mila, global stocks down!"},
-            {"ticker": "BTC", "type": "good", "text": "🚀 CRYPTO PUMP: US Federal Reserve ne Bitcoin ko safe reserve asset ghoshit kiya! Bull run alert!"},
-            {"ticker": "BTC", "type": "bad", "text": "🐋 WHALE ALERT: Ek purane dormant wallet se 50,000 Bitcoins exchange par dump kiye gaye! Crypto market panic!"},
-            {"ticker": "RELI", "type": "good", "text": "⛽ RELIANCE BOOM: Jio ne global satellite internet rollout complete kiya, market caps soaring!"},
-            {"ticker": "TATA", "type": "good", "text": "🚗 TATA MOTORS UPDATE: Tata Motors ko Europe se 50,000 premium EVs ka order mila!"}
+        # 🌍 MASSIVE SECTOR CO-RELATION NEWS ARRAYS
+        sector_news = [
+            {
+                "title": "🚨 GLOBAL TECH BOOM: SECTOR PUMP IMMINENT! 🚀",
+                "tickers": ["SMSNG", "APPL", "MSFT", "GOOGL", "AMZN", "NVDA", "META"],
+                "type": "good",
+                "text": "🔥 BREAKING: Artificial Intelligence chips ke tech infrastructure business me record boom! Saare global tech stocks heavily rocket hone ke liye taiyar!"
+            },
+            {
+                "title": "💥 TECH SECTOR CRASH ALERT: PANIC SELL-OFF! 📉",
+                "tickers": ["SMSNG", "APPL", "MSFT", "GOOGL", "AMZN", "NVDA", "META"],
+                "type": "bad",
+                "text": "⚠️ TECH ALERT: Semi-conductor suppliers ne structural transport halt ghoshit kiya. Saare leading tech giants ke production data heavily crash ho rahe hain!"
+            },
+            {
+                "title": "📈 INDIAN ECONOMY REAP JACKPOT: BLUECHIPS RUSH! 🇮🇳",
+                "tickers": ["RELI", "TATA", "TCS", "INFY", "HDFCB", "ICICIB", "SBIN", "ITC"],
+                "type": "good",
+                "text": "📊 MARKET BULLS: Indian Union Budget reports out! Foreign institutional investors ne massive funding inject ki, saare top Indian bluechips upar jaane ke liye ready!"
+            },
+            {
+                "title": "📉 INDIAN NIFTY INDEX HEAVY CRASH: SEVERE DRAINDOWN! 🔻",
+                "tickers": ["RELI", "TATA", "TCS", "INFY", "HDFCB", "ICICIB", "SBIN", "ITC"],
+                "type": "bad",
+                "text": "🚨 CRASH WATCH: Regulatory transaction taxes badhne ke darr se investors ne leading companies se billions of coins liquidate kiye! Market index red zone me!"
+            },
+            {
+                "title": "🐋 CRYPTO SUPER RUN ACTIVE: GREEN WAVE! 🪙",
+                "tickers": ["BTC", "ETH", "SOL", "BNB"],
+                "type": "good",
+                "text": "🚀 BULL RUN CONFIRMED: Massive institutional investment firms ne saare primary crypto tokens holdings legal balance sheet me accept kar liye hain! Prices skyrocketing!"
+            },
+            {
+                "title": "📉 CRYPTO INSECURE EXPLOIT: LIQUIDATION PANIC! 🚫",
+                "tickers": ["BTC", "ETH", "SOL", "BNB"],
+                "type": "bad",
+                "text": "💥 PANIC ALERT: Major web3 network protocols me bug leak hone se markets me short-selling peak par! Saare asset tokens down!"
+            }
         ]
 
-        selected_news = random.choice(news_database)
-        ticker = selected_news["ticker"]
-        news_type = selected_news["type"]
-        alert_text = selected_news["text"]
+        selected = random.choice(sector_news)
+        tickers_list = selected["tickers"]
+        news_type = selected["type"]
+        alert_text = selected["text"]
+        news_title = selected["title"]
 
-        conn = get_db()
+        conn = sqlite3.connect("warnings.db")
         cursor = conn.cursor()
         
-        # Check if the target stock exist in database row
-        cursor.execute("SELECT current_price, company_name FROM stocks WHERE ticker = ?", (ticker,))
-        row = cursor.fetchone()
+        affected_details = ""
         
-        if not row:
-            conn.close()
-            return
+        # 🔥 MULTI-STOCK PROCESSOR LOOP: Ek sath list ke saare tickers ko select karke prices badlega
+        for ticker in tickers_list:
+            cursor.execute("SELECT current_price, company_name FROM stocks WHERE ticker = ?", (ticker,))
+            row = cursor.fetchone()
+            if not row: continue
             
-        current_price, comp_name = row[0], row[1]
-
-        # Calculate massive artificial news volatility adjustments matrices
-        if news_type == "good":
-            pump_factor = random.randint(25, 40)
-            new_price = int(current_price * (1 + (pump_factor / 100)))
-            change_str = f"+{pump_factor}% (News Pump)"
-            color = discord.Color.green()
-            title = "🔔 SPACE-X MARKET BREAKING: GOOD NEWS! 📈"
-        else:
-            dump_factor = random.randint(20, 35)
-            new_price = max(10, int(current_price * (1 - (dump_factor / 100))))
-            change_str = f"-{dump_factor}% (News Crash)"
-            color = discord.Color.red()
-            title = "⚠️ SPACE-X MARKET BREAKING: CRASH ALERT! 📉"
-
-        # Push artificial news overrides into master charts database
-        cursor.execute("UPDATE stocks SET current_price = ?, last_change = ? WHERE ticker = ?", (new_price, change_str, ticker))
+            current_price, comp_name = row[0], row[1]
+            
+            if news_type == "good":
+                factor = random.randint(20, 35)
+                new_price = int(current_price * (1 + (factor / 100)))
+                change_str = f"+{factor}% (Sector Pump)"
+            else:
+                factor = random.randint(15, 30)
+                new_price = max(10, int(current_price * (1 - (factor / 100))))
+                change_str = f"-{factor}% (Sector Crash)"
+                
+            cursor.execute("UPDATE stocks SET current_price = ?, last_change = ? WHERE ticker = ?", (new_price, change_str, ticker))
+            affected_details += f"🔹 **{comp_name}** (`{ticker}`): `{current_price}` ➡️ **`{new_price} Coins`**\n"
+            
         conn.commit()
         conn.close()
 
-        # Global system broadcast inside server channels
-        embed = discord.Embed(title=title, description=f"### {alert_text}\n\n📊 **Affected Asset:** {comp_name} (`{ticker}`)\n💸 Old Value: `{current_price} Coins` -> Naya Price: **`{new_price} Coins`**", color=color)
-        embed.set_footer(text="Ghar ka jua ya genuine trading? !!stocks check karein!")
+        # Build composite output embed channel notifications
+        embed = discord.Embed(
+            title=news_title, 
+            description=f"### {alert_text}\n\n📊 **Sector Rate Adjustments:**\n{affected_details}", 
+            color=discord.Color.green() if news_type == "good" else discord.Color.red()
+        )
+        embed.set_footer(text="Ghar ka jua ya professional trading? !!stocks check karein!")
 
-        # Dynamic server announcement delivery routing loops channels map
         for guild in self.bot.guilds:
-            # Server ke default/system text channel par news broadside fenkega
             channel = guild.system_channel or next((c for c in guild.text_channels if c.permissions_for(guild.me).send_messages), None)
             if channel:
                 try: await channel.send(embed=embed)
@@ -81,8 +104,8 @@ class StocksNews(commands.Cog):
 
     @commands.command(name="marketnews", aliases=["news"])
     async def force_news_trigger(self, ctx):
-        """Live trading floor par instantly naya flash check alert lane ke liye."""
-        await ctx.send("📻 Dynamic News Broadcast Matrix manually active kiya jaa raha hai...")
+        """Live trading floor par instantly poore sector ki flash news lane ke liye."""
+        await ctx.send("📻 Sector Volatility News Matrix manually trigger kiya jaa raha hai...")
         await self.flash_market_news()
 
 async def setup(bot):
