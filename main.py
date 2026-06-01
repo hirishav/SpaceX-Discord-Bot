@@ -140,9 +140,17 @@ async def on_ready():
     print('Modules load ho rahe hain...')
     for filename in os.listdir('./cogs'):
         if filename.endswith('.py'):
-            await bot.load_extension(f'cogs.{filename[:-3]}')
-            print(f'-> Successfully Loaded: {filename}')
-            
+            # 🔥 CRITICAL ENGINE FIX: Non-cog utility files ko load handler se filter out karo
+            if filename in ['stocks_core.py', 'eco_stocks_list.py', 'music_core.py']:
+                print(f'-> Skipped Non-Cog Utility File: {filename}')
+                continue
+                
+            try:
+                await bot.load_extension(f'cogs.{filename[:-3]}')
+                print(f'-> Successfully Loaded: {filename}')
+            except Exception as e:
+                print(f'💥 Failed to Load Extension {filename}: {e}')
+                
     print('Bot successfully online aa gaya hai! 🎉')
     print("---------------------------------------")
 

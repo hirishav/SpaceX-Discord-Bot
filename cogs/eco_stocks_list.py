@@ -34,4 +34,4 @@ TOP_200_STOCKS = [
 
 # Auto-expanding placeholder logic arrays matrix up to exactly 200 real-world entities
 for i in range(1, 155):
-   TOP_200_STOCKS.append((f"STK{i}", f"Global Enterprise Asset Pool {i}", 100 + (i * 5)))
+    TOP_200_STOCKS.append((f"STK{i}", f"Global Enterprise Asset Pool {i}", 100 + (i * 5)))
