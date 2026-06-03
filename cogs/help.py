@@ -15,7 +15,7 @@ class Help(commands.Cog):
         # ---- CASE 1: Agar user ne sirf !help ya !!help likha hai ----
         if not command_name:
             embed = discord.Embed(
-                title=f"✨ {self.bot.user.name} Premium Help Menu ✨",
+                title=f"✨ {self.bot.user.name} Help Menu ✨",
                 description=f"Mera current prefix **`{prefix}`** hai.\n`Kisi specific command ki details ke liye likhein:` **`{prefix}help <command>`**\n\n▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬",
                 color=discord.Color.from_rgb(47, 49, 54) # Sleek Dark Aesthetic Charcoal Color
             )
@@ -23,14 +23,14 @@ class Help(commands.Cog):
             # --- 👑 OWNER ONLY CATEGORY ---
             if await self.bot.is_owner(ctx.author):
                 embed.add_field(
-                    name="👑 SYSTEM ADMIN / OWNER ONLY", 
+                    name="👑 OWNER ONLY", 
                     value="> `servers`, `setstatus`, `addmoney`, `removemoney`, `seeconfess`, `maintenance`, `blacklist`, `ownerportfolio`, `addstock`, `setshares`", 
                     inline=False
                 )
             
             # --- 🛡️ MODERATION CATEGORY ---
             mod_list = "> `warn`, `warnings`, `delwarn`, `clearwarn`, `mute`, `unmute`, `kick`, `ban`, `unban`, `purge`, `slowmode`, `lock`, `unlock`, `lockdown`, `say`, `modlogs`, `poll`, `pin`, `unpin`, `setprefix`, `giveaway`, `staffstats`, `roleaudit`, `lookup`"
-            embed.add_field(name="🛡️ POLICE & MODERATION SYSTEMS", value=mod_list, inline=False)
+            embed.add_field(name="🛡️ MODERATION ENGINE", value=mod_list, inline=False)
             
             # --- 💰 ECONOMY, CASINO & STOCKS Subcategory Nested System ---
             eco_nested = (
@@ -41,22 +41,22 @@ class Help(commands.Cog):
                 "📈 **Stocks & Market**\n"
                 "> `stocks`, `buystock`, `sellstock`, `portfolio`, `marketnews`"
             )
-            embed.add_field(name="💰 THE FINANCE, ECONOMY & ENTERTAINMENT", value=eco_nested, inline=False)
+            embed.add_field(name="💰 ECONOMY & GAMING", value=eco_nested, inline=False)
 
             # --- 🎭 FUN CATEGORY ---
             fun_list = "> `roast`, `confess`, `match`, `dm`"
-            embed.add_field(name="🎭 COMEDY, FUN & ENGAGEMENT", value=fun_list, inline=False)
+            embed.add_field(name="🎭 COMEDY & FUN", value=fun_list, inline=False)
             
             # --- ⚙️ UTILITY CATEGORY ---
             util_list = "> `serverinfo`, `botinfo`, `invite`, `avatar`"
-            embed.add_field(name="⚙️ BASE NETWORKS & UTILITIES", value=util_list, inline=False)
+            embed.add_field(name="⚙️ UTILITIES", value=util_list, inline=False)
             
             # --- ✨ GENERAL CATEGORY ---
             general_list = "> `afk`, `remindme`"
-            embed.add_field(name="✨ CORE GENERAL COMMANDS", value=general_list, inline=False)
+            embed.add_field(name="✨ CORE GENERAL", value=general_list, inline=False)
 
             embed.add_field(name="​", value="▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬", inline=False)
-            embed.set_footer(text=f"Requested by {ctx.author.name} | SpaceX Matrix Engine", icon_url=ctx.author.display_avatar.url)
+            embed.set_footer(text=f"Requested by {ctx.author.name} | SpaceX Bot!", icon_url=ctx.author.display_avatar.url)
             return await ctx.send(embed=embed)
 
         # ---- CASE 2: Agar user ne !help <command> likha hai ----
