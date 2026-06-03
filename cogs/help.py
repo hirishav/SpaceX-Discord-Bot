@@ -15,39 +15,48 @@ class Help(commands.Cog):
         # ---- CASE 1: Agar user ne sirf !help ya !!help likha hai ----
         if not command_name:
             embed = discord.Embed(
-                title=f"🤖 {self.bot.user.name} Help Menu",
-                description=f"Mera prefix **`{prefix}`** hai. Kisi command ki detail dekhne ke liye `{prefix}help <command>` likhein.",
-                color=discord.Color.blue()
+                title=f"✨ {self.bot.user.name} Premium Help Menu ✨",
+                description=f"Mera current prefix **`{prefix}`** hai.\n`Kisi specific command ki details ke liye likhein:` **`{prefix}help <command>`**\n\n▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬",
+                color=discord.Color.from_rgb(47, 49, 54) # Sleek Dark Aesthetic Charcoal Color
             )
             
             # --- 👑 OWNER ONLY CATEGORY ---
             if await self.bot.is_owner(ctx.author):
-                embed.add_field(name="👑 Owner Only", value="`servers`, `setstatus`, `addmoney`, `removemoney`, `seeconfess`, `maintenance`, `blacklist`, `ownerportfolio`, `addstock`, `setshares`", inline=False)
+                embed.add_field(
+                    name="👑 SYSTEM ADMIN / OWNER ONLY", 
+                    value="> `servers`, `setstatus`, `addmoney`, `removemoney`, `seeconfess`, `maintenance`, `blacklist`, `ownerportfolio`, `addstock`, `setshares`", 
+                    inline=False
+                )
             
             # --- 🛡️ MODERATION CATEGORY ---
-            mod_list = "`warn`, `warnings`, `delwarn`, `clearwarn`, `mute`, `unmute`, `kick`, `ban`, `unban`, `purge`, `slowmode`, `lock`, `unlock`, `lockdown`, `say`, `modlogs`, `poll`, `pin`, `unpin`, `setprefix`, `giveaway`, `staffstats`, `roleaudit`"
-            embed.add_field(name="🛡️ Moderation", value=mod_list, inline=False)
+            mod_list = "> `warn`, `warnings`, `delwarn`, `clearwarn`, `mute`, `unmute`, `kick`, `ban`, `unban`, `purge`, `slowmode`, `lock`, `unlock`, `lockdown`, `say`, `modlogs`, `poll`, `pin`, `unpin`, `setprefix`, `giveaway`, `staffstats`, `roleaudit`, `lookup`"
+            embed.add_field(name="🛡️ POLICE & MODERATION SYSTEMS", value=mod_list, inline=False)
             
-            # --- 💰 ECONOMY, CASINO & STOCKS Subcategory Matrix ---
-            eco_list = "**💵 Routine Wallet Cash Engine**\n`bal`, `work`, `slut`, `crime`, `rob`, `give`, `deposit`, `withdraw`, `leaderboard`"
-            game_list = "**🎲 Casino Gambling Hub Channels**\n`coinflip`, `roulette`, `blackjack`"
-            stock_list = "**📈 Stocks & Market (200 Top Tickers Pool)**\n`stocks`, `buystock`, `sellstock`, `portfolio`, `marketnews`"
-            
-            embed.add_field(name="💰 Economy & Gaming", value=f"{eco_list}\n\n{game_list}\n\n{stock_list}", inline=False)
+            # --- 💰 ECONOMY, CASINO & STOCKS Subcategory Nested System ---
+            eco_nested = (
+                "💳 **Routine Wallet Cash Engine**\n"
+                "> `bal`, `work`, `slut`, `crime`, `rob`, `give`, `deposit`, `withdraw`, `leaderboard`\n\n"
+                "🎲 **Casino Gambling Hub**\n"
+                "> `coinflip`, `roulette`, `blackjack`\n\n"
+                "📈 **Stocks & Market**\n"
+                "> `stocks`, `buystock`, `sellstock`, `portfolio`, `marketnews`"
+            )
+            embed.add_field(name="💰 THE FINANCE, ECONOMY & ENTERTAINMENT", value=eco_nested, inline=False)
 
             # --- 🎭 FUN CATEGORY ---
-            fun_list = "`roast`, `confess`, `match`, `dm`"
-            embed.add_field(name="🎭 Fun", value=fun_list, inline=False)
+            fun_list = "> `roast`, `confess`, `match`, `dm`"
+            embed.add_field(name="🎭 COMEDY, FUN & ENGAGEMENT", value=fun_list, inline=False)
             
             # --- ⚙️ UTILITY CATEGORY ---
-            util_list = "`serverinfo`, `botinfo`, `invite`, `avatar`"
-            embed.add_field(name="⚙️ Utility", value=util_list, inline=False)
+            util_list = "> `serverinfo`, `botinfo`, `invite`, `avatar`"
+            embed.add_field(name="⚙️ BASE NETWORKS & UTILITIES", value=util_list, inline=False)
             
             # --- ✨ GENERAL CATEGORY ---
-            general_list = "`afk`, `remindme`"
-            embed.add_field(name="✨ General", value=general_list, inline=False)
+            general_list = "> `afk`, `remindme`"
+            embed.add_field(name="✨ CORE GENERAL COMMANDS", value=general_list, inline=False)
 
-            embed.set_footer(text=f"Requested by {ctx.author.name}", icon_url=ctx.author.display_avatar.url)
+            embed.add_field(name="​", value="▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬", inline=False)
+            embed.set_footer(text=f"Requested by {ctx.author.name} | SpaceX Matrix Engine", icon_url=ctx.author.display_avatar.url)
             return await ctx.send(embed=embed)
 
         # ---- CASE 2: Agar user ne !help <command> likha hai ----
@@ -74,7 +83,7 @@ class Help(commands.Cog):
         # Explicit hardcoded manual categories structure blocks
         if cmd.name in owner_cmds:
             category = "Owner Only"
-        elif cmd.name in ["warn", "warnings", "delwarn", "clearwarn", "mute", "unmute", "kick", "ban", "unban", "purge", "slowmode", "lock", "unlock", "lockdown", "say", "modlogs", "poll", "pin", "unpin", "setprefix", "giveaway", "staffstats", "roleaudit"]:
+        elif cmd.name in ["warn", "warnings", "delwarn", "clearwarn", "mute", "unmute", "kick", "ban", "unban", "purge", "slowmode", "lock", "unlock", "lockdown", "say", "modlogs", "poll", "pin", "unpin", "setprefix", "giveaway", "staffstats", "roleaudit", "lookup"]:
             category = "Moderation"
         elif cmd.name in ["balance", "bal", "money", "work", "job", "slut", "crime", "rob", "steal", "give", "share", "pay", "coinflip", "cf", "roulette", "rt", "blackjack", "bj", "deposit", "dep", "withdraw", "with", "leaderboard", "lb", "stocks", "buystock", "sellstock", "portfolio", "marketnews"]:
             category = "Economy & Gaming"
@@ -379,11 +388,16 @@ class Help(commands.Cog):
             usage = f"`{prefix}staffstats` ya `{prefix}staffstats @user`"
             examples = f"`{prefix}staffstats`\n`{prefix}staffstats @Rishav`"
 
-        # 🔥 --- NEW ROLEAUDIT REGISTER LINK ---
         elif cmd.name == "roleaudit":
             description = "🛡️ Server security matrix audit. Dangerous administrative permissions (Administrator, Manage Roles) wale logo ki tracking dashboard screen par lane ke liye."
             usage = f"`{prefix}roleaudit`"
             examples = f"`{prefix}roleaudit`"
+
+        # 🔥 --- NEW LOOKUP COMMAND REGISTRY INTEGRATION ---
+        elif cmd.name == "lookup":
+            description = "🕵️ User Profile Forensics Matrix. Kisi bhi member ka deep timeline creation aur safety check permissions report dekhne ke liye."
+            usage = f"`{prefix}lookup` ya `{prefix}lookup @user`"
+            examples = f"`{prefix}lookup @Rishav`"
 
         cmd_embed = discord.Embed(title=f"ℹ️ Command Detail: {cmd.name.upper()}", color=discord.Color.green())
         cmd_embed.add_field(name="📝 Description", value=description, inline=False)
