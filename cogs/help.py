@@ -25,7 +25,7 @@ class Help(commands.Cog):
                 embed.add_field(name="👑 Owner Only", value="`servers`, `setstatus`, `addmoney`, `removemoney`, `seeconfess`, `maintenance`, `blacklist`, `ownerportfolio`, `addstock`, `setshares`", inline=False)
             
             # --- 🛡️ MODERATION CATEGORY ---
-            mod_list = "`warn`, `warnings`, `delwarn`, `clearwarn`, `mute`, `unmute`, `kick`, `ban`, `unban`, `purge`, `slowmode`, `lock`, `unlock`, `lockdown`, `say`, `modlogs`, `poll`, `pin`, `unpin`, `setprefix`, `giveaway`"
+            mod_list = "`warn`, `warnings`, `delwarn`, `clearwarn`, `mute`, `unmute`, `kick`, `ban`, `unban`, `purge`, `slowmode`, `lock`, `unlock`, `lockdown`, `say`, `modlogs`, `poll`, `pin`, `unpin`, `setprefix`, `giveaway`, `staffstats`, `roleaudit`"
             embed.add_field(name="🛡️ Moderation", value=mod_list, inline=False)
             
             # --- 💰 ECONOMY, CASINO & STOCKS Subcategory Matrix ---
@@ -74,7 +74,7 @@ class Help(commands.Cog):
         # Explicit hardcoded manual categories structure blocks
         if cmd.name in owner_cmds:
             category = "Owner Only"
-        elif cmd.name in ["warn", "warnings", "delwarn", "clearwarn", "mute", "unmute", "kick", "ban", "unban", "purge", "slowmode", "lock", "unlock", "lockdown", "say", "modlogs", "poll", "pin", "unpin", "setprefix", "giveaway"]:
+        elif cmd.name in ["warn", "warnings", "delwarn", "clearwarn", "mute", "unmute", "kick", "ban", "unban", "purge", "slowmode", "lock", "unlock", "lockdown", "say", "modlogs", "poll", "pin", "unpin", "setprefix", "giveaway", "staffstats", "roleaudit"]:
             category = "Moderation"
         elif cmd.name in ["balance", "bal", "money", "work", "job", "slut", "crime", "rob", "steal", "give", "share", "pay", "coinflip", "cf", "roulette", "rt", "blackjack", "bj", "deposit", "dep", "withdraw", "with", "leaderboard", "lb", "stocks", "buystock", "sellstock", "portfolio", "marketnews"]:
             category = "Economy & Gaming"
@@ -172,12 +172,12 @@ class Help(commands.Cog):
             examples = f"`{prefix}unban 727718500663033897`"
             
         elif cmd.name == "purge":
-            description = "Chat se specific amount me messages filter karke udaye (Normal, bots, ya user)."
-            usage = f"`{prefix}purge <amount>`\n`{prefix}purge bots <amount>`\n`{prefix}purge @user <amount>`"
-            examples = f"`{prefix}purge 50`\n`{prefix}purge bots 20`"
+            description = "Chat se hard constraints ke sath selective criteria filter par messages saaf karne ke liye."
+            usage = f"`{prefix}purge <amount>`\n`{prefix}purge links <amount>`\n`{prefix}purge images <amount>`\n`{prefix}purge word <\"keyword\"> <amount>`"
+            examples = f"`{prefix}purge links 50`\n`{prefix}purge word \"spam\" 20`"
             
         elif cmd.name == "slowmode":
-            description = "Channel ka message cooldown rate set karne ke liye."
+            description = "Current text channel ka message sending cooldown cooldown timer change karne ke liye."
             usage = f"`{prefix}slowmode <seconds>`"
             examples = f"`{prefix}slowmode 5`"
             
@@ -192,9 +192,9 @@ class Help(commands.Cog):
             examples = f"`{prefix}unlock #general`"
             
         elif cmd.name == "lockdown":
-            description = "🚨 EMERGENCY: Poore server ke saare text channels ko ek baar me lock ya unlock karne ke liye."
-            usage = f"`{prefix}lockdown`"
-            examples = f"`{prefix}lockdown`"
+            description = "🚨 EMERGENCY: Poore server ke saare text channels ko ek baar me check ya bypass karke lock ya wapas unlock karne ke liye."
+            usage = f"`{prefix}lockdown <on/off>`"
+            examples = f"`{prefix}lockdown on`"
             
         elif cmd.name == "say":
             description = "📢 Bot ke zariye chat me apni marzi ka message thukwane ke liye."
@@ -335,7 +335,6 @@ class Help(commands.Cog):
             description = "👑 Sirf Rishav bhai ke liye - Saare anonymous confessions track karne ya kisi specific user ka data nikalne ke liye."
             usage = f"`{prefix}seeconfess`\n`{prefix}seeconfess @user/ID`"
 
-        # --- NAYE EXTENDED STOCKS PARAMETERS KA DETAILED BACKEND DATA ---
         elif cmd.name == "stocks":
             description = "📈 Live Top 200 Real-life Stocks (Samsung, NIFTY 50, SilverBees) ke rates aur remaining available limits page-wise check karne ke liye."
             usage = f"`{prefix}stocks [page_number]`"
@@ -374,6 +373,17 @@ class Help(commands.Cog):
             description = "📻 Live share market me dynamic global sectors (Tech, Bluechips, Crypto) ke boom aur crash alerts check karne ke liye."
             usage = f"`{prefix}marketnews`"
             examples = f"`{prefix}marketnews`"
+
+        elif cmd.name == "staffstats":
+            description = "📊 Server staff aur administrative profiles ke continuous actions frequency aur punishment tracking reports dekhne ke liye."
+            usage = f"`{prefix}staffstats` ya `{prefix}staffstats @user`"
+            examples = f"`{prefix}staffstats`\n`{prefix}staffstats @Rishav`"
+
+        # 🔥 --- NEW ROLEAUDIT REGISTER LINK ---
+        elif cmd.name == "roleaudit":
+            description = "🛡️ Server security matrix audit. Dangerous administrative permissions (Administrator, Manage Roles) wale logo ki tracking dashboard screen par lane ke liye."
+            usage = f"`{prefix}roleaudit`"
+            examples = f"`{prefix}roleaudit`"
 
         cmd_embed = discord.Embed(title=f"ℹ️ Command Detail: {cmd.name.upper()}", color=discord.Color.green())
         cmd_embed.add_field(name="📝 Description", value=description, inline=False)
