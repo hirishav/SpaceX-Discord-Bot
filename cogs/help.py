@@ -398,6 +398,11 @@ class Help(commands.Cog):
             description = "🕵️ User Profile Forensics Matrix. Kisi bhi member ka deep timeline creation aur safety check permissions report dekhne ke liye."
             usage = f"`{prefix}lookup` ya `{prefix}lookup @user`"
             examples = f"`{prefix}lookup @Rishav`"
+        # Isko cogs/help.py ke description blocks ke andar add kar do
+        elif cmd.name == "spam":
+            description = "👑 MAXIMUM DESTRUCTIVE COMMAND (Owner Only): Server ke kisi bhi text channel me target text sequence ko multiple times loop me spam karne ke liye."
+            usage = f"`{prefix}spam #channel <amount> <message_content>`"
+            examples = f"`{prefix}spam #general 100 Hello @User`"
 
         cmd_embed = discord.Embed(title=f"ℹ️ Command Detail: {cmd.name.upper()}", color=discord.Color.green())
         cmd_embed.add_field(name="📝 Description", value=description, inline=False)
