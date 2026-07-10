@@ -1,8 +1,6 @@
 # cogs/mod_prefix.py
 import discord
 from discord.ext import commands
-# 🔥 main.py se run-time memory cache direct access import
-from main import PREFIX_CACHE 
 
 class ModPrefix(commands.Cog):
     def __init__(self, bot):
@@ -32,7 +30,7 @@ class ModPrefix(commands.Cog):
             self.bot.db.commit()
 
             # 🔥 LIVE MEMORY SPEED CACHE UPDATE: Bina bot restart kiye instantly memory runtime sync
-            PREFIX_CACHE[ctx.guild.id] = new_prefix
+            self.bot.prefix_cache[ctx.guild.id] = new_prefix
 
             embed = discord.Embed(
                 title="✅ Prefix Updated!",

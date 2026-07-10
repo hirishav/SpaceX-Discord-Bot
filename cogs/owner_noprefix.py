@@ -1,8 +1,6 @@
 # cogs/owner_noprefix.py
 import discord
 from discord.ext import commands
-# 🔥 main.py se direct set-cache array map reference access
-from main import PREFIXLESS_CACHE 
 
 class OwnerNoPrefix(commands.Cog):
     def __init__(self, bot):
@@ -22,7 +20,8 @@ class OwnerNoPrefix(commands.Cog):
             self.bot.db.commit()
             
             # 🔥 LIVE MEMORY CACHE INJECTION: Direct inject hash integer to run-time set
-            PREFIXLESS_CACHE.add(member.id)
+            if hasattr(self.bot, 'prefixless_cache'):
+                self.bot.prefixless_cache.add(member.id)
             
             await ctx.send(f"✅ **{member.name}** ko prefixless access de diya gaya hai! Ab ye launda bina prefix ke aag laga sakta hai. 😎")
         except Exception:
@@ -43,7 +42,8 @@ class OwnerNoPrefix(commands.Cog):
             self.bot.db.commit()
             
             # 🔥 LIVE MEMORY CACHE DISCARD: Memory structure clean discard route
-            PREFIXLESS_CACHE.discard(member.id)
+            if hasattr(self.bot, 'prefixless_cache'):
+                self.bot.prefixless_cache.discard(member.id)
             
             await ctx.send(f"🔓 **{member.name}** ka prefixless access saaf kar diya gaya hai! Ab isko normal system follow karna hoga.")
         else:
