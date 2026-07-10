@@ -32,20 +32,14 @@ def keep_alive():
     t = Thread(target=run_server)
     t.start()
 
-# 🔥 GLOBAL SPEED MATRIX: Run-time Memory Cache
-# Isse har message par DB fetch karne ka load 0% ho jayega
-PREFIX_CACHE = {}
-PREFIXLESS_CACHE = set()
-BLACKLIST_CACHE = {} # ⚡ OPTIMIZATION: user_id -> (expires_at, reason)
-
 # ⚙️ DYNAMIC CUSTOM PREFIX FETCH ENGINE (OPTIMIZED)
 def get_prefix(bot, message):
     if not message.guild:
         return '!!'
     
     # ⚡ Cache se instantly uthao (0.000ms Latency)
-    if message.guild.id in PREFIX_CACHE:
-        return PREFIX_CACHE[message.guild.id]
+    if hasattr(bot, 'prefix_cache') and message.guild.id in bot.prefix_cache:
+        return bot.prefix_cache[message.guild.id]
         
     return '!!'
 
@@ -61,6 +55,10 @@ class SpaceXBot(commands.Bot):
         self.maintenance_mode = False
         self.maintenance_end = 0
         self.interrupted_users = {} # Format: {user_id: channel_id}
+        
+        self.prefix_cache = {}
+        self.prefixless_cache = set()
+        self.blacklist_cache = {}
 
     async def setup_hook(self):
         # ⚡ PERSISTENT CONNECTION MATRIX
@@ -147,15 +145,15 @@ class SpaceXBot(commands.Bot):
         
         cursor.execute("SELECT server_id, prefix FROM server_prefixes")
         for s_id, pref in cursor.fetchall():
-            PREFIX_CACHE[int(s_id)] = pref
+            self.prefix_cache[int(s_id)] = pref
             
         cursor.execute("SELECT user_id FROM prefixless_users")
         for (u_id,) in cursor.fetchall():
-            PREFIXLESS_CACHE.add(int(u_id))
+            self.prefixless_cache.add(int(u_id))
 
         cursor.execute("SELECT user_id, expires_at, reason FROM blacklist")
         for u_id, exp_at, reason in cursor.fetchall():
-            BLACKLIST_CACHE[int(u_id)] = (exp_at, reason)
+            self.blacklist_cache[int(u_id)] = (exp_at, reason)
             
         print("-> Database Connected & Speed Cache Engines Synchronized!")
         
@@ -209,7 +207,7 @@ async def on_message(message):
 
     # 🚨 STEP A: PREFIXLESS ROUTING LAYER ENGINE (FAST LOOKUP)
     is_whitelisted = False
-    if message.author.id in bot.owner_ids or message.author.id in PREFIXLESS_CACHE:
+    if message.author.id in bot.owner_ids or message.author.id in bot.prefixless_cache:
         is_whitelisted = True
 
     # Agar banda whitelist hai aur message bina command prefix ke aaya hai
@@ -245,8 +243,8 @@ async def on_message(message):
     # 2. 🚨 GLOBAL BLACKLIST CHECKER (Zero DB Queries - Ultra Fast)
     current_time = int(time.time())
     
-    if message.author.id in BLACKLIST_CACHE:
-        expires_at, reason = BLACKLIST_CACHE[message.author.id]
+    if message.author.id in bot.blacklist_cache:
+        expires_at, reason = bot.blacklist_cache[message.author.id]
         
         # Check if the blacklist is still active (-1 is permanent)
         if expires_at == -1 or current_time < expires_at:
@@ -257,7 +255,7 @@ async def on_message(message):
                 return # Block command execution completely
         elif current_time >= expires_at:
             # Blacklist expired: Remove from cache and database
-            del BLACKLIST_CACHE[message.author.id]
+            del bot.blacklist_cache[message.author.id]
             cursor = bot.db.cursor()
             cursor.execute("DELETE FROM blacklist WHERE user_id = ?", (str(message.author.id),))
             bot.db.commit()
@@ -279,4 +277,4 @@ if __name__ == '__main__':
     if BOT_TOKEN:
         bot.run(BOT_TOKEN)
     else:
-        print("💥 BOT_TOKEN is missing! Please configure config.py or environment variables.")
+        print("💥 BOT_TOKEN is missing! Please configure config.py or environment variables.")git
