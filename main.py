@@ -36,6 +36,7 @@ def keep_alive():
 # Isse har message par DB fetch karne ka load 0% ho jayega
 PREFIX_CACHE = {}
 PREFIXLESS_CACHE = set()
+BLACKLIST_CACHE = {} # ⚡ OPTIMIZATION: user_id -> (expires_at, reason)
 
 # ⚙️ DYNAMIC CUSTOM PREFIX FETCH ENGINE (OPTIMIZED)
 def get_prefix(bot, message):
@@ -49,127 +50,135 @@ def get_prefix(bot, message):
     return '!!'
 
 # Discord Bot Setup
-# ⚡ SPEED HACK: Intents parsing ko explicitly direct reference access diya
 intents = discord.Intents.all() 
 
-bot = commands.Bot(command_prefix=get_prefix, intents=intents, owner_ids={OWNER_ID})
-bot.remove_command('help')
+class SpaceXBot(commands.Bot):
+    def __init__(self):
+        super().__init__(command_prefix=get_prefix, intents=intents, owner_ids={OWNER_ID})
+        self.remove_command('help')
+        
+        # 🔥 MAINTENANCE GLOBALS
+        self.maintenance_mode = False
+        self.maintenance_end = 0
+        self.interrupted_users = {} # Format: {user_id: channel_id}
 
-# 🔥 MAINTENANCE GLOBALS
-bot.maintenance_mode = False
-bot.maintenance_end = 0
-bot.interrupted_users = {} # Format: {user_id: channel_id}
+    async def setup_hook(self):
+        # ⚡ PERSISTENT CONNECTION MATRIX
+        # Initialize Database connection once safely
+        self.db = sqlite3.connect("warnings.db", check_same_thread=False)
+        cursor = self.db.cursor()
+
+        # 🔥 SQLITE PERFORMANCE PRAGMAS (Ultra-Speed Tweaks)
+        cursor.execute("PRAGMA journal_mode=WAL;")  # Write-Ahead Logging for concurrency
+        cursor.execute("PRAGMA synchronous=NORMAL;") # Fast disk writing bounds
+        cursor.execute("PRAGMA cache_size=-64000;")  # 64MB cache optimization memory allocation
+
+        # SERVER CUSTOM PREFIX TABLE
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS server_prefixes (
+            server_id TEXT PRIMARY KEY,
+            prefix TEXT
+        )
+        """)
+
+        # CENTRAL MODERATION LOGS TABLE
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS mod_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            server_id TEXT,
+            user_id TEXT,
+            action TEXT,
+            moderator_id TEXT,
+            reason TEXT,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+        """)
+        
+        # Moderation & AFK Tables
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS warnings (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            server_id TEXT,
+            user_id TEXT,
+            reason TEXT,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+        """)
+        
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS afk (
+            server_id TEXT,
+            user_id TEXT,
+            reason TEXT,
+            timestamp INTEGER,
+            PRIMARY KEY (server_id, user_id)
+        )
+        """)
+        
+        # GLOBAL ECONOMY TABLE (OwO Style)
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS economy (
+            user_id TEXT PRIMARY KEY,
+            wallet INTEGER DEFAULT 0,
+            bank INTEGER DEFAULT 0
+        )
+        """)
+        
+        # GLOBAL BLACKLIST TABLE
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS blacklist (
+            user_id TEXT PRIMARY KEY,
+            expires_at INTEGER,
+            reason TEXT
+        )
+        """)
+
+        # PREFIXLESS USERS LEAF MATRIX TABLE
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS prefixless_users (
+            user_id TEXT PRIMARY KEY
+        )
+        """)
+        
+        self.db.commit()
+        
+        # 🧠 WARM UP CACHE ENGINE: Memory hydration on startup
+        print("-> Hydrating runtime memory cache arrays...")
+        
+        cursor.execute("SELECT server_id, prefix FROM server_prefixes")
+        for s_id, pref in cursor.fetchall():
+            PREFIX_CACHE[int(s_id)] = pref
+            
+        cursor.execute("SELECT user_id FROM prefixless_users")
+        for (u_id,) in cursor.fetchall():
+            PREFIXLESS_CACHE.add(int(u_id))
+
+        cursor.execute("SELECT user_id, expires_at, reason FROM blacklist")
+        for u_id, exp_at, reason in cursor.fetchall():
+            BLACKLIST_CACHE[int(u_id)] = (exp_at, reason)
+            
+        print("-> Database Connected & Speed Cache Engines Synchronized!")
+        
+        print('Modules load ho rahe hain...')
+        if os.path.exists('./cogs'):
+            for filename in os.listdir('./cogs'):
+                if filename.endswith('.py'):
+                    if filename in ['stocks_core.py', 'eco_stocks_list.py', 'music_core.py']:
+                        print(f'-> Skipped Non-Cog Utility File: {filename}')
+                        continue
+                        
+                    try:
+                        await self.load_extension(f'cogs.{filename[:-3]}')
+                        print(f'-> Successfully Loaded: {filename}')
+                    except Exception as e:
+                        print(f'💥 Failed to Load Extension {filename}: {e}')
+
+bot = SpaceXBot()
 
 @bot.event
 async def on_ready():
     print("---------------------------------------")
     print(f'Mubarak ho! Bot ka naam hai: {bot.user.name}')
-    
-    # ⚡ PERSISTENT CONNECTION MATRIX
-    # Bot runtime me ab sirf ek single connection object reuse karega
-    bot.db = sqlite3.connect("warnings.db")
-    cursor = bot.db.cursor()
-
-    # 🔥 SQLITE PERFORMANCE PRAGMAS (Ultra-Speed Tweaks)
-    cursor.execute("PRAGMA journal_mode=WAL;")  # Write-Ahead Logging for concurrency
-    cursor.execute("PRAGMA synchronous=NORMAL;") # Fast disk writing bounds
-    cursor.execute("PRAGMA cache_size=-64000;")  # 64MB cache optimization memory allocation
-
-    # SERVER CUSTOM PREFIX TABLE
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS server_prefixes (
-        server_id TEXT PRIMARY KEY,
-        prefix TEXT
-    )
-    """)
-
-    # CENTRAL MODERATION LOGS TABLE
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS mod_logs (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        server_id TEXT,
-        user_id TEXT,
-        action TEXT,
-        moderator_id TEXT,
-        reason TEXT,
-        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-    """)
-    
-    # Moderation & AFK Tables
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS warnings (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        server_id TEXT,
-        user_id TEXT,
-        reason TEXT,
-        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-    """)
-    
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS afk (
-        server_id TEXT,
-        user_id TEXT,
-        reason TEXT,
-        timestamp INTEGER,
-        PRIMARY KEY (server_id, user_id)
-    )
-    """)
-    
-    # GLOBAL ECONOMY TABLE (OwO Style)
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS economy (
-        user_id TEXT PRIMARY KEY,
-        wallet INTEGER DEFAULT 0,
-        bank INTEGER DEFAULT 0
-    )
-    """)
-    
-    # GLOBAL BLACKLIST TABLE
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS blacklist (
-        user_id TEXT PRIMARY KEY,
-        expires_at INTEGER,
-        reason TEXT
-    )
-    """)
-
-    # PREFIXLESS USERS LEAF MATRIX TABLE
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS prefixless_users (
-        user_id TEXT PRIMARY KEY
-    )
-    """)
-    
-    bot.db.commit()
-    
-    # 🧠 WARM UP CACHE ENGINE: Memory hydration on startup
-    print("-> Hydrating runtime memory cache arrays...")
-    
-    cursor.execute("SELECT server_id, prefix FROM server_prefixes")
-    for s_id, pref in cursor.fetchall():
-        PREFIX_CACHE[int(s_id)] = pref
-        
-    cursor.execute("SELECT user_id FROM prefixless_users")
-    for (u_id,) in cursor.fetchall():
-        PREFIXLESS_CACHE.add(int(u_id))
-        
-    print("-> Database Connected & Speed Cache Engines Synchronized!")
-    
-    print('Modules load ho rahe hain...')
-    for filename in os.listdir('./cogs'):
-        if filename.endswith('.py'):
-            if filename in ['stocks_core.py', 'eco_stocks_list.py', 'music_core.py']:
-                print(f'-> Skipped Non-Cog Utility File: {filename}')
-                continue
-                
-            try:
-                await bot.load_extension(f'cogs.{filename[:-3]}')
-                print(f'-> Successfully Loaded: {filename}')
-            except Exception as e:
-                print(f'💥 Failed to Load Extension {filename}: {e}')
-                
     print('Bot successfully online aa gaya hai! 🎉')
     print("---------------------------------------")
 
@@ -233,20 +242,23 @@ async def on_message(message):
                 return await message.channel.send(embed=embed)
             return
 
-    # 2. 🚨 GLOBAL BLACKLIST CHECKER (USES ACTIVE CONNECTION)
+    # 2. 🚨 GLOBAL BLACKLIST CHECKER (Zero DB Queries - Ultra Fast)
     current_time = int(time.time())
-    cursor = bot.db.cursor()
-    cursor.execute("SELECT expires_at, reason FROM blacklist WHERE user_id = ?", (str(message.author.id),))
-    row = cursor.fetchone()
-
-    if row:
-        expires_at, reason = row[0], row[1]
+    
+    if message.author.id in BLACKLIST_CACHE:
+        expires_at, reason = BLACKLIST_CACHE[message.author.id]
+        
+        # Check if the blacklist is still active (-1 is permanent)
         if expires_at == -1 or current_time < expires_at:
+            # Allow them to check their blacklist status ONLY
             if message.content.startswith(f"{current_prefix}blacklist") or message.content.startswith(f"{current_prefix}bl"):
                 pass
             else:
-                return
+                return # Block command execution completely
         elif current_time >= expires_at:
+            # Blacklist expired: Remove from cache and database
+            del BLACKLIST_CACHE[message.author.id]
+            cursor = bot.db.cursor()
             cursor.execute("DELETE FROM blacklist WHERE user_id = ?", (str(message.author.id),))
             bot.db.commit()
 
@@ -264,4 +276,7 @@ async def on_message(message):
 if __name__ == '__main__':
     keep_alive()
     print("-> Background Web Server Started!")
-    bot.run(BOT_TOKEN)
+    if BOT_TOKEN:
+        bot.run(BOT_TOKEN)
+    else:
+        print("💥 BOT_TOKEN is missing! Please configure config.py or environment variables.")
