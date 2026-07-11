@@ -176,9 +176,9 @@ class LavalinkMusic(commands.Cog):
         return voice_client
 
     async def search_track(self, query: str) -> Optional[wavelink.Playable]:
-        tracks = await wavelink.Playable.search(query, source=wavelink.TrackSource.YouTube)
-        if not tracks and not query.startswith(("http://", "https://")):
-            tracks = await wavelink.Playable.search(query, source=wavelink.TrackSource.SoundCloud)
+        tracks = await wavelink.Playable.search(query, source=wavelink.TrackSource.YouTubeMusic)
+        if not tracks:
+            tracks = await wavelink.Playable.search(query, source=wavelink.TrackSource.YouTube)
         return tracks[0] if tracks else None
 
     async def queue_query(self, ctx: commands.Context, query: str, *, front: bool = False) -> None:

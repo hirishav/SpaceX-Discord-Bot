@@ -330,7 +330,7 @@ class Music(commands.Cog):
     async def extract_track(self, query: str, requester: discord.abc.User) -> Track:
         """Resolve a URL or try YouTube then SoundCloud for a plain search."""
 
-        candidates = [query] if self._is_url(query) else [f"ytsearch1:{query}"]
+        candidates = [query] if self._is_url(query) else [f"ytmsearch1:{query}", f"ytsearch1:{query}"]
         errors: list[Exception] = []
         for candidate in candidates:
             try:
