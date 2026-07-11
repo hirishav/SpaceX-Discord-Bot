@@ -349,6 +349,12 @@ class LavalinkMusic(commands.Cog):
                 await channel.send(embed=self.now_playing_embed(track), view=LavalinkControls(self, player.guild.id))
         except Exception as e:
             log.exception("Error in on_wavelink_track_start")
+            # Emergency fallback to show error in Discord
+            try:
+                if channel is not None:
+                    await channel.send(f"⚠️ **Debug Error in Player:** `{e}`")
+            except:
+                pass
 
 
     @commands.Cog.listener()
