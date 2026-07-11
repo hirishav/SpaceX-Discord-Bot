@@ -1,2 +1,7 @@
-discord.py
+discord.py[voice]>=2.4,<3
 Flask
+aiohttp>=3.9,<4
+PyNaCl>=1.5,<2
+python-dotenv>=1.0,<2
+wavelink>=3.5.2,<4
+yt-dlp>=2023.7.4

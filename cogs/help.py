@@ -47,6 +47,10 @@ class Help(commands.Cog):
             fun_list = "> `roast`, `confess`, `match`, `dm`"
             embed.add_field(name="🎭 COMEDY & FUN", value=fun_list, inline=False)
             
+            # --- 🎵 MUSIC ENGINE ---
+            music_list = "> `play`, `playnext`, `pause`, `resume`, `skip`, `previous`, `stop`, `leave`, `queue`, `nowplaying`, `volume`, `mute`, `autoplay`, `loop`, `shuffle`, `clear`, `remove`, `move`, `history`"
+            embed.add_field(name="🎵 MUSIC ENGINE", value=music_list, inline=False)
+            
             # --- ⚙️ UTILITY CATEGORY ---
             util_list = "> `serverinfo`, `botinfo`, `invite`, `avatar`"
             embed.add_field(name="⚙️ UTILITIES", value=util_list, inline=False)
@@ -93,6 +97,8 @@ class Help(commands.Cog):
             category = "Utility"
         elif cmd.name in ["afk", "remindme"]:
             category = "General"
+        elif cmd.name in ["join", "play", "playnext", "pause", "resume", "skip", "previous", "stop", "leave", "queue", "nowplaying", "volume", "mute", "autoplay", "loop", "shuffle", "clear", "remove", "move", "history", "p", "pn", "prev", "dc", "q", "np", "ap", "rm"]:
+            category = "Music"
 
         # ---- 📦 SAARE CUSTOM DESCRIPTIONS KA BACCHAFULL EXTENDED DATABASE ----
         if cmd.name == "blacklist":
@@ -408,6 +414,11 @@ class Help(commands.Cog):
             description = "👑 Owner-Only: Server ke kisi trusted member ko bina prefix execution route ke bot use karne ka premium access dene ke liye."
             usage = f"`{prefix}addprefixless @user`"
             examples = f"`{prefix}addprefixless @User`"
+
+        elif category == "Music":
+            description = cmd.help if cmd.help else "Music playback and control engine command."
+            usage = f"`{prefix}{cmd.name}`"
+            examples = f"`{prefix}{cmd.name}`"
 
         cmd_embed = discord.Embed(title=f"ℹ️ Command Detail: {cmd.name.upper()}", color=discord.Color.green())
         cmd_embed.add_field(name="📝 Description", value=description, inline=False)

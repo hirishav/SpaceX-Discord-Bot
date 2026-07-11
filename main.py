@@ -5,13 +5,19 @@ import os
 import sqlite3
 import time
 import asyncio
+import wavelink
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
 
 # Environment Variable aur Config setup
 try:
     import config
     OWNER_ID = config.OWNER_ID
     BOT_TOKEN = config.BOT_TOKEN
-except ImportError:
+except (ImportError, AttributeError):
     OWNER_ID = 727718500663033897  # Aapki asli Discord ID permanent backup
     BOT_TOKEN = os.getenv("BOT_TOKEN")
 
@@ -65,6 +71,20 @@ class SpaceXBot(commands.Bot):
         # Initialize Database connection once safely
         self.db = sqlite3.connect("warnings.db", check_same_thread=False)
         cursor = self.db.cursor()
+
+        # 🔥 MUSIC ENGINE SETUP
+        self.audio_backend = os.getenv("AUDIO_BACKEND", "direct").strip().lower()
+        if self.audio_backend == "lavalink":
+            password = os.getenv("LAVALINK_SERVER_PASSWORD")
+            if password:
+                uri = os.getenv("LAVALINK_URI", "http://127.0.0.1:2333")
+                node = wavelink.Node(identifier="main", uri=uri, password=password, retries=None)
+                await wavelink.Pool.connect(nodes=[node], client=self, cache_capacity=None)
+                print(f"-> Connected to Lavalink at {uri}")
+            else:
+                print("💥 LAVALINK_SERVER_PASSWORD is required for lavalink backend. Falling back to direct.")
+                self.audio_backend = "direct"
+
 
         # 🔥 SQLITE PERFORMANCE PRAGMAS (Ultra-Speed Tweaks)
         cursor.execute("PRAGMA journal_mode=WAL;")  # Write-Ahead Logging for concurrency
@@ -163,6 +183,14 @@ class SpaceXBot(commands.Bot):
                 if filename.endswith('.py'):
                     if filename in ['stocks_core.py', 'eco_stocks_list.py', 'music_core.py']:
                         print(f'-> Skipped Non-Cog Utility File: {filename}')
+                        continue
+                        
+                    # Skip music cogs that don't match the configured backend
+                    if filename == 'music.py' and self.audio_backend != 'direct':
+                        print('-> Skipped direct music cog (using lavalink)')
+                        continue
+                    if filename == 'lavalink_music.py' and self.audio_backend != 'lavalink':
+                        print('-> Skipped lavalink music cog (using direct)')
                         continue
                         
                     try:

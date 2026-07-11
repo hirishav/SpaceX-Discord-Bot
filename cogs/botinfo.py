@@ -56,5 +56,17 @@ class BotInfo(commands.Cog):
         )
         await ctx.send(embed=embed)
 
+    @commands.command(name="ping", aliases=["latency"])
+    async def ping(self, ctx):
+        """Bot ka current response ping / latency dekhne ke liye."""
+        latency = round(self.bot.latency * 1000)
+        
+        embed = discord.Embed(
+            title="🏓 Pong!",
+            description=f"Bot latency is **{latency}ms**",
+            color=discord.Color.green() if latency < 150 else discord.Color.orange() if latency < 300 else discord.Color.red()
+        )
+        await ctx.send(embed=embed)
+
 async def setup(bot):
     await bot.add_cog(BotInfo(bot))
