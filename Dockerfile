@@ -1,5 +1,5 @@
 # Use an official Python runtime as a parent image (full version includes build tools)
-FROM python:3.9
+FROM python:3.11
 
 # Install ffmpeg
 RUN apt-get update && \
