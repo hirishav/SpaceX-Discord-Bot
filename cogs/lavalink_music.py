@@ -444,9 +444,9 @@ class LavalinkMusic(commands.Cog):
         await player.set_volume(percent)
         await ctx.send(f"Volume set to {percent}%.")
 
-    @commands.command(help="Toggle mute without changing the saved volume.")
+    @commands.command(name="vmute", aliases=["audiomute"], help="Toggle mute without changing the saved volume.")
     @commands.guild_only()
-    async def mute(self, ctx: commands.Context) -> None:
+    async def vmute(self, ctx: commands.Context) -> None:
         if not self.is_same_voice_channel(ctx):
             await ctx.send("Join my voice channel before controlling playback.")
             return

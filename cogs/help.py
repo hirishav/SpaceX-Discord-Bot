@@ -48,7 +48,7 @@ class Help(commands.Cog):
             embed.add_field(name="🎭 COMEDY & FUN", value=fun_list, inline=False)
             
             # --- 🎵 MUSIC ENGINE ---
-            music_list = "> `play`, `playnext`, `pause`, `resume`, `skip`, `previous`, `stop`, `leave`, `queue`, `nowplaying`, `volume`, `mute`, `autoplay`, `loop`, `shuffle`, `clear`, `remove`, `move`, `history`"
+            music_list = "> `play`, `playnext`, `pause`, `resume`, `skip`, `previous`, `stop`, `leave`, `queue`, `nowplaying`, `volume`, `vmute`, `autoplay`, `loop`, `shuffle`, `clear`, `remove`, `move`, `history`"
             embed.add_field(name="🎵 MUSIC ENGINE", value=music_list, inline=False)
             
             # --- ⚙️ UTILITY CATEGORY ---
@@ -97,7 +97,7 @@ class Help(commands.Cog):
             category = "Utility"
         elif cmd.name in ["afk", "remindme"]:
             category = "General"
-        elif cmd.name in ["join", "play", "playnext", "pause", "resume", "skip", "previous", "stop", "leave", "queue", "nowplaying", "volume", "mute", "autoplay", "loop", "shuffle", "clear", "remove", "move", "history", "p", "pn", "prev", "dc", "q", "np", "ap", "rm"]:
+        elif cmd.name in ["join", "play", "playnext", "pause", "resume", "skip", "previous", "stop", "leave", "queue", "nowplaying", "volume", "vmute", "autoplay", "loop", "shuffle", "clear", "remove", "move", "history", "p", "pn", "prev", "dc", "q", "np", "ap", "rm"]:
             category = "Music"
 
         # ---- 📦 SAARE CUSTOM DESCRIPTIONS KA BACCHAFULL EXTENDED DATABASE ----

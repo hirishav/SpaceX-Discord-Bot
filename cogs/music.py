@@ -804,9 +804,9 @@ class Music(commands.Cog):
             voice_client.source.volume = self.effective_volume(player)
         await ctx.send(f"Volume set to {percent}%.")
 
-    @commands.command(help="Toggle mute without changing the saved volume.")
+    @commands.command(name="vmute", aliases=["audiomute"], help="Toggle mute without changing the saved volume.")
     @commands.guild_only()
-    async def mute(self, ctx: commands.Context) -> None:
+    async def vmute(self, ctx: commands.Context) -> None:
         if not self.requester_is_with_bot(ctx):
             await ctx.send("Join my voice channel before controlling playback.")
             return
