@@ -7,7 +7,7 @@ class GenRemindme(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="remindme", aliases=["rm"])
+    @commands.command(name="remindme")
     async def remindme(self, ctx, time_str: str = None, *, task: str = None):
         """Aapko kisi specific kaam ke liye ping karke yaad dilane ke liye."""
         if not time_str or not task:

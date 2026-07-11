@@ -6,7 +6,7 @@ class OwnerNoPrefix(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="addprefixless", aliases=["ap"], hidden=True)
+    @commands.command(name="addprefixless", hidden=True)
     @commands.is_owner()
     async def add_prefixless(self, ctx, member: discord.Member = None):
         """👑 Owner Only: Kisi member ko bina prefix ke bot use karne ki permission dene ke liye."""

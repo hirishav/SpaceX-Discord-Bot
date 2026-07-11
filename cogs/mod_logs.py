@@ -19,7 +19,7 @@ class ModLogs(commands.Cog):
             except Exception:
                 return None, None
 
-    @commands.command(name="modlogs", aliases=["history", "logs"])
+    @commands.command(name="modlogs", aliases=["logs"])
     @commands.has_permissions(manage_messages=True)
     async def modlogs(self, ctx, user_str: str = None):
         """Kisi user ke saare moderation history/stats dekhne ke liye."""
