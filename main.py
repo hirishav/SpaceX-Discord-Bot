@@ -6,6 +6,7 @@ import sqlite3
 import time
 import asyncio
 import wavelink
+import aiohttp
 try:
     from dotenv import load_dotenv
     load_dotenv()
