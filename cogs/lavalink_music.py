@@ -215,17 +215,44 @@ class LavalinkMusic(commands.Cog):
 
     def now_playing_embed(self, track: wavelink.Playable) -> discord.Embed:
         title = discord.utils.escape_markdown(track.title)
+        
+        # Determine track source for custom color/icon (Premium feel)
+        source = track.source if hasattr(track, 'source') else 'unknown'
+        color = discord.Color.blurple()
+        icon_url = "https://cdn.discordapp.com/attachments/1105436691458920448/1105436737520775248/music.png"
+        
+        if "youtube" in str(source).lower():
+            color = discord.Color.from_str("#FF0000")
+            icon_url = "https://cdn.discordapp.com/attachments/1105436691458920448/1105436762397196328/youtube.png"
+        elif "spotify" in str(source).lower():
+            color = discord.Color.from_str("#1DB954")
+            icon_url = "https://cdn.discordapp.com/attachments/1105436691458920448/1105436785004494918/spotify.png"
+        elif "soundcloud" in str(source).lower():
+            color = discord.Color.from_str("#FF5500")
+
         embed = discord.Embed(
-            title="Now playing",
-            description=f"**[{title}]({track.uri})**" if track.uri else f"**{title}**",
-            color=discord.Color.blurple(),
+            title=f"{title}",
+            url=track.uri or "",
+            color=color,
         )
-        embed.add_field(name="Duration", value=self.format_duration(track.length))
-        embed.add_field(name="Channel", value=discord.utils.escape_markdown(track.author or "Unknown"))
-        requester = getattr(track.extras, "requester", "Autoplay")
-        embed.add_field(name="Requested by", value=requester, inline=False)
+        embed.set_author(name="🎵 Now Playing", icon_url=icon_url)
+        
+        # Robustly fetch requester from extras, fallback gracefully
+        requester = "Autoplay"
+        if hasattr(track, "extras") and track.extras:
+            if hasattr(track.extras, "get"):
+                requester = track.extras.get("requester", "Autoplay")
+            else:
+                requester = getattr(track.extras, "requester", "Autoplay")
+
+        embed.add_field(name="👤 Requested by", value=requester, inline=True)
+        embed.add_field(name="⏳ Duration", value=f"`{self.format_duration(track.length)}`", inline=True)
+        embed.add_field(name="🎙️ Channel", value=f"`{discord.utils.escape_markdown(track.author or 'Unknown')}`", inline=True)
+        
         if track.artwork:
             embed.set_thumbnail(url=track.artwork)
+            
+        embed.set_footer(text="Powered by Lavalink ✨")
         return embed
 
     def queue_embed(self, guild: discord.Guild, player: wavelink.Player) -> discord.Embed:
@@ -301,14 +328,28 @@ class LavalinkMusic(commands.Cog):
 
     @commands.Cog.listener()
     async def on_wavelink_track_start(self, payload: wavelink.TrackStartEventPayload) -> None:
-        player = payload.player
-        if player is None or player.guild is None:
-            return
-        track = payload.original or payload.track
-        channel_id = getattr(track.extras, "channel_id", self.text_channels.get(player.guild.id))
-        channel = self.bot.get_channel(channel_id) if channel_id else None
-        if channel is not None:
-            await channel.send(embed=self.now_playing_embed(track), view=LavalinkControls(self, player.guild.id))
+        try:
+            player = payload.player
+            if player is None or player.guild is None:
+                return
+            
+            track = payload.original or payload.track
+            
+            # Robustly resolve channel ID
+            channel_id = self.text_channels.get(player.guild.id)
+            if hasattr(track, "extras") and track.extras:
+                if hasattr(track.extras, "get"):
+                    channel_id = track.extras.get("channel_id", channel_id)
+                else:
+                    channel_id = getattr(track.extras, "channel_id", channel_id)
+
+            channel = self.bot.get_channel(channel_id) if channel_id else None
+            
+            if channel is not None:
+                await channel.send(embed=self.now_playing_embed(track), view=LavalinkControls(self, player.guild.id))
+        except Exception as e:
+            log.exception("Error in on_wavelink_track_start")
+
 
     @commands.Cog.listener()
     async def on_wavelink_track_exception(self, payload: wavelink.TrackExceptionEventPayload) -> None:
