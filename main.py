@@ -78,7 +78,10 @@ class SpaceXBot(commands.Bot):
             password = os.getenv("LAVALINK_SERVER_PASSWORD")
             if password:
                 uri = os.getenv("LAVALINK_URI", "http://127.0.0.1:2333")
-                node = wavelink.Node(identifier="main", uri=uri, password=password, retries=None)
+                session = aiohttp.ClientSession(headers={
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+                })
+                node = wavelink.Node(identifier="main", uri=uri, password=password, retries=None, session=session)
                 await wavelink.Pool.connect(nodes=[node], client=self, cache_capacity=None)
                 print(f"-> Connected to Lavalink at {uri}")
             else:
