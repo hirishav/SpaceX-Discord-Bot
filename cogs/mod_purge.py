@@ -8,7 +8,7 @@ class ModPurge(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="purge", aliases=["clear", "clean"])
+    @commands.command(name="purge", aliases=["clean"])
     @commands.has_permissions(manage_messages=True)
     async def purge(self, ctx, target: typing.Union[discord.Member, discord.User, str, int] = None, amount: int = None):
         """Chat se messages filter karke delete karne ke liye."""
