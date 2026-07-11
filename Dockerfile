@@ -1,5 +1,5 @@
-# Use an official Python runtime as a parent image
-FROM python:3.9-slim
+# Use an official Python runtime as a parent image (full version includes build tools)
+FROM python:3.9
 
 # Install ffmpeg
 RUN apt-get update && \
@@ -14,10 +14,12 @@ WORKDIR /app
 COPY requirements.txt .
 
 # Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+# Added --prefer-binary to avoid compilation if possible
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the working directory contents into the container
 COPY . .
 
 # Run main.py when the container launches
-CMD ["python", "main.py"]
+CMD ["python", "-u", "main.py"]
