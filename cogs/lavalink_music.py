@@ -110,20 +110,7 @@ class LavalinkControls(discord.ui.View):
             return None
         return player
 
-    @discord.ui.button(label="Pause", emoji="⏯️", style=discord.ButtonStyle.success, row=0)
-    async def play_pause(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-        player = await self._player_for(interaction)
-        if player is None: return
-        if not player.playing:
-            await interaction.response.send_message("Nothing is playing right now.", ephemeral=True)
-            return
-
-        await player.pause(not player.paused)
-        button.label = "Resume" if player.paused else "Pause"
-        button.emoji = "▶️" if player.paused else "⏸️"
-        await interaction.response.edit_message(view=self)
-
-    @discord.ui.button(label="Previous", emoji="⏮️", style=discord.ButtonStyle.secondary, row=0)
+    @discord.ui.button(emoji="⏮️", style=discord.ButtonStyle.secondary, row=0)
     async def previous(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         player = await self._player_for(interaction)
         if player is None: return
@@ -132,7 +119,19 @@ class LavalinkControls(discord.ui.View):
             return
         await interaction.response.send_message("Playing the previous track.", ephemeral=True)
 
-    @discord.ui.button(label="Skip", emoji="⏭️", style=discord.ButtonStyle.primary, row=0)
+    @discord.ui.button(emoji="⏸️", style=discord.ButtonStyle.secondary, row=0)
+    async def play_pause(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+        player = await self._player_for(interaction)
+        if player is None: return
+        if not player.playing:
+            await interaction.response.send_message("Nothing is playing right now.", ephemeral=True)
+            return
+
+        await player.pause(not player.paused)
+        button.emoji = "▶️" if player.paused else "⏸️"
+        await interaction.response.edit_message(view=self)
+
+    @discord.ui.button(emoji="⏭️", style=discord.ButtonStyle.secondary, row=0)
     async def skip(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         player = await self._player_for(interaction)
         if player is None: return
@@ -142,29 +141,28 @@ class LavalinkControls(discord.ui.View):
         await player.skip(force=True)
         await interaction.response.send_message("Skipped the current track.", ephemeral=True)
 
-    @discord.ui.button(label="Stop", emoji="⏹️", style=discord.ButtonStyle.danger, row=0)
+    @discord.ui.button(emoji="⏹️", style=discord.ButtonStyle.danger, row=0)
     async def stop(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         player = await self._player_for(interaction)
         if player is None: return
         await self.cog.stop_player(player, disconnect=not is_247_enabled(self.guild_id))
         await interaction.response.send_message("Stopped playback and cleared the queue.", ephemeral=True)
 
-    @discord.ui.button(label="Queue", emoji="📜", style=discord.ButtonStyle.secondary, row=1)
+    @discord.ui.button(emoji="🔁", style=discord.ButtonStyle.secondary, row=1)
+    async def loop(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+        player = await self._player_for(interaction)
+        if player is None: return
+        enabled = self.cog.toggle_loop(player)
+        button.style = discord.ButtonStyle.primary if enabled else discord.ButtonStyle.secondary
+        await interaction.response.edit_message(view=self)
+
+    @discord.ui.button(emoji="📜", style=discord.ButtonStyle.secondary, row=1)
     async def queue(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         player = await self._player_for(interaction)
         if player is None: return
         await interaction.response.send_message(embed=self.cog.queue_embed(interaction.guild, player), ephemeral=True)
 
-    @discord.ui.button(label="Loop", emoji="🔁", style=discord.ButtonStyle.secondary, row=1)
-    async def loop(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-        player = await self._player_for(interaction)
-        if player is None: return
-        enabled = self.cog.toggle_loop(player)
-        button.label = "Loop On" if enabled else "Loop"
-        button.style = discord.ButtonStyle.success if enabled else discord.ButtonStyle.secondary
-        await interaction.response.edit_message(view=self)
-
-    @discord.ui.button(label="Shuffle", emoji="🔀", style=discord.ButtonStyle.secondary, row=1)
+    @discord.ui.button(emoji="🔀", style=discord.ButtonStyle.secondary, row=1)
     async def shuffle(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         player = await self._player_for(interaction)
         if player is None: return
@@ -174,12 +172,11 @@ class LavalinkControls(discord.ui.View):
         player.queue.shuffle()
         await interaction.response.send_message("Shuffled the queue.", ephemeral=True)
 
-    @discord.ui.button(label="Autoplay", emoji="♾️", style=discord.ButtonStyle.secondary, row=1)
+    @discord.ui.button(emoji="🤍", style=discord.ButtonStyle.success, row=1)
     async def autoplay(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         player = await self._player_for(interaction)
         if player is None: return
         enabled = self.cog.set_autoplay(player)
-        button.label = "Autoplay On" if enabled else "Autoplay"
         button.style = discord.ButtonStyle.success if enabled else discord.ButtonStyle.secondary
         await interaction.response.edit_message(view=self)
 
@@ -300,27 +297,27 @@ class LavalinkMusic(commands.Cog):
             await searching.edit(content=f"✅ Added **{discord.utils.escape_markdown(track.title)}** ({placement}).")
 
     def now_playing_embed(self, track: wavelink.Playable, position: int = 0) -> discord.Embed:
-        title = discord.utils.escape_markdown(track.title)
+        # Fallbacks for missing attributes
+        title = getattr(track, 'title', 'Unknown Title')
+        author = getattr(track, 'author', 'Unknown Author')
+        length = getattr(track, 'length', 0)
+        source = getattr(track, 'source', 'unknown')
+        artwork = getattr(track, 'artwork', None)
+        uri = getattr(track, 'uri', "")
         
-        source = track.source if hasattr(track, 'source') else 'unknown'
-        color = discord.Color.from_str("#ff0077") # Premium pinkish-purple default
+        color = discord.Color.from_str("#00a2ff") # A nice blue color as shown in image
         icon_url = "https://cdn.discordapp.com/attachments/1105436691458920448/1105436737520775248/music.png"
         
         if "youtube" in str(source).lower():
-            color = discord.Color.from_str("#FF0000")
-            icon_url = "https://cdn.discordapp.com/attachments/1105436691458920448/1105436762397196328/youtube.png"
+            icon_url = "https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/YouTube_full-color_icon_%282017%29.svg/2560px-YouTube_full-color_icon_%282017%29.svg.png"
         elif "spotify" in str(source).lower():
-            color = discord.Color.from_str("#1DB954")
-            icon_url = "https://cdn.discordapp.com/attachments/1105436691458920448/1105436785004494918/spotify.png"
-        elif "soundcloud" in str(source).lower():
-            color = discord.Color.from_str("#FF5500")
+            icon_url = "https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Spotify_logo_without_text.svg/1024px-Spotify_logo_without_text.svg.png"
 
         embed = discord.Embed(
-            title=f"{title}",
-            url=track.uri or "",
             color=color,
         )
-        embed.set_author(name="🎵 Now Playing", icon_url=icon_url)
+        # Using a red play button emoji in the author name to match the screenshot
+        embed.set_author(name="▶ Now Playing", icon_url=icon_url)
         
         requester = "Autoplay ♾️"
         if hasattr(track, "extras") and track.extras:
@@ -329,11 +326,20 @@ class LavalinkMusic(commands.Cog):
             else:
                 requester = getattr(track.extras, "requester", "Autoplay ♾️")
 
-        bar = self.create_progress_bar(position, track.length)
-        embed.description = f"`{self.format_duration(position)}` {bar} `{self.format_duration(track.length)}`\n\n👤 **Requested by:** {requester}\n🎙️ **Channel:** `{discord.utils.escape_markdown(track.author or 'Unknown')}`"
+        title_text = f"{discord.utils.escape_markdown(title)} - {discord.utils.escape_markdown(author)}"
         
-        if track.artwork:
-            embed.set_thumbnail(url=track.artwork)
+        # Max length truncating if too long
+        if len(title_text) > 40:
+            title_text = f"{title_text[:37]}..."
+            
+        embed.description = (
+            f"• [{title_text}]({uri})\n"
+            f"• {requester}\n"
+            f"• Duration: **{self.format_duration(length)}**"
+        )
+        
+        if artwork:
+            embed.set_thumbnail(url=artwork)
             
         embed.set_footer(text="Powered by Annieee ✨")
         return embed
