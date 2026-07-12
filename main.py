@@ -50,12 +50,15 @@ def get_prefix(bot, message):
         
     return '!!'
 
-# Discord Bot Setup
-intents = discord.Intents.all() 
+# Discord Bot Setup - Optimized for 512MB RAM
+intents = discord.Intents.default()
+intents.members = True
+intents.message_content = True
+# Presences disabled to save MASSIVE amounts of RAM
 
 class SpaceXBot(commands.Bot):
     def __init__(self):
-        super().__init__(command_prefix=get_prefix, intents=intents, owner_ids={OWNER_ID, 1061268825913438358})
+        super().__init__(command_prefix=get_prefix, intents=intents, owner_ids={OWNER_ID, 1061268825913438358}, chunk_guilds_at_startup=False)
         self.remove_command('help')
         
         # 🔥 MAINTENANCE GLOBALS
@@ -84,8 +87,8 @@ class SpaceXBot(commands.Bot):
                     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
                 })
                 node = wavelink.Node(identifier="main", uri=uri, password=password, retries=None, session=session)
-                await wavelink.Pool.connect(nodes=[node], client=self, cache_capacity=None)
-                print(f"-> Connected to Lavalink at {uri}")
+                await wavelink.Pool.connect(nodes=[node], client=self, cache_capacity=100)
+                print(f"-> Connected to Lavalink at {uri} (Cache optimized)")
             else:
                 print("💥 LAVALINK_SERVER_PASSWORD is required for lavalink backend. Falling back to direct.")
                 self.audio_backend = "direct"
@@ -94,7 +97,7 @@ class SpaceXBot(commands.Bot):
         # 🔥 SQLITE PERFORMANCE PRAGMAS (Ultra-Speed Tweaks)
         cursor.execute("PRAGMA journal_mode=WAL;")  # Write-Ahead Logging for concurrency
         cursor.execute("PRAGMA synchronous=NORMAL;") # Fast disk writing bounds
-        cursor.execute("PRAGMA cache_size=-64000;")  # 64MB cache optimization memory allocation
+        cursor.execute("PRAGMA cache_size=-8000;")  # 8MB cache optimization memory allocation (down from 64MB to save RAM)
 
         # SERVER CUSTOM PREFIX TABLE
         cursor.execute("""

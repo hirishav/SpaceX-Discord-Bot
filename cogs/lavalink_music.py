@@ -243,7 +243,7 @@ class LavalinkMusic(commands.Cog):
         voice_client = ctx.guild.voice_client
         if voice_client is None:
             player = await requested_channel.connect(cls=wavelink.Player, self_deaf=True)
-            player.autoplay = wavelink.AutoPlayMode.enabled # Default Autoplay ON
+            player.autoplay = wavelink.AutoPlayMode.partial # Default Autoplay OFF
             await player.set_volume(self.saved_volumes.get(ctx.guild.id, 80)) # Default 80%
             return player
         if not isinstance(voice_client, wavelink.Player):
