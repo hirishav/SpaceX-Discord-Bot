@@ -373,14 +373,22 @@ class Music(commands.Cog):
 
         requested_channel = ctx.author.voice.channel
         voice_client = ctx.guild.voice_client
-        if voice_client is None:
-            return await requested_channel.connect(self_deaf=True)
-        if voice_client.channel != requested_channel:
-            if voice_client.is_playing() or voice_client.is_paused():
-                await ctx.send("I am already playing in another voice channel.")
-                return None
-            await voice_client.move_to(requested_channel)
-        return voice_client
+        try:
+            if voice_client is None:
+                return await requested_channel.connect(self_deaf=True)
+            if voice_client.channel != requested_channel:
+                if voice_client.is_playing() or voice_client.is_paused():
+                    await ctx.send("I am already playing in another voice channel.")
+                    return None
+                await voice_client.move_to(requested_channel)
+            return voice_client
+        except discord.ClientException as e:
+            await ctx.send(f"I cannot connect to voice: {e}")
+            return None
+        except Exception as e:
+            log.exception("Error connecting to voice channel")
+            await ctx.send("An unexpected error occurred while connecting to the voice channel. Make sure I have permissions and PyNaCl is installed.")
+            return None
 
     async def enqueue(
         self, guild_id: int, track: Track, channel: discord.abc.Messageable, *, front: bool = False
@@ -913,6 +921,12 @@ class Music(commands.Cog):
         if isinstance(error, commands.NoPrivateMessage):
             await ctx.send("Music commands can only be used in a server.")
             return
+        if isinstance(error, commands.CommandInvokeError):
+            original = error.original
+            log.error("Music command failed", exc_info=original)
+            await ctx.send(f"An error occurred: `{original}`")
+            return
+            
         log.error("Music command failed", exc_info=error)
         await ctx.send("Something went wrong while handling that command.")
 

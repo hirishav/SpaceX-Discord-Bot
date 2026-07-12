@@ -241,20 +241,25 @@ class LavalinkMusic(commands.Cog):
 
         requested_channel = ctx.author.voice.channel
         voice_client = ctx.guild.voice_client
-        if voice_client is None:
-            player = await requested_channel.connect(cls=wavelink.Player, self_deaf=True)
-            player.autoplay = wavelink.AutoPlayMode.partial # Default Autoplay OFF
-            await player.set_volume(self.saved_volumes.get(ctx.guild.id, 80)) # Default 80%
-            return player
-        if not isinstance(voice_client, wavelink.Player):
-            await ctx.send("Another audio backend is connected. Disconnect it before using Lavalink.")
-            return None
-        if voice_client.channel != requested_channel:
-            if voice_client.playing:
-                await ctx.send("I am already playing in another voice channel.")
+        try:
+            if voice_client is None:
+                player = await requested_channel.connect(cls=wavelink.Player, self_deaf=True)
+                player.autoplay = wavelink.AutoPlayMode.partial # Default Autoplay OFF
+                await player.set_volume(self.saved_volumes.get(ctx.guild.id, 80)) # Default 80%
+                return player
+            if not isinstance(voice_client, wavelink.Player):
+                await ctx.send("Another audio backend is connected. Disconnect it before using Lavalink.")
                 return None
-            await voice_client.move_to(requested_channel, self_deaf=True)
-        return voice_client
+            if voice_client.channel != requested_channel:
+                if voice_client.playing:
+                    await ctx.send("I am already playing in another voice channel.")
+                    return None
+                await voice_client.move_to(requested_channel, self_deaf=True)
+            return voice_client
+        except Exception as e:
+            log.exception("Error connecting to voice channel in Lavalink")
+            await ctx.send(f"An unexpected error occurred while connecting to the voice channel: `{e}`")
+            return None
 
     async def search_track(self, query: str) -> Optional[wavelink.Playable]:
         tracks = await wavelink.Playable.search(query, source=wavelink.TrackSource.YouTubeMusic)
@@ -279,7 +284,17 @@ class LavalinkMusic(commands.Cog):
             await searching.edit(content="I could not find a playable result for that search or URL.")
             return
 
-        track.extras = {"requester": ctx.author.mention, "channel_id": ctx.channel.id}
+        # Workaround for Wavelink 3.x where track.extras is read-only
+        if hasattr(track, 'extras') and hasattr(track.extras, 'update'):
+            try:
+                track.extras.update({"requester": ctx.author.mention, "channel_id": ctx.channel.id})
+            except AttributeError:
+                pass
+        else:
+            try:
+                object.__setattr__(track, 'extras', {"requester": ctx.author.mention, "channel_id": ctx.channel.id})
+            except AttributeError:
+                pass
         self.text_channels[ctx.guild.id] = ctx.channel.id
         
         self.cancel_idle(ctx.guild.id)
@@ -753,15 +768,24 @@ class LavalinkMusic(commands.Cog):
     async def cog_command_error(self, ctx: commands.Context, error: commands.CommandError) -> None:
         if isinstance(error, commands.MissingRequiredArgument):
             await ctx.send(f"Missing an argument. Try `{ctx.prefix}help {ctx.command.qualified_name}`.")
-        elif isinstance(error, commands.BadArgument):
+            return
+        if isinstance(error, commands.BadArgument):
             await ctx.send(f"That argument is not valid. Try `{ctx.prefix}help {ctx.command.qualified_name}`.")
-        elif isinstance(error, commands.NoPrivateMessage):
+            return
+        if isinstance(error, commands.NoPrivateMessage):
             await ctx.send("Music commands can only be used in a server.")
-        elif isinstance(error, commands.MissingPermissions):
+            return
+        if isinstance(error, commands.MissingPermissions):
             await ctx.send("❌ You don't have permission to use this command.")
-        else:
-            log.error("Lavalink music command failed", exc_info=error)
-            await ctx.send("Something went wrong while handling that command.")
+            return
+        if isinstance(error, commands.CommandInvokeError):
+            original = error.original
+            log.error("Lavalink Music command failed", exc_info=original)
+            await ctx.send(f"An error occurred: `{original}`")
+            return
+            
+        log.error("Lavalink Music command failed", exc_info=error)
+        await ctx.send("Something went wrong while handling that command.")
 
 async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(LavalinkMusic(bot))
