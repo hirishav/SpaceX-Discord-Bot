@@ -5,7 +5,6 @@ import os
 import sqlite3
 import time
 import asyncio
-import wavelink
 import aiohttp
 try:
     from dotenv import load_dotenv
@@ -77,23 +76,6 @@ class SpaceXBot(commands.Bot):
         self.db = sqlite3.connect("warnings.db", check_same_thread=False)
         cursor = self.db.cursor()
 
-        # 🔥 MUSIC ENGINE SETUP
-        self.audio_backend = os.getenv("AUDIO_BACKEND", "direct").strip().lower()
-        if self.audio_backend == "lavalink":
-            password = os.getenv("LAVALINK_SERVER_PASSWORD")
-            if password:
-                uri = os.getenv("LAVALINK_URI", "http://127.0.0.1:2333")
-                session = aiohttp.ClientSession(headers={
-                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-                })
-                node = wavelink.Node(identifier="main", uri=uri, password=password, retries=None, session=session)
-                await wavelink.Pool.connect(nodes=[node], client=self, cache_capacity=100)
-                print(f"-> Connected to Lavalink at {uri} (Cache optimized)")
-            else:
-                print("💥 LAVALINK_SERVER_PASSWORD is required for lavalink backend. Falling back to direct.")
-                self.audio_backend = "direct"
-
-
         # 🔥 SQLITE PERFORMANCE PRAGMAS (Ultra-Speed Tweaks)
         cursor.execute("PRAGMA journal_mode=WAL;")  # Write-Ahead Logging for concurrency
         cursor.execute("PRAGMA synchronous=NORMAL;") # Fast disk writing bounds
@@ -120,21 +102,6 @@ class SpaceXBot(commands.Bot):
         )
         """)
 
-        # MUSIC BOT CONFIG TABLES (DJ and 24/7 Mode)
-        cursor.execute("""
-        CREATE TABLE IF NOT EXISTS dj_roles (
-            server_id TEXT PRIMARY KEY,
-            role_id TEXT
-        )
-        """)
-
-        cursor.execute("""
-        CREATE TABLE IF NOT EXISTS twentyfour_seven (
-            server_id TEXT PRIMARY KEY,
-            enabled INTEGER DEFAULT 0
-        )
-        """)
-        
         # Moderation & AFK Tables
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS warnings (
@@ -215,16 +182,8 @@ class SpaceXBot(commands.Bot):
         if os.path.exists('./cogs'):
             for filename in os.listdir('./cogs'):
                 if filename.endswith('.py'):
-                    if filename in ['stocks_core.py', 'eco_stocks_list.py', 'music_core.py']:
+                    if filename in ['stocks_core.py', 'eco_stocks_list.py']:
                         print(f'-> Skipped Non-Cog Utility File: {filename}')
-                        continue
-                        
-                    # Skip music cogs that don't match the configured backend
-                    if filename == 'music.py' and self.audio_backend != 'direct':
-                        print('-> Skipped direct music cog (using lavalink)')
-                        continue
-                    if filename == 'lavalink_music.py' and self.audio_backend != 'lavalink':
-                        print('-> Skipped lavalink music cog (using direct)')
                         continue
                         
                     try:
