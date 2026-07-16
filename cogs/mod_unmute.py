@@ -46,7 +46,7 @@ class ModUnmute(commands.Cog):
     @unmute.error
     async def unmute_error(self, ctx, error):
         if isinstance(error, commands.MissingPermissions):
-            await ctx.send("❌ Aapke paas `Moderate Members` permission nahi hai!")
+            pass
         elif isinstance(error, commands.MissingRequiredArgument):
             await ctx.send(f"❌ Sahi tarika: `{ctx.prefix}unmute @user <reason>`")
 

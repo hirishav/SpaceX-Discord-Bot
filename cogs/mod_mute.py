@@ -91,7 +91,7 @@ class ModMute(commands.Cog):
     @mute.error
     async def mute_error(self, ctx, error):
         if isinstance(error, commands.MissingPermissions):
-            await ctx.send("❌ Aapke paas `Moderate Members` permission nahi hai!")
+            pass
         elif isinstance(error, commands.MissingRequiredArgument):
             await ctx.send(f"❌ Sahi tarika: `{ctx.prefix}mute @user <time> <reason>`\nExample: `{ctx.prefix}mute @user 10m Abusing`")
 

@@ -45,7 +45,7 @@ class ModPrefix(commands.Cog):
     @setprefix.error
     async def setprefix_error(self, ctx, error):
         if isinstance(error, commands.MissingPermissions):
-            await ctx.send("❌ **Permission Denied:** Is command ko chalane ke liye aapke paas `Manage Server` permission honi chahiye!")
+            pass
 
 async def setup(bot):
     await bot.add_cog(ModPrefix(bot))

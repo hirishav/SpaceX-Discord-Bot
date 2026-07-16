@@ -102,7 +102,7 @@ class ModPurge(commands.Cog):
     @purge.error
     async def purge_error(self, ctx, error):
         if isinstance(error, commands.MissingPermissions):
-            await ctx.send("❌ Aapke paas `Manage Messages` permission nahi hai!")
+            pass
         else:
             await ctx.send(f"❌ Kuch gadbad hui: {error}")
 

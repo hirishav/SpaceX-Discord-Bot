@@ -47,7 +47,7 @@ class ModUnban(commands.Cog):
     @unban.error
     async def unban_error(self, ctx, error):
         if isinstance(error, commands.MissingPermissions):
-            await ctx.send("❌ Aapke paas `Ban Members` permission nahi hai!")
+            pass
         elif isinstance(error, commands.MissingRequiredArgument):
             await ctx.send(f"❌ Sahi tarika: `{ctx.prefix}unban <User_ID_Ya_Username>`\nExample: `{ctx.prefix}unban 727718500663033897`")
 

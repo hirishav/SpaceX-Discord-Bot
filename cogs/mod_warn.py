@@ -68,7 +68,7 @@ class ModWarn(commands.Cog):
     @warn.error
     async def warn_error(self, ctx, error):
         if isinstance(error, commands.MissingPermissions):
-            await ctx.send("❌ Aapke paas `Manage Messages` permission nahi hai!")
+            pass
         elif isinstance(error, commands.MissingRequiredArgument):
             await ctx.send(f"❌ Sahi tarika: `{ctx.prefix}warn @user <reason>`")
 

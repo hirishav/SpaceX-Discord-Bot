@@ -54,7 +54,7 @@ class ModPoll(commands.Cog):
     @poll.error
     async def poll_error(self, ctx, error):
         if isinstance(error, commands.MissingPermissions):
-            await ctx.send("❌ **Permission Denied:** Is command ko use karne ke liye aapke paas `Manage Messages` permission honi chahiye!")
+            pass
 
 async def setup(bot):
     await bot.add_cog(ModPoll(bot))

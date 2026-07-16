@@ -64,7 +64,7 @@ class ModDelWarn(commands.Cog):
     @delwarn.error
     async def delwarn_error(self, ctx, error):
         if isinstance(error, commands.MissingPermissions):
-            await ctx.send("❌ Aapke paas `Manage Messages` permission nahi hai!")
+            pass
         elif isinstance(error, commands.MissingRequiredArgument):
             await ctx.send(f"❌ Sahi tarika: `{ctx.prefix}delwarn @user <warning_number>`\nExample: `{ctx.prefix}delwarn @user 1`")
         elif isinstance(error, commands.BadArgument):

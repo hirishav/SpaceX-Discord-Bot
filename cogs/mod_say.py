@@ -24,7 +24,7 @@ class ModSay(commands.Cog):
     @say.error
     async def say_error(self, ctx, error):
         if isinstance(error, commands.MissingPermissions):
-            await ctx.send("❌ Aapke paas `Manage Messages` permission nahi hai!")
+            pass
 
 async def setup(bot):
     await bot.add_cog(ModSay(bot))

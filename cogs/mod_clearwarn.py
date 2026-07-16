@@ -61,7 +61,7 @@ class ModClearWarn(commands.Cog):
     @clearwarn.error
     async def clearwarn_error(self, ctx, error):
         if isinstance(error, commands.MissingPermissions):
-            await ctx.send("❌ Aapke paas is command ko use karne ki `Manage Server` (Manage Guild) permission nahi hai! (Higher Staff Only)")
+            pass permission nahi hai! (Higher Staff Only)")
         elif isinstance(error, commands.MissingRequiredArgument):
             await ctx.send(f"❌ Sahi tarika: `{ctx.prefix}clearwarn @user`")
 

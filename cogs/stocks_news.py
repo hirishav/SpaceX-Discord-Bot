@@ -10,7 +10,7 @@ class StocksNews(commands.Cog):
         # 🔥 LOCK: Automatic loop background calls completely removed!
 
     # 🔥 FIX: `@tasks.loop` decorator ko poora hata diya hai taaki automatic trigger strictly dead ho jaye
-    async def flash_market_news(self):
+    async def flash_market_news(self, ctx):
         # 🌏 SINGLE POPULAR STOCK TARGET DATABASE
         single_stock_news = [
             {
@@ -28,7 +28,7 @@ class StocksNews(commands.Cog):
             {
                 "ticker": "NIFTY", 
                 "type": "good", 
-                "title": "📈 NIFTY 50 INDEX INDEX BREAKOUT: BULL RUN! 🇮🇳",
+                "title": "📈 NIFTY 50 INDEX BREAKOUT: BULL RUN! 🇮🇳",
                 "text": "📊 MARKET BULLS: Indian Union Budget reports aane ke baad Foreign Institutional Investors ne massive capital pump kiya! NIFTY Index records hit karne ke liye taiyar!"
             },
             {
@@ -58,7 +58,7 @@ class StocksNews(commands.Cog):
             {
                 "ticker": "BTC", 
                 "type": "bad", 
-                "title": "🚫 CRYPTO DUMP REPORT: BLACK BLACK SWAN EVENT! 💀",
+                "title": "🚫 CRYPTO DUMP REPORT: BLACK SWAN EVENT! 💀",
                 "text": "💥 WHALE ALERT: Ek purane dormant wallet se 50,000 Bitcoins exchange liquidity pool par instant sell orders par throw kiye gaye! Bitcoin heavy panic down!"
             },
             {
@@ -119,17 +119,13 @@ class StocksNews(commands.Cog):
         )
         embed.set_footer(text="Baki saare stocks stable hain. !!stocks check karein!")
 
-        for guild in self.bot.guilds:
-            channel = guild.system_channel or next((c for c in guild.text_channels if c.permissions_for(guild.me).send_messages), None)
-            if channel:
-                try: await channel.send(embed=embed)
-                except Exception: pass
+        await ctx.send(embed=embed)
 
     @commands.command(name="marketnews", aliases=["news"])
     async def force_news_trigger(self, ctx):
         """Live trading floor par instantly kisi ek popular stock ki flash news lane ke liye."""
         await ctx.send("📻 Single Asset Volatility News Matrix trigger kiya jaa raha hai...")
-        await self.flash_market_news()
+        await self.flash_market_news(ctx)
 
 async def setup(bot):
     await bot.add_cog(StocksNews(bot))
