@@ -31,9 +31,8 @@ class BotInfo(commands.Cog):
         )
         embed.set_thumbnail(url=self.bot.user.display_avatar.url)
         
-        embed.add_field(name="🧑‍💻 Creator", value="<@727718500663033897>", inline=True)
-        embed.add_field(name="🙎 Developer", value="<@1061268825913438358>", inline=True)
-        embed.add_field(name="🎯 Valorant Support", value="<@993033538838482986>", inline=True)
+        embed.add_field(name="🤴 Creator", value="<@727718500663033897>", inline=True)
+        embed.add_field(name="🙎 Dev", value="<@1061268825913438358>", inline=True)
         embed.add_field(name="⏱️ Uptime", value=f"`{uptime_str}`", inline=True)
         embed.add_field(name="🌐 Total Servers", value=f"**{total_servers}** Servers", inline=True)
         embed.add_field(name="👥 Total Members", value=f"**{total_members}** Users", inline=True)

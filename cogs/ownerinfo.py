@@ -21,7 +21,15 @@ class OwnerInfo(commands.Cog):
         embed.add_field(name="👑 Developer", value=owner_username, inline=True)
         embed.add_field(name="🆔 Discord ID", value=owner_id, inline=True)
         embed.add_field(name="🌐 GitHub", value=f"[Click Here]({github_link})", inline=True)
-        embed.add_field(name="🛠️ Tech Stack", value="Python (Discord.py), Hosted on Render!", inline=False)
+        embed.add_field(name="📚 Education", value="B.Tech CSE (2025-2029)", inline=False)
+        embed.add_field(name="💬 Languages Known", value="Python, C, C++, Java", inline=False)
+        embed.add_field(name="🛠️ Skills", value="Bot Development, LLMs, AI, AI/ML", inline=False)
+        embed.add_field(name="📊 Databases Known", value="MySQL, PostgreSQL, MongoDB", inline=False)
+        embed.add_field(name="📌 Hobbies", value="Coding, Gaming, AI Research, Music", inline=False)
+        embed.add_field(name="📫 Contact", value="You can reach me via Discord DM or GitHub or mail me.", inline=False)
+        embed.add_field(name="📧 Email", value="rishavproductions@gmail.com", inline=False)
+        embed.add_field(name="🖥️ Tech Stack", value="Python (Discord.py), Hosted on Render!", inline=False)
+        embed.set_footer(text="SpaceX Official Support • Secure & Verified Application")
         
         # Discord avatar fetch karne ke liye (Cog format)
         try:
