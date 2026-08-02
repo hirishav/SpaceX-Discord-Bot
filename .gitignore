@@ -1,0 +1,28 @@
+# Secrets — never commit these
+config.py
+.env
+.env.*
+!.env.example
+
+# Local runtime data
+warnings.db
+warnings.db-shm
+warnings.db-wal
+cookies.txt
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+env/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
