@@ -29,7 +29,7 @@ CATEGORY_ORDER = ["moderation", "economy", "fun", "utility", "general", "owner"]
 
 CATEGORY_META = {
     "moderation": {
-        "emoji": "🛡️",
+        "emoji": "🛠️",
         "label": "Moderation",
         "aliases": ["mod", "mods", "moderation", "modding"],
         "blurb": "Server ko control aur safe rakhne ke liye saare moderation tools.",
@@ -41,7 +41,7 @@ CATEGORY_META = {
         "blurb": "Wallet, casino games aur live stock market — sab kuch ek jagah.",
     },
     "fun": {
-        "emoji": "🎭",
+        "emoji": "🎮",
         "label": "Fun & Comedy",
         "aliases": ["fun", "comedy", "meme", "memes"],
         "blurb": "Masti-mazak aur entertainment ke liye commands.",
