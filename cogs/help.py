@@ -206,8 +206,8 @@ class HelpView(discord.ui.View):
         self.add_item(
             discord.ui.Button(label="Invite", emoji="🤖", url=BOT_INVITE_URL, style=discord.ButtonStyle.link, row=1)
         )
-        support_url = _cfg("SUPPORT_SERVER_URL")
-        if support_url and support_url.startswith("https://discord.gg/xgHkpePc9J"):
+        support_url = _cfg("SUPPORT_SERVER_URL") or f"https://discord.gg/xgHkpePc9J"
+        if support_url and support_url.startswith("http"):
             self.add_item(
                 discord.ui.Button(label="Support", emoji="🛠️", url=support_url, style=discord.ButtonStyle.link, row=1)
             )
