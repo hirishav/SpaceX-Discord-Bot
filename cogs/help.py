@@ -696,6 +696,11 @@ class Help(commands.Cog):
             usage = f"`{prefix}vote`"
             examples = f"`{prefix}vote`"
 
+        elif cmd.name in ["updatetopgg", "topggupdate", "poststats"]:
+            description = "👑 Owner-Only: Top.gg website par direct live server count post karne aur API status verify karne ke liye."
+            usage = f"`{prefix}updatetopgg`"
+            examples = f"`{prefix}updatetopgg`"
+
         elif cmd.name == "ping":
             description = "🏓 Bot ki current response latency check karne ke liye."
             usage = f"`{prefix}ping`"

@@ -1,6 +1,6 @@
 # main.py
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 import os
 import sqlite3
 import time
@@ -79,6 +79,41 @@ class SpaceXBot(commands.Bot):
         self.blacklist_cache = {}
         self.premium_cache = set()
         self.topgg_client = None
+
+    async def post_topgg_stats(self):
+        """Top.gg API me direct live server count post karta hai (zero dependency on topgg-py)."""
+        if not TOPGG_TOKEN or not self.user:
+            return False, "TOPGG_TOKEN missing ya Bot abhi ready nahi hai."
+
+        url = f"https://top.gg/api/bots/{self.user.id}/stats"
+        headers = {
+            "Authorization": TOPGG_TOKEN,
+            "Content-Type": "application/json"
+        }
+        payload = {
+            "server_count": len(self.guilds)
+        }
+        if self.shard_count and self.shard_count > 1:
+            payload["shard_count"] = self.shard_count
+
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.post(url, json=payload, headers=headers) as resp:
+                    if resp.status == 200:
+                        print(f"-> Successfully posted {len(self.guilds)} servers to Top.gg!")
+                        return True, f"Successfully posted {len(self.guilds)} servers to Top.gg! (Status 200)"
+                    else:
+                        text = await resp.text()
+                        print(f"⚠️ Top.gg API returned status {resp.status}: {text}")
+                        return False, f"Status {resp.status}: {text}"
+        except Exception as e:
+            print(f"⚠️ Top.gg stats posting failed: {e}")
+            return False, str(e)
+
+    @tasks.loop(minutes=30)
+    async def topgg_autopost_task(self):
+        await self.wait_until_ready()
+        await self.post_topgg_stats()
 
     async def setup_hook(self):
         # ⚡ PERSISTENT CONNECTION MATRIX
@@ -187,13 +222,13 @@ class SpaceXBot(commands.Bot):
             
         print("-> Database Connected & Speed Cache Engines Synchronized!")
         
-        # 🚀 TOP.GG API INTEGRATION MATRIX
+        # 🚀 TOP.GG API INTEGRATION MATRIX (DIRECT HTTP POST)
         if TOPGG_TOKEN:
             try:
-                self.topgg_client = topgg.DBLClient(self, TOPGG_TOKEN, autopost=True)
-                print("-> Top.gg API Client successfully initialized with AutoPost!")
+                self.topgg_autopost_task.start()
+                print("-> Top.gg Direct AutoPost task started (30m interval)!")
             except Exception as e:
-                print(f"⚠️ Top.gg API Client initialization skipped/warned: {e}")
+                print(f"⚠️ Top.gg task start failed: {e}")
         else:
             print("⚠️ TOPGG_TOKEN missing. Top.gg stats posting is disabled.")
 
@@ -220,13 +255,18 @@ async def on_ready():
     print('Bot successfully online aa gaya hai! 🎉')
     print("---------------------------------------")
     
-    # 📈 TOP.GG GUILD COUNT POSTING
-    if bot.topgg_client:
-        try:
-            await bot.topgg_client.post_guild_count()
-            print(f"-> Posted guild count ({len(bot.guilds)}) to Top.gg!")
-        except Exception as e:
-            print(f"⚠️ Failed to post guild count to Top.gg: {e}")
+    # 📈 TOP.GG GUILD COUNT POSTING (DIRECT)
+    await bot.post_topgg_stats()
+
+@bot.event
+async def on_guild_join(guild):
+    print(f"-> Joined new server: {guild.name} (Total: {len(bot.guilds)})")
+    await bot.post_topgg_stats()
+
+@bot.event
+async def on_guild_remove(guild):
+    print(f"-> Left server: {guild.name} (Total: {len(bot.guilds)})")
+    await bot.post_topgg_stats()
 
 def get_remaining_time_str(expires_at):
     remaining = expires_at - int(time.time())

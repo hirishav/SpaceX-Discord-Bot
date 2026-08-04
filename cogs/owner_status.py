@@ -47,6 +47,32 @@ class OwnerStatus(commands.Cog):
         if isinstance(error, commands.NotOwner):
             await ctx.send("❌ You cannot use this command. This command belongs to the Owner!")
 
+    @commands.command(name="updatetopgg", aliases=["topggupdate", "poststats"], hidden=True)
+    @commands.is_owner()
+    async def updatetopgg(self, ctx):
+        """Top.gg website par live server count direct update karein."""
+        msg = await ctx.send("🚀 **Top.gg par server count post kiya ja raha hai...**")
+        success, details = await self.bot.post_topgg_stats()
+        if success:
+            embed = discord.Embed(
+                title="✅ Top.gg Server Count Updated!",
+                description=f"**Servers Posted:** `{len(self.bot.guilds)}`\n**API Response:** `{details}`",
+                color=discord.Color.green()
+            )
+            await msg.edit(content=None, embed=embed)
+        else:
+            embed = discord.Embed(
+                title="❌ Top.gg Update Failed!",
+                description=f"**Error Details:** `{details}`\n*Check karein ki TOPGG_TOKEN config.py ya .env me sahi set hai.*",
+                color=discord.Color.red()
+            )
+            await msg.edit(content=None, embed=embed)
+
+    @updatetopgg.error
+    async def updatetopgg_error(self, ctx, error):
+        if isinstance(error, commands.NotOwner):
+            await ctx.send("❌ You cannot use this command. This command belongs to the Owner!")
+
 # Is file ka apna alag setup function
 async def setup(bot):
     await bot.add_cog(OwnerStatus(bot))
