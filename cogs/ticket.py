@@ -1,7 +1,7 @@
 # cogs/ticket.py
 import discord
 from discord.ext import commands
-import sqlite3
+import database as sqlite3
 import asyncio
 import io
 import time

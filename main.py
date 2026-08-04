@@ -2,7 +2,7 @@
 import discord
 from discord.ext import commands, tasks
 import os
-import sqlite3
+import database as sqlite3
 import time
 import asyncio
 import aiohttp

@@ -1,7 +1,7 @@
 # cogs/stocks_news.py
 import discord
 from discord.ext import commands
-import sqlite3
+import database as sqlite3
 import random
 
 class StocksNews(commands.Cog):

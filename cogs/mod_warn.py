@@ -1,7 +1,7 @@
 # cogs/mod_warn.py
 import discord
 from discord.ext import commands
-import sqlite3
+import database as sqlite3
 
 class ModWarn(commands.Cog):
     def __init__(self, bot):

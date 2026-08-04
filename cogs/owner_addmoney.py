@@ -1,7 +1,7 @@
 # cogs/owner_addmoney.py
 import discord
 from discord.ext import commands
-import sqlite3
+import database as sqlite3
 import re
 
 class OwnerAddMoney(commands.Cog):

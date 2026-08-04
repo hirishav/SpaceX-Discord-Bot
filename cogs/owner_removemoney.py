@@ -1,7 +1,7 @@
 # cogs/owner_removemoney.py
 import discord
 from discord.ext import commands
-import sqlite3
+import database as sqlite3
 import re
 
 class OwnerRemoveMoney(commands.Cog):

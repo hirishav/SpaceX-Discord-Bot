@@ -1,7 +1,7 @@
 # cogs/stocks_buy.py
 import discord
 from discord.ext import commands
-import sqlite3
+import database as sqlite3
 from cogs.stocks_core import get_db
 
 class StocksBuy(commands.Cog):

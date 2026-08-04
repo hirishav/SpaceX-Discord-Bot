@@ -1,5 +1,5 @@
 # cogs/stocks_core.py
-import sqlite3
+import database as sqlite3
 from cogs.eco_stocks_list import TOP_200_STOCKS
 
 def get_db():

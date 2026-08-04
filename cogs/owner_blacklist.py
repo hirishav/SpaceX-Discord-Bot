@@ -1,7 +1,7 @@
 # cogs/mod_blacklist.py
 import discord
 from discord.ext import commands
-import sqlite3
+import database as sqlite3
 import time
 
 class ModBlacklist(commands.Cog):

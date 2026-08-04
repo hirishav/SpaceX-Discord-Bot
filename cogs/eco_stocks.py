@@ -2,7 +2,7 @@
 import discord
 from discord.ext import commands, tasks
 import random
-import sqlite3
+import database as sqlite3
 from cogs.stocks_core import get_db, init_stocks_db
 
 # --- 🔢 MODAL POPUP FOR "GO TO PAGE" BUTTON ---
