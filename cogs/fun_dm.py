@@ -19,7 +19,7 @@ class FunDM(commands.Cog):
 
     @commands.command(name="dm")
     async def dm_user(self, ctx, user_target: str = None, *, message: str = None):
-        """Kisi user ko bot ke through direct DM bhejkar embed preview display karta hai."""
+        """Kisi user ko bot ke through direct DM bhejkar embed preview display karta hai.."""
         if not user_target or not message:
             return await ctx.send(f"❌ Sahi tarika: `{ctx.prefix}dm @user/ID <your_message>`")
 
