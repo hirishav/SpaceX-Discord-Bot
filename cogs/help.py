@@ -701,6 +701,16 @@ class Help(commands.Cog):
             usage = f"`{prefix}ping`"
             examples = f"`{prefix}ping`"
 
+        elif cmd.name == "ticket":
+            description = "🎫 Server support tickets create aur manage karne ke liye complete system."
+            usage = f"`{prefix}ticket setup #category @SupportRole`\n`{prefix}ticket panel`\n`{prefix}ticket create`\n`{prefix}ticket close [reason]`"
+            examples = f"`{prefix}ticket setup #Support @Mod`\n`{prefix}ticket panel`"
+
+        elif cmd.name == "welcome":
+            description = "👋 Server me naye members ka custom swagat aur join messages configure karne ke liye."
+            usage = f"`{prefix}welcome setchannel #channel`\n`{prefix}welcome setmessage <msg>`\n`{prefix}welcome mention <on/off>`\n`{prefix}welcome test`"
+            examples = f"`{prefix}welcome setchannel #welcome`\n`{prefix}welcome setmessage Welcome {{user}} to {{server}}! 🎉`"
+
         elif cmd.name == "help":
             description = "📖 Bot ke saare commands ki premium, category-wise list dikhata hai."
             usage = f"`{prefix}help`\n`{prefix}help <category>`\n`{prefix}help <command>`"
