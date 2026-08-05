@@ -39,10 +39,15 @@ class OwnerSync(commands.Cog):
                         await self.bot.tree.sync(guild=guild)
                         synced_count += 1
                         await asyncio.sleep(1.2)  # Anti rate-limit buffer
-                    except discord.HTTPException:
+                    except discord.HTTPException as e:
+                        if synced_count == 0:
+                            first_error = f"{e.status} - {e.text}"
                         pass
                 
-                await msg.edit(content=f"✅ **Success!** Forcefully synced slash commands to **{synced_count}/{len(self.bot.guilds)}** servers! Everyone should see them instantly now.")
+                if synced_count == 0 and 'first_error' in locals():
+                    await msg.edit(content=f"❌ **Failed to sync!** All 79 servers rejected the slash commands.\n**Reason:** `{first_error}`\n*(If this says 403 Forbidden, the bot is missing the `applications.commands` invite permission in those servers!)*")
+                else:
+                    await msg.edit(content=f"✅ **Success!** Forcefully synced slash commands to **{synced_count}/{len(self.bot.guilds)}** servers! Everyone should see them instantly now.")
                 return
             else:
                 synced = await ctx.bot.tree.sync()
