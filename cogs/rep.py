@@ -70,8 +70,16 @@ class RepSystem(commands.Cog):
             
             results = []
             for user_id, points in all_reps:
-                if ctx.guild.get_member(int(user_id)):
+                member = ctx.guild.get_member(int(user_id))
+                if not member:
+                    try:
+                        member = await ctx.guild.fetch_member(int(user_id))
+                    except discord.NotFound:
+                        pass
+                
+                if member:
                     results.append((user_id, points))
+                
                 if len(results) == 10:
                     break
             

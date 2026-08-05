@@ -7,7 +7,7 @@ import time
 import asyncio
 import aiohttp
 import topgg
-from flask import Flask
+from flask import Flask, request, jsonify
 from threading import Thread
 
 try:
@@ -33,6 +33,28 @@ app = Flask('')
 @app.route('/')
 def home():
     return "SpaceX Bot Is Alive & Running 24/7! 🚀"
+
+@app.route('/topgg_webhook', methods=['POST'])
+def topgg_webhook():
+    data = request.json
+    if data and 'user' in data:
+        user_id = str(data['user'])
+        
+        # Connect to database
+        db = sqlite3.connect("warnings.db", check_same_thread=False)
+        cursor = db.cursor()
+        cursor.execute("INSERT OR IGNORE INTO reps (user_id, rep_points) VALUES (?, 0)", (user_id,))
+        
+        # Determine rep points: e.g., 2 points for weekend votes, 1 for normal
+        rep_amount = 2 if data.get('isWeekend') else 1
+        
+        cursor.execute("UPDATE reps SET rep_points = rep_points + ? WHERE user_id = ?", (rep_amount, user_id))
+        db.commit()
+        db.close()
+        
+        return jsonify({"status": "success", "user": user_id, "reps_added": rep_amount}), 200
+        
+    return jsonify({"status": "error", "message": "Invalid payload"}), 400
 
 def run_server():
     app.run(host='0.0.0.0', port=8080)
