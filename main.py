@@ -185,6 +185,14 @@ class SpaceXBot(commands.Bot):
         )
         """)
 
+        # GLOBAL REPS TABLE
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS reps (
+            user_id TEXT PRIMARY KEY,
+            rep_points INTEGER DEFAULT 0
+        )
+        """)
+
         # PREFIXLESS USERS LEAF MATRIX TABLE
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS prefixless_users (

@@ -718,6 +718,21 @@ class Help(commands.Cog):
             usage = f"`{prefix}welcome setchannel #channel`\n`{prefix}welcome setmessage <msg>`\n`{prefix}welcome mention <on/off>`\n`{prefix}welcome test`"
             examples = f"`{prefix}welcome setchannel #welcome`\n`{prefix}welcome setmessage Welcome {{user}} to {{server}}! 🎉`"
 
+        elif cmd.name == "rep":
+            description = "⭐ Apna ya kisi doosre user ka rep points check karne aur leaderboard dekhne ke liye."
+            usage = f"`{prefix}rep [@user]`\n`{prefix}rep lb global`\n`{prefix}rep lb server`"
+            examples = f"`{prefix}rep @User`\n`{prefix}rep lb server`"
+
+        elif cmd.name == "addrep":
+            description = "👑 Owner-Only: Kisi user ko instantly globally rep points grant karne ke liye."
+            usage = f"`{prefix}addrep @user <amount>`"
+            examples = f"`{prefix}addrep @User 10`"
+
+        elif cmd.name == "removerep":
+            description = "👑 Owner-Only: Kisi user ke rep points hatane ya reset karne ke liye."
+            usage = f"`{prefix}removerep @user <amount/all>`"
+            examples = f"`{prefix}removerep @User all`"
+
         elif cmd.name == "help":
             description = "📖 Bot ke saare commands ki premium, category-wise list dikhata hai."
             usage = f"`{prefix}help`\n`{prefix}help <category>`\n`{prefix}help <command>`"
