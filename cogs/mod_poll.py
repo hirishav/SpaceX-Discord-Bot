@@ -7,7 +7,7 @@ class ModPoll(commands.Cog):
         self.bot = bot
         self.poll_emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
 
-    @commands.command(name="poll")
+    @commands.hybrid_command(name="poll")
     @commands.has_permissions(manage_messages=True)  # 🛡️ Sirf Manage Messages perms
     async def poll(self, ctx, question: str = None, *options):
         """Server me dynamic options ke sath professional poll start karne ke liye."""

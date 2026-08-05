@@ -7,7 +7,7 @@ class ModUnmute(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="unmute", aliases=["untimeout"])
+    @commands.hybrid_command(name="unmute", aliases=["untimeout"])
     @commands.has_permissions(moderate_members=True)
     async def unmute(self, ctx, member: discord.Member, *, reason: str = "No reason provided"):
         """Kisi member ka timeout (mute) pehle hatane ke liye."""

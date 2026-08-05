@@ -6,7 +6,7 @@ class ModSay(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="say", aliases=["echo", "repeat"])
+    @commands.hybrid_command(name="say", aliases=["echo", "repeat"])
     @commands.has_permissions(manage_messages=True)
     async def say(self, ctx, *, message_content: str = None):
         """Bot se apni marzi ka message bulwane ke liye (Moderation Command)."""

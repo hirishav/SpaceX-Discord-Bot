@@ -166,7 +166,7 @@ class Welcome(commands.Cog):
     # ⌨️ WELCOME COMMANDS (MODERATOR ONLY)
     # ─────────────────────────────────────────────────────────────
 
-    @commands.group(name="welcome", invoke_without_command=True)
+    @commands.hybrid_group(name="welcome", invoke_without_command=True)
     async def welcome(self, ctx):
         """SpaceX Welcome System — Naye members ka custom swagat configure karne ke liye."""
         cfg = self.get_config(ctx.guild.id)

@@ -30,7 +30,7 @@ class EcoCrime(commands.Cog):
         self.cooldowns[user_id] = current_time + 30
         return True
 
-    @commands.command(name="crime")
+    @commands.hybrid_command(name="crime")
     async def crime(self, ctx):
         """High-risk, High-reward illegal kaam!"""
         if not await self.handle_cooldown(ctx): return

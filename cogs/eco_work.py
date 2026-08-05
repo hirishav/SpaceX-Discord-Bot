@@ -42,7 +42,7 @@ class EcoWork(commands.Cog):
         self.cooldowns[user_id] = current_time + 30
         return True
 
-    @commands.command(name="work")
+    @commands.hybrid_command(name="work")
     async def work(self, ctx):
         """Mehnat ka kaam karke safe coins kamane ke liye."""
         if not await self.handle_cooldown(ctx):

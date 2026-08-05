@@ -7,7 +7,7 @@ class EcoLeaderboard(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="leaderboard", aliases=["lb"])
+    @commands.hybrid_command(name="leaderboard", aliases=["lb"])
     async def leaderboard(self, ctx, mode: str = None):
         """Server ya Global level par top economy/gaming players dekhne ke liye."""
         

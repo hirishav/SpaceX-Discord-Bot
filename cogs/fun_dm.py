@@ -17,7 +17,7 @@ class FunDM(commands.Cog):
             except Exception:
                 return None
 
-    @commands.command(name="dm")
+    @commands.hybrid_command(name="dm")
     async def dm_user(self, ctx, user_target: str = None, *, message: str = None):
         """Kisi user ko bot ke through direct DM bhejkar embed preview display karta hai.."""
         if not user_target or not message:

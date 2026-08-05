@@ -8,7 +8,7 @@ class StocksPortfolio(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="portfolio", aliases=["pf", "mystocks"])
+    @commands.hybrid_command(name="portfolio", aliases=["pf", "mystocks"])
     async def view_portfolio(self, ctx, option_or_user: str = None):
         """Portfolio dekhne ya privacy set karne ke liye. Usage: !!pf / !!pf set private / !!pf @user"""
         user_id = str(ctx.author.id)

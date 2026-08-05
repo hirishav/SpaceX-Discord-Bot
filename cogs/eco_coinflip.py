@@ -17,7 +17,7 @@ class EcoCoinflip(commands.Cog):
         conn.close()
         return row[0] if row else 0
 
-    @commands.command(name="coinflip", aliases=["cf", "flip"])
+    @commands.hybrid_command(name="coinflip", aliases=["cf", "flip"])
     async def coinflip(self, ctx, amount_str: str = None, choice: str = None):
         """Kismat aazmaiye! !!coinflip <amount/all/half> <heads/tails>"""
         if not amount_str or not choice or choice.lower() not in ["heads", "tails", "h", "t"]:

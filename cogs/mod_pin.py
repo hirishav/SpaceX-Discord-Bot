@@ -6,7 +6,7 @@ class ModPin(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="pin")
+    @commands.hybrid_command(name="pin")
     @commands.has_permissions(manage_messages=True)  # 🛡️ Lock to moderator perms
     async def pin_message(self, ctx, message_id: int = None):
         """Kisi bhi message ko uski ID ke zariye instantly pin karne ke liye."""
@@ -35,7 +35,7 @@ class ModPin(commands.Cog):
         except Exception as e:
             await ctx.send(f"❌ Kuch gadbad hui: `{e}`")
 
-    @commands.command(name="unpin")
+    @commands.hybrid_command(name="unpin")
     @commands.has_permissions(manage_messages=True)  # 🛡️ Lock to moderator perms
     async def unpin_message(self, ctx, message_id: int = None):
         """Channel ke kisi bhi pinned message ko ID ke zariye unpin karne ke liye."""

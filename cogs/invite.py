@@ -6,7 +6,7 @@ class Invite(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="invite", aliases=["inv", "addbot"])
+    @commands.hybrid_command(name="invite", aliases=["inv", "addbot"])
     async def invite(self, ctx):
         """Bot ko apne server me add karne ke liye invite link deta hai (No Delete Fix)."""
         

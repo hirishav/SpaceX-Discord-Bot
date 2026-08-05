@@ -6,7 +6,7 @@ class ModSlowmode(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="slowmode", aliases=["sm", "cooldown"])
+    @commands.hybrid_command(name="slowmode", aliases=["sm", "cooldown"])
     @commands.has_permissions(manage_messages=True)
     async def slowmode(self, ctx, seconds_input: str = None):
         """Channel me slowmode cooldown set karne ke liye (Manage Messages)."""

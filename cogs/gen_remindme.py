@@ -2,18 +2,51 @@
 import discord
 from discord.ext import commands
 import asyncio
+import time
 
 class GenRemindme(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.active_reminders = {}
 
-    @commands.command(name="remindme")
+    @commands.hybrid_command(name="remindme")
     async def remindme(self, ctx, time_str: str = None, *, task: str = None):
         """Aapko kisi specific kaam ke liye ping karke yaad dilane ke liye."""
+        
+        if not time_str and not task:
+            user_reminders = self.active_reminders.get(ctx.author.id, [])
+            if not user_reminders:
+                embed = discord.Embed(
+                    title="📝 Active Reminders",
+                    description=f"Aapka koi bhi active reminder nahi hai.\nReminder set karne ke liye: `{ctx.prefix or '/'}remindme <time> <task>`",
+                    color=discord.Color.red()
+                )
+                return await ctx.send(embed=embed)
+            
+            description = ""
+            current_time = time.time()
+            valid_reminders = []
+            
+            for idx, rem in enumerate(user_reminders, 1):
+                remaining = int(rem['end_time'] - current_time)
+                if remaining > 0:
+                    valid_reminders.append(rem)
+                    description += f"**{len(valid_reminders)}.** {rem['task']} (in <t:{int(rem['end_time'])}:R>)\n"
+            
+            if not description:
+                description = "Aapka koi bhi active reminder nahi hai."
+                
+            embed = discord.Embed(
+                title="📝 Aapke Active Reminders",
+                description=description,
+                color=discord.Color.blue()
+            )
+            return await ctx.send(embed=embed)
+
         if not time_str or not task:
             embed_err = discord.Embed(
                 title="❌ Galat Format!",
-                description=f"Sahi tarika: `{ctx.prefix}remindme <time><s/m/h> <work>`\n\n💡 **Examples:**\n👉 `{ctx.prefix}remindme 20m Padhne jana hai`\n👉 `{ctx.prefix}rm 1h Video edit karni hai`",
+                description=f"Sahi tarika: `{ctx.prefix or '/'}remindme <time><s/m/h> <work>`\n\n💡 **Examples:**\n👉 `{ctx.prefix or '/'}remindme 20m Padhne jana hai`\n👉 `{ctx.prefix or '/'}rm 1h Video edit karni hai`",
                 color=discord.Color.red()
             )
             return await ctx.send(embed=embed_err)
@@ -47,7 +80,17 @@ class GenRemindme(commands.Cog):
         embed.set_footer(text=f"Requested by {ctx.author.name}", icon_url=ctx.author.display_avatar.url)
         await ctx.send(embed=embed)
 
+        end_time = time.time() + calculated_seconds
+        reminder_obj = {'task': task, 'end_time': end_time}
+        
+        if ctx.author.id not in self.active_reminders:
+            self.active_reminders[ctx.author.id] = []
+        self.active_reminders[ctx.author.id].append(reminder_obj)
+
         await asyncio.sleep(calculated_seconds)
+
+        if ctx.author.id in self.active_reminders and reminder_obj in self.active_reminders[ctx.author.id]:
+            self.active_reminders[ctx.author.id].remove(reminder_obj)
 
         alert_embed = discord.Embed(
             title="🔔 REMINDER ALERT!",

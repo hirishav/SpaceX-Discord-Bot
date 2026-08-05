@@ -6,7 +6,7 @@ class UtilAvatar(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="avatar", aliases=["av", "pfp"])
+    @commands.hybrid_command(name="avatar", aliases=["av", "pfp"])
     async def avatar(self, ctx, member: discord.Member = None):
         """Kisi bhi member ki profile picture (avatar) dekhne ke liye."""
         # Agar koi member tag nahi kiya, toh command chalane wale ka avatar dikhao

@@ -8,7 +8,7 @@ class ModDelWarn(commands.Cog):
         self.bot = bot
         self.db_name = "warnings.db"
 
-    @commands.command(name="delwarn", aliases=["deletewarn", "unwarn"])
+    @commands.hybrid_command(name="delwarn", aliases=["deletewarn", "unwarn"])
     @commands.has_permissions(manage_messages=True)
     async def delwarn(self, ctx, member: discord.Member, warn_num: int):
         """Kisi user ki koi ek specific warning number delete karne ke liye."""

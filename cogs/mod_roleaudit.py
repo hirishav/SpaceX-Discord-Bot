@@ -6,7 +6,7 @@ class ModRoleAudit(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="roleaudit", aliases=["auditperms", "checkadmins"])
+    @commands.hybrid_command(name="roleaudit", aliases=["auditperms", "checkadmins"])
     @commands.has_permissions(administrator=True)
     async def role_audit_command(self, ctx):
         """Server ke dangerous permissions wale log aur total role counting analyze karne ke liye."""

@@ -32,7 +32,7 @@ class GenAFK(commands.Cog):
         conn.close()
         return row
 
-    @commands.command(name="afk")
+    @commands.hybrid_command(name="afk")
     async def afk(self, ctx, *, reason: str = "I am currently away!"):
         """Aapko AFK status par set kar deta hai."""
         try:

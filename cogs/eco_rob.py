@@ -30,7 +30,7 @@ class EcoRob(commands.Cog):
         self.cooldowns[user_id] = current_time + 30
         return True
 
-    @commands.command(name="rob", aliases=["steal"])
+    @commands.hybrid_command(name="rob", aliases=["steal"])
     async def rob(self, ctx, member: discord.Member = None):
         """Kisi doosre user ke wallet se chori karne ke liye."""
         if not member:

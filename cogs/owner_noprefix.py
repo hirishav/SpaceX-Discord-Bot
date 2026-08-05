@@ -6,7 +6,7 @@ class OwnerNoPrefix(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="addprefixless", hidden=True)
+    @commands.hybrid_command(name="addprefixless", hidden=True)
     @commands.is_owner()
     async def add_prefixless(self, ctx, member: discord.Member = None):
         """👑 Owner Only: Kisi member ko bina prefix ke bot use karne ki permission dene ke liye."""
@@ -28,7 +28,7 @@ class OwnerNoPrefix(commands.Cog):
             # Handle standard unique integrity violation array checks
             await ctx.send("❌ Yeh banda pehle se hi whitelisted hai bhai!")
 
-    @commands.command(name="removeprefixless", aliases=["rp"], hidden=True)
+    @commands.hybrid_command(name="removeprefixless", aliases=["rp"], hidden=True)
     @commands.is_owner()
     async def remove_prefixless(self, ctx, member: discord.Member = None):
         """👑 Owner Only: Kisi user ka prefixless access wapas chheen ne ke liye."""
@@ -49,7 +49,7 @@ class OwnerNoPrefix(commands.Cog):
         else:
             await ctx.send("❌ Yeh user whitelisted list me nahi mila bhai!")
 
-    @commands.command(name="listprefixless", aliases=["lp"], hidden=True)
+    @commands.hybrid_command(name="listprefixless", aliases=["lp"], hidden=True)
     @commands.is_owner()
     async def list_prefixless(self, ctx):
         """👑 Owner Only: Saare whitelisted logo ki absolute matrix list dekhne ke liye."""

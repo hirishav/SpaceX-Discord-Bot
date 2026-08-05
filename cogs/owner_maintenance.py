@@ -8,7 +8,7 @@ class OwnerMaintenance(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="maintenance", aliases=["mm"])
+    @commands.hybrid_command(name="maintenance", aliases=["mm"])
     @commands.is_owner()
     async def maintenance(self, ctx, duration_str: str = None):
         """Bot ko global maintenance lockdown engine par lagane ke liye."""

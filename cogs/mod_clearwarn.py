@@ -8,7 +8,7 @@ class ModClearWarn(commands.Cog):
         self.bot = bot
         self.db_name = "warnings.db"
 
-    @commands.command(name="clearwarn", aliases=["clearwarns"])
+    @commands.hybrid_command(name="clearwarn", aliases=["clearwarns"])
     @commands.has_permissions(manage_guild=True) # BADAL DIYA: Ab sirf Manage Server waale hi chala payenge
     async def clearwarn(self, ctx, member: discord.Member):
         """Kisi user ki saari warnings ek baar me clear karne ke liye (Manage Server Required)."""

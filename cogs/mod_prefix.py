@@ -6,7 +6,7 @@ class ModPrefix(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="setprefix", aliases=["changeprefix"])
+    @commands.hybrid_command(name="setprefix", aliases=["changeprefix"])
     @commands.has_permissions(manage_guild=True)  # 🛡️ Sirf Manage Server perms wale change kar payenge
     async def setprefix(self, ctx, new_prefix: str = None):
         """Server ka default bot prefix badalne ke liye."""

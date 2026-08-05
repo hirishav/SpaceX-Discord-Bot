@@ -6,7 +6,7 @@ class ModLockdown(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="lockdown")
+    @commands.hybrid_command(name="lockdown")
     @commands.has_permissions(manage_guild=True) # Sirf badw admins ke liye (Manage Server)
     async def lockdown(self, ctx, status: str = None):
         """Poore server ke saare text channels ko ek sath lock/unlock karne ke liye (!!lockdown / !!lockdown off)"""

@@ -8,7 +8,7 @@ class ModWarn(commands.Cog):
         self.bot = bot
         self.db_name = "warnings.db"
 
-    @commands.command(name="warn")
+    @commands.hybrid_command(name="warn")
     @commands.has_permissions(manage_messages=True)
     async def warn(self, ctx, member: discord.Member, *, reason: str = "No reason provided"):
         """Kisi user ko warn karne ke liye (Sari errors se mukt code)."""

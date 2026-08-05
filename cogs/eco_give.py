@@ -21,7 +21,7 @@ class EcoGive(commands.Cog):
         conn.close()
         return row[0]
 
-    @commands.command(name="give", aliases=["share", "pay"])
+    @commands.hybrid_command(name="give", aliases=["share", "pay"])
     async def give(self, ctx, member: discord.Member = None, amount_str: str = None):
         """Kisi doosre member ko apne wallet se paise dene ke liye."""
         if not member or not amount_str:

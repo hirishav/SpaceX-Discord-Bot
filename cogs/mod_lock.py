@@ -20,7 +20,7 @@ class ModLock(commands.Cog):
             return None
         return None
 
-    @commands.command(name="lock", aliases=["freeze"])
+    @commands.hybrid_command(name="lock", aliases=["freeze"])
     @commands.has_permissions(manage_channels=True)
     async def lock(self, ctx, channel: discord.TextChannel = None, time_str: str = None, *, reason: str = "No reason provided"):
         """Kisi channel ko timer aur reason ke sath lock karne ke liye (!!lock #channel 30m Spamming!)"""
@@ -59,7 +59,7 @@ class ModLock(commands.Cog):
         except discord.Forbidden:
             await ctx.send("❌ Mere paas permissions nahi hain!")
 
-    @commands.command(name="unlock")
+    @commands.hybrid_command(name="unlock")
     @commands.has_permissions(manage_channels=True)
     async def unlock(self, ctx, channel: discord.TextChannel = None):
         """Channel ko manually unlock karne ke liye."""

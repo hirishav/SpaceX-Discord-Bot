@@ -7,7 +7,7 @@ class OwnerStatus(commands.Cog):
         self.bot = bot
 
     # setstatus command aur uska alias 'ss'
-    @commands.command(name="setstatus", aliases=["ss"], hidden=True)
+    @commands.hybrid_command(name="setstatus", aliases=["ss"], hidden=True)
     @commands.is_owner()
     async def setstatus(self, ctx, status_type: str, activity_type: str = "playing", *, activity_name: str = None):
         """Bot ka status aur activity badalye."""
@@ -47,7 +47,7 @@ class OwnerStatus(commands.Cog):
         if isinstance(error, commands.NotOwner):
             await ctx.send("❌ You cannot use this command. This command belongs to the Owner!")
 
-    @commands.command(name="updatetopgg", aliases=["topggupdate", "poststats"], hidden=True)
+    @commands.hybrid_command(name="updatetopgg", aliases=["topggupdate", "poststats"], hidden=True)
     @commands.is_owner()
     async def updatetopgg(self, ctx):
         """Top.gg website par live server count direct update karein."""

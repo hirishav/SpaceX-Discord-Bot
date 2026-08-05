@@ -8,7 +8,7 @@ class StocksBuy(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="buystock", aliases=["buy-stock", "bstock"])
+    @commands.hybrid_command(name="buystock", aliases=["buy-stock", "bstock"])
     async def buy_shares(self, ctx, ticker: str = None, amount: int = None):
         """10k limited tracking supply lines se safe assets buy karne ke liye."""
         if not ticker or not amount or amount <= 0:

@@ -246,6 +246,13 @@ class SpaceXBot(commands.Bot):
                     except Exception as e:
                         print(f'💥 Failed to Load Extension {filename}: {e}')
 
+        print('Syncing slash commands...')
+        try:
+            synced = await self.tree.sync()
+            print(f"-> Synced {len(synced)} slash commands globally!")
+        except Exception as e:
+            print(f"⚠️ Failed to sync slash commands: {e}")
+
 bot = SpaceXBot()
 
 @bot.event

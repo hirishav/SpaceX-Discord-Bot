@@ -6,7 +6,7 @@ class ModUnban(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="unban")
+    @commands.hybrid_command(name="unban")
     @commands.has_permissions(ban_members=True)
     async def unban(self, ctx, *, user_input: str):
         """Kisi banned user ko unban karne ke liye (ID ya Username se)."""

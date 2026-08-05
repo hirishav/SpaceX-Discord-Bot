@@ -59,7 +59,7 @@ class ModStaffStats(commands.Cog):
         conn.commit()
         conn.close()
 
-    @commands.command(name="staffstats", aliases=["sstats", "modstats"])
+    @commands.hybrid_command(name="staffstats", aliases=["sstats", "modstats"])
     @commands.has_permissions(manage_messages=True)
     async def view_staff_stats(self, ctx, member: discord.Member = None):
         """Server ke moderators aur admins ke working records analytic dashboard dekhne ke liye."""

@@ -45,7 +45,7 @@ class FunRoast(commands.Cog):
             "Tera dimaag ekdum cloud jaisa hai... Hamesha khali aur hawa me udta rehta hai!"
         ]
 
-    @commands.command(name="roast")
+    @commands.hybrid_command(name="roast")
     async def roast(self, ctx, member: discord.Member = None):
         """Kisi ki dosto ke beech witty Hinglish roasts ke sath taang kheenchte hain."""
         member = member or ctx.author

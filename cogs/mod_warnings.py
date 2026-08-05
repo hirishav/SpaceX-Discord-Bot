@@ -8,7 +8,7 @@ class ModWarnings(commands.Cog):
         self.bot = bot
         self.db_name = "warnings.db"
 
-    @commands.command(name="warnings", aliases=["warns"])
+    @commands.hybrid_command(name="warnings", aliases=["warns"])
     @commands.has_permissions(manage_messages=True)
     async def warnings(self, ctx, member: discord.Member):
         """Kisi user ki saari warnings database se nikalne ke liye."""

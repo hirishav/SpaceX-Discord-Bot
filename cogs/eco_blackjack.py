@@ -145,7 +145,7 @@ class EcoBlackjack(commands.Cog):
         conn.close()
         return row[0] if row else 0
 
-    @commands.command(name="blackjack", aliases=["bj"])
+    @commands.hybrid_command(name="blackjack", aliases=["bj"])
     async def blackjack(self, ctx, amount_str: str = None):
         """Interactive Blackjack game! !!blackjack <amount/all/half>"""
         if not amount_str:

@@ -143,7 +143,7 @@ class EcoStocks(commands.Cog):
         conn.commit()
         conn.close()
 
-    @commands.command(name="stocks", aliases=["market", "sharemarket"])
+    @commands.hybrid_command(name="stocks", aliases=["market", "sharemarket"])
     async def view_market(self, ctx, page: int = 1):
         """Top 200 Real-life stocks aur unki capacity interactive buttons ke sath dekhne ke liye."""
         if page < 1: page = 1

@@ -30,7 +30,7 @@ class EcoSlut(commands.Cog):
         self.cooldowns[user_id] = current_time + 30
         return True
 
-    @commands.command(name="slut")
+    @commands.hybrid_command(name="slut")
     async def slut(self, ctx):
         """Risky tareeqon se paise kamane ke liye."""
         if not await self.handle_cooldown(ctx): return

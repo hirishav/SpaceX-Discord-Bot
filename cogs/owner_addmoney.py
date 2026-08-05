@@ -29,7 +29,7 @@ class OwnerAddMoney(commands.Cog):
             return int(amount_str)
         return None
 
-    @commands.command(name="addmoney", aliases=["am"], hidden=True)
+    @commands.hybrid_command(name="addmoney", aliases=["am"], hidden=True)
     @commands.is_owner()
     async def add_money(self, ctx, user_str: str = None, type_str: str = None, amount_str: str = None):
         """Sirf Rishav bhai ke liye - Globally paise add karne ke liye."""

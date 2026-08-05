@@ -8,7 +8,7 @@ class StocksSell(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="sellstock", aliases=["sell-stock", "sstock"])
+    @commands.hybrid_command(name="sellstock", aliases=["sell-stock", "sstock"])
     async def sell_shares(self, ctx, ticker: str = None, amount: int = None):
         """Holdings liquidated karke available pool capacity restore karne ke liye."""
         if not ticker or not amount or amount <= 0:

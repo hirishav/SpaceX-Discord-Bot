@@ -6,7 +6,7 @@ class ModKick(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="kick")
+    @commands.hybrid_command(name="kick")
     @commands.has_permissions(kick_members=True)
     async def kick(self, ctx, member: discord.Member, *, reason: str = "No reason provided"):
         """Kisi member ko server se kick karne ke liye."""

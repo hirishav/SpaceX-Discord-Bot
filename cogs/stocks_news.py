@@ -121,7 +121,7 @@ class StocksNews(commands.Cog):
 
         await ctx.send(embed=embed)
 
-    @commands.command(name="marketnews", aliases=["news"])
+    @commands.hybrid_command(name="marketnews", aliases=["news"])
     async def force_news_trigger(self, ctx):
         """Live trading floor par instantly kisi ek popular stock ki flash news lane ke liye."""
         await ctx.send("📻 Single Asset Volatility News Matrix trigger kiya jaa raha hai...")

@@ -7,7 +7,7 @@ class FunMatch(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="match")
+    @commands.hybrid_command(name="match")
     async def match(self, ctx, user1: discord.Member, user2: discord.Member):
         """Do dosto ke beech ka love/friendship checker status layout."""
         score = random.randint(1, 100)

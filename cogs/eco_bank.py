@@ -20,7 +20,7 @@ class EcoBank(commands.Cog):
         conn.close()
         return row[0], row[1]
 
-    @commands.command(name="deposit", aliases=["dep"])
+    @commands.hybrid_command(name="deposit", aliases=["dep"])
     async def deposit(self, ctx, amount_str: str = None):
         """Wallet se paise Bank me jama karne ke liye."""
         if not amount_str:
@@ -54,7 +54,7 @@ class EcoBank(commands.Cog):
 
         await ctx.send(f"🏦 {ctx.author.mention} ne **🪙 {amount:,}** coins apne bank me safe deposit kar diye!")
 
-    @commands.command(name="withdraw", aliases=["with"])
+    @commands.hybrid_command(name="withdraw", aliases=["with"])
     async def withdraw(self, ctx, amount_str: str = None):
         """Bank se paise Wallet me nikalne ke liye."""
         if not amount_str:

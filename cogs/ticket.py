@@ -508,7 +508,7 @@ class Ticket(commands.Cog):
     # ⌨️ TICKET COMMANDS (GROUP & SUBCOMMANDS)
     # ─────────────────────────────────────────────────────────────
 
-    @commands.group(name="ticket", invoke_without_command=True)
+    @commands.hybrid_group(name="ticket", invoke_without_command=True)
     async def ticket(self, ctx):
         """SpaceX Ticket System — Support tickets create aur manage karne ke liye commands."""
         embed = discord.Embed(

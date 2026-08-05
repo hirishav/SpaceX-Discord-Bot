@@ -6,7 +6,7 @@ class ServerInfo(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="serverinfo", aliases=["si", "guildinfo"])
+    @commands.hybrid_command(name="serverinfo", aliases=["si", "guildinfo"])
     async def serverinfo(self, ctx):
         """Server ki poori jankari dikhata hai (Command text delete nahi hoga)."""
         

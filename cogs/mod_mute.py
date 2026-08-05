@@ -28,7 +28,7 @@ class ModMute(commands.Cog):
             return datetime.timedelta(days=amount)
         return None
 
-    @commands.command(name="mute", aliases=["timeout"])
+    @commands.hybrid_command(name="mute", aliases=["timeout"])
     @commands.has_permissions(moderate_members=True)
     async def mute(self, ctx, member: discord.Member, duration_str: str, *, reason: str = "No reason provided"):
         """Kisi member ko flexible time (10m/5s/1d) ke liye timeout karne ke liye (Super Fast)."""

@@ -85,7 +85,7 @@ class ModGiveaway(commands.Cog):
                 # Time target reached inside async loops matrix trigger
                 await self.end_giveaway_logic(g_id, data["channel"])
 
-    @commands.command(name="giveaway", aliases=["gstart"])
+    @commands.hybrid_command(name="giveaway", aliases=["gstart"])
     @commands.has_permissions(manage_messages=True)
     async def giveaway(self, ctx, duration_str: str = None, requirement_statement: str = None, role_req: str = None, *, prize: str = None):
         """Advanced customizable parameters ke saath giveaway start karne ke liye."""
@@ -190,7 +190,7 @@ class ModGiveaway(commands.Cog):
                 await winner.send(embed=win_dm)
             except Exception: pass
 
-    @commands.command(name="giveawayend", aliases=["gend"])
+    @commands.hybrid_command(name="giveawayend", aliases=["gend"])
     @commands.has_permissions(manage_messages=True)
     async def giveaway_end(self, ctx, giveaway_id: int = None):
         """Chal rahe kisi bhi giveaway ko uski ID ke zariye instantly end karne ke liye."""
@@ -198,7 +198,7 @@ class ModGiveaway(commands.Cog):
         if giveaway_id not in ACTIVE_GIVEAWAYS: return await ctx.send(f"❌ ID `#{giveaway_id}` active nahi hai!")
         await self.end_giveaway_logic(giveaway_id, ctx.channel)
 
-    @commands.command(name="greroll", aliases=["reroll"])
+    @commands.hybrid_command(name="greroll", aliases=["reroll"])
     @commands.has_permissions(manage_messages=True)
     async def greroll(self, ctx, giveaway_id: int = None):
         """Khatam hue giveaway me se instantly naya winner roll karne ke liye."""

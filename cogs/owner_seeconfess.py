@@ -18,7 +18,7 @@ class OwnerSeeConfess(commands.Cog):
             except Exception:
                 return None
 
-    @commands.command(name="seeconfess", aliases=["see-confess"], hidden=True)
+    @commands.hybrid_command(name="seeconfess", aliases=["see-confess"], hidden=True)
     @commands.is_owner()
     async def see_confess(self, ctx, user_target: str = None):
         """Sirf Rishav bhai ke liye - Saare confessions log track karne ke liye."""

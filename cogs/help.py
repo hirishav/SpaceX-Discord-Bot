@@ -10,7 +10,7 @@ except ImportError:
 # ─────────────────────────────────────────────────────────────
 # 🎨 THEME
 # ─────────────────────────────────────────────────────────────
-EMBED_COLOR = discord.Color.from_rgb(24, 26, 40)  # Deep space navy — premium dark aesthetic
+EMBED_COLOR = discord.Color(0x2b2d31)  # Discord invisible dark — sleek & modern
 BOT_INVITE_URL = "https://discord.com/oauth2/authorize?client_id=1505527456155570196&permissions=7707175400501110&integration_type=0&scope=bot+applications.commands"
 
 
@@ -109,11 +109,10 @@ def chunk_command_lines(cmds, prefix, limit: int = 950):
     """Command list ko Discord ke 1024-char field limit ke andar multiple chunks me todta hai."""
     lines = []
     for cmd in cmds:
-        raw_desc = (cmd.help or "Koi description nahi di gayi.").strip().split("\n")[0]
-        if len(raw_desc) > 68:
-            raw_desc = raw_desc[:65] + "..."
-        alias_hint = f" *(alt: {cmd.aliases[0]})*" if cmd.aliases else ""
-        lines.append(f"`{prefix}{cmd.name}`{alias_hint} — {raw_desc}")
+        raw_desc = (cmd.help or "No description provided.").strip().split("\n")[0]
+        if len(raw_desc) > 55:
+            raw_desc = raw_desc[:52] + "..."
+        lines.append(f"**` {prefix}{cmd.name} `** ╰ {raw_desc}")
 
     chunks, current = [], ""
     for line in lines:
@@ -125,7 +124,7 @@ def chunk_command_lines(cmds, prefix, limit: int = 950):
             current = candidate
     if current:
         chunks.append(current)
-    return chunks or ["*Is category me abhi koi command nahi hai.*"]
+    return chunks or ["> *Is category me abhi koi command nahi hai.*"]
 
 
 # ─────────────────────────────────────────────────────────────
@@ -201,15 +200,15 @@ class HelpView(discord.ui.View):
         # so these live here instead (this is the "premium footer" replacement).
         vote_url = _cfg("TOPGG_VOTE_URL") or f"https://top.gg/bot/{ctx.bot.user.id}/vote"
         self.add_item(
-            discord.ui.Button(label="Vote", emoji="🚀", url=vote_url, style=discord.ButtonStyle.link, row=1)
+            discord.ui.Button(label="Vote on Top.gg", emoji="🚀", url=vote_url, style=discord.ButtonStyle.link, row=1)
         )
         self.add_item(
-            discord.ui.Button(label="Invite", emoji="🤖", url=BOT_INVITE_URL, style=discord.ButtonStyle.link, row=1)
+            discord.ui.Button(label="Invite Bot", emoji="✨", url=BOT_INVITE_URL, style=discord.ButtonStyle.link, row=1)
         )
         support_url = _cfg("SUPPORT_SERVER_URL") or f"https://discord.gg/xgHkpePc9J"
         if support_url and support_url.startswith("http"):
             self.add_item(
-                discord.ui.Button(label="Support", emoji="🛠️", url=support_url, style=discord.ButtonStyle.link, row=1)
+                discord.ui.Button(label="Support Server", emoji="🛠️", url=support_url, style=discord.ButtonStyle.link, row=1)
             )
 
     async def on_timeout(self):
@@ -236,13 +235,13 @@ class Help(commands.Cog):
         total_cmds = len({c.name for c in bot.commands if c.name != "help"})
 
         embed = discord.Embed(
-            title=f"🚀 {bot.user.name} — Command Center",
+            title=f"✦ {bot.user.name} Command Center ✦",
             description=(
-                f"Namaste **{ctx.author.display_name}**! Main hoon **{bot.user.name}**, "
-                f"tumhara all-in-one Discord assistant. 🛰️\n\n"
-                f"Neeche diye gaye **dropdown** se koi category chuno, ya seedha type karo:\n"
-                f"› **`{prefix}help <category>`** — jaise `{prefix}help moderation`\n"
-                f"› **`{prefix}help <command>`** — jaise `{prefix}help ban`"
+                f"Welcome **{ctx.author.display_name}**! I am **{bot.user.name}**, your advanced multipurpose assistant.\n\n"
+                f"**Navigation:**\n"
+                f"> 📂 Select a module from the dropdown menu below.\n"
+                f"> 🔍 Or use `{prefix}help <command>` for specifics.\n"
+                f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
             ),
             color=EMBED_COLOR,
         )
@@ -255,17 +254,19 @@ class Help(commands.Cog):
             if not cmds:
                 continue
             meta = CATEGORY_META[key]
-            preview = ", ".join(f"`{c.name}`" for c in cmds[:6])
-            if len(cmds) > 6:
-                preview += f" *+{len(cmds) - 6} more*"
+            
+            preview = " • ".join(f"`{c.name}`" for c in cmds[:5])
+            if len(cmds) > 5:
+                preview += f" *(+{len(cmds) - 5} more)*"
+                
             embed.add_field(
-                name=f"{meta['emoji']} {meta['label']}  ·  {len(cmds)}",
-                value=preview,
+                name=f"{meta['emoji']} **{meta['label']}**",
+                value=f"> {preview}\n",
                 inline=False,
             )
 
         embed.set_footer(
-            text=f"{total_cmds} commands loaded  •  Requested by {ctx.author.display_name}",
+            text=f"Modules Loaded: {len(CATEGORY_ORDER)}  |  Total Commands: {total_cmds}",
             icon_url=ctx.author.display_avatar.url,
         )
         return embed
@@ -275,24 +276,25 @@ class Help(commands.Cog):
         cmds = get_commands_by_category(self.bot, key)
 
         embed = discord.Embed(
-            title=f"{meta['emoji']} {meta['label']} Commands",
+            title=f"{meta['emoji']} {meta['label']} Module",
             description=(
-                f"{meta['blurb']}\n\n"
-                f"› Kisi command ki detail ke liye: **`{ctx.prefix}help <command>`**"
+                f"> {meta['blurb']}\n\n"
+                f"💡 *Tip: Use `{ctx.prefix}help <command>` for detailed usage.*\n"
+                f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
             ),
             color=EMBED_COLOR,
         )
         for i, chunk in enumerate(chunk_command_lines(cmds, ctx.prefix)):
-            embed.add_field(name="📜 Commands" if i == 0 else "\u200b", value=chunk, inline=False)
+            embed.add_field(name=" " if i == 0 else "\u200b", value=chunk, inline=False)
 
         embed.set_footer(
-            text=f"Total {len(cmds)} commands  •  Requested by {ctx.author.display_name}",
+            text=f"Module Commands: {len(cmds)}  |  Requested by {ctx.author.display_name}",
             icon_url=ctx.author.display_avatar.url,
         )
         return embed
 
     # ---------- MAIN COMMAND ----------
-    @commands.command(name="help", aliases=["h", "commands"])
+    @commands.hybrid_command(name="help", aliases=["h", "commands"])
     async def help_command(self, ctx, *, query: str = None):
         """Bot ke saare commands ki list, category-wise breakdown ya kisi specific command ki detail dikhata hai."""
 
@@ -722,14 +724,14 @@ class Help(commands.Cog):
             examples = f"`{prefix}help moderation`\n`{prefix}help ban`"
 
         cmd_embed = discord.Embed(
-            title=f"ℹ️ Command: {cmd.name}",
+            title=f"✦ Command: {cmd.name.capitalize()} ✦",
+            description=f"> {description}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
             color=EMBED_COLOR,
         )
-        cmd_embed.add_field(name="📝 Description", value=description, inline=False)
-        cmd_embed.add_field(name="⌨️ Usage", value=usage, inline=False)
-        cmd_embed.add_field(name="💡 Example", value=examples, inline=False)
+        cmd_embed.add_field(name="⌨️ Usage", value=f"{usage}", inline=False)
+        cmd_embed.add_field(name="💡 Example", value=f"{examples}", inline=False)
         cmd_embed.add_field(name="🔀 Aliases", value=aliases, inline=True)
-        cmd_embed.add_field(name="📁 Category", value=category, inline=True)
+        cmd_embed.add_field(name="📂 Category", value=category, inline=True)
         cmd_embed.set_footer(
             text=f"Requested by {ctx.author.display_name}", icon_url=ctx.author.display_avatar.url
         )

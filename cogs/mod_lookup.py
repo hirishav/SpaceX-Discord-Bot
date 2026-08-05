@@ -6,7 +6,7 @@ class ModLookup(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="lookup", aliases=["whois", "userinfo"])
+    @commands.hybrid_command(name="lookup", aliases=["whois", "userinfo"])
     @commands.has_permissions(manage_messages=True)
     async def user_lookup(self, ctx, member: discord.Member = None):
         """Server ke kisi bhi user ka raw account matrix aur granular data analytics dekhne ke liye."""

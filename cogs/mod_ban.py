@@ -6,7 +6,7 @@ class ModBan(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="ban")
+    @commands.hybrid_command(name="ban")
     @commands.has_permissions(ban_members=True)
     async def ban(self, ctx, member: discord.Member, *, reason: str = "No reason provided"):
         """Kisi member ko server se permanent ban karne ke liye (Role Check & DM Bug Fixed)."""

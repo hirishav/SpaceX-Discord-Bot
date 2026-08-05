@@ -20,7 +20,7 @@ class ModBlacklist(commands.Cog):
             except Exception:
                 return None, None
 
-    @commands.command(name="blacklist", aliases=["bl"])
+    @commands.hybrid_command(name="blacklist", aliases=["bl"])
     async def blacklist(self, ctx, user_str: str = None, duration_str: str = None, *, reason: str = "Bypassing rules of the bot"):
         """Kisi user ko bot commands use karne se globally block karne ke liye."""
         

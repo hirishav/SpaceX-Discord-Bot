@@ -17,7 +17,7 @@ class EcoRoulette(commands.Cog):
         conn.close()
         return row[0] if row else 0
 
-    @commands.command(name="roulette", aliases=["rt"])
+    @commands.hybrid_command(name="roulette", aliases=["rt"])
     async def roulette(self, ctx, amount_str: str = None, color_choice: str = None):
         """Casino Roulette! !!roulette <amount/all/half> <red/black/green>"""
         if not amount_str or not color_choice or color_choice.lower() not in ["red", "black", "green", "r", "b", "g"]:

@@ -6,7 +6,7 @@ class OwnerServers(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="servers", aliases=["guilds", "serverlist"], hidden=True)
+    @commands.hybrid_command(name="servers", aliases=["guilds", "serverlist"], hidden=True)
     @commands.is_owner()
     async def servers_list(self, ctx):
         """👑 Sirf Bot Owner ke liye - Saare servers ki list nikalne ke liye jahan bot add hai."""
@@ -63,7 +63,7 @@ class OwnerServers(commands.Cog):
             # Alternate pathway if DM configurations are sealed shut
             await ctx.send("⚠️ Aapka DM locked hai bhai, validation details yahin override kar raha hoon:", embed=embed)
 
-    @commands.command(name="addpremium", aliases=["apremium"], hidden=True)
+    @commands.hybrid_command(name="addpremium", aliases=["apremium"], hidden=True)
     @commands.is_owner()
     async def add_premium(self, ctx, server_id: int):
         """👑 Sirf Bot Owner ke liye - Kisi server ko premium status dene ke liye."""
@@ -79,7 +79,7 @@ class OwnerServers(commands.Cog):
         except Exception as e:
             await ctx.send(f"❌ Error while adding premium: {e}")
 
-    @commands.command(name="removepremium", aliases=["rpremium"], hidden=True)
+    @commands.hybrid_command(name="removepremium", aliases=["rpremium"], hidden=True)
     @commands.is_owner()
     async def remove_premium(self, ctx, server_id: int):
         """👑 Sirf Bot Owner ke liye - Kisi server ka premium status hatane ke liye."""

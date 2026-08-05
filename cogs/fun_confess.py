@@ -22,7 +22,7 @@ class FunConfess(commands.Cog):
         conn.commit()
         conn.close()
 
-    @commands.command(name="confess")
+    @commands.hybrid_command(name="confess")
     async def confess(self, ctx, channel: discord.TextChannel = None, *, message: str = None):
         """Mentioned channel me ek anonymous confession embed bhejta hai."""
         if not channel or not message:

@@ -22,7 +22,7 @@ class EcoBal(commands.Cog):
         conn.close()
         return row[0], row[1]
 
-    @commands.command(name="balance", aliases=["bal", "money"])
+    @commands.hybrid_command(name="balance", aliases=["bal", "money"])
     async def balance(self, ctx, member: discord.Member = None):
         """User ka global wallet aur bank balance check karne ke liye."""
         member = member or ctx.author
