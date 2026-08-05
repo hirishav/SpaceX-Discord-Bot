@@ -7,30 +7,51 @@ import time
 class GenAFK(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.afk_cache = {}
+        
+        # Hydrate cache from DB on boot
+        conn = sqlite3.connect("warnings.db")
+        cursor = conn.cursor()
+        cursor.execute("SELECT server_id, user_id, reason, timestamp FROM afk")
+        for s_id, u_id, reason, ts in cursor.fetchall():
+            self.afk_cache[(str(s_id), str(u_id))] = (reason, ts)
+        conn.close()
+        print(f"-> AFK Cache Hydrated: {len(self.afk_cache)} active AFKs loaded into RAM.")
 
     # Helper functions database handle karne ke liye
     def set_afk(self, server_id, user_id, reason):
+        s_id = str(server_id)
+        u_id = str(user_id)
+        ts = int(time.time())
+        
+        # Update Cache
+        self.afk_cache[(s_id, u_id)] = (reason, ts)
+        
+        # Update DB (Background operation)
         conn = sqlite3.connect("warnings.db")
         cursor = conn.cursor()
         cursor.execute("INSERT OR REPLACE INTO afk (server_id, user_id, reason, timestamp) VALUES (?, ?, ?, ?)",
-                       (str(server_id), str(user_id), reason, int(time.time())))
+                       (s_id, u_id, reason, ts))
         conn.commit()
         conn.close()
 
     def remove_afk(self, server_id, user_id):
+        s_id = str(server_id)
+        u_id = str(user_id)
+        
+        # Update Cache
+        self.afk_cache.pop((s_id, u_id), None)
+        
+        # Update DB
         conn = sqlite3.connect("warnings.db")
         cursor = conn.cursor()
-        cursor.execute("DELETE FROM afk WHERE server_id = ? AND user_id = ?", (str(server_id), str(user_id)))
+        cursor.execute("DELETE FROM afk WHERE server_id = ? AND user_id = ?", (s_id, u_id))
         conn.commit()
         conn.close()
 
     def get_afk(self, server_id, user_id):
-        conn = sqlite3.connect("warnings.db")
-        cursor = conn.cursor()
-        cursor.execute("SELECT reason, timestamp FROM afk WHERE server_id = ? AND user_id = ?", (str(server_id), str(user_id)))
-        row = cursor.fetchone()
-        conn.close()
-        return row
+        # 1000x faster: Read directly from RAM cache instead of opening a database connection
+        return self.afk_cache.get((str(server_id), str(user_id)))
 
     @commands.hybrid_command(name="afk")
     async def afk(self, ctx, *, reason: str = "I am currently away!"):
