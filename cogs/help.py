@@ -296,7 +296,7 @@ class Help(commands.Cog):
     # ---------- MAIN COMMAND ----------
     @commands.hybrid_command(name="help", aliases=["h", "commands"])
     async def help_command(self, ctx, *, query: str = None):
-        """Bot ke saare commands ki list, category-wise breakdown ya kisi specific command ki detail dikhata hai."""
+        """Bot ke saare commands ki list aur kisi specific command ki details."""
 
         prefix = ctx.prefix
         is_owner = await self.bot.is_owner(ctx.author)

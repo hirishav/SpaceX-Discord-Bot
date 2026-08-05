@@ -9,7 +9,7 @@ class ModLockdown(commands.Cog):
     @commands.hybrid_command(name="lockdown")
     @commands.has_permissions(manage_guild=True) # Sirf badw admins ke liye (Manage Server)
     async def lockdown(self, ctx, status: str = None):
-        """Poore server ke saare text channels ko ek sath lock/unlock karne ke liye (!!lockdown / !!lockdown off)"""
+        """Poore server ke channels ko ek sath lock/unlock karne ke liye."""
         if status is None:
             # Emergency Lock lagana
             await ctx.send("🚨 **SERVER LOCKDOWN STARTED!** Saare channels freeze kiye jaa rahe hain, kripya thoda wait karein...")
