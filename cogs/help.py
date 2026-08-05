@@ -431,9 +431,20 @@ class Help(commands.Cog):
             examples = f"`{prefix}unban 727718500663033897`"
 
         elif cmd.name == "purge":
-            description = "Chat se hard constraints ke sath selective criteria filter par messages saaf karne ke liye."
-            usage = f"`{prefix}purge <amount>`\n`{prefix}purge links <amount>`\n`{prefix}purge images <amount>`\n`{prefix}purge word \"<keyword>\" <amount>`"
-            examples = f"`{prefix}purge links 50`\n`{prefix}purge word \"spam\" 20`"
+            description = "Chat se specific constraints filter lagakar bulk messages saaf karne ke liye advanced toolkit."
+            usage = (
+                f"`{prefix}purge <amount>`\n"
+                f"`{prefix}purge text <amount>`\n"
+                f"`{prefix}purge humans <amount>`\n"
+                f"`{prefix}purge bots <amount>`\n"
+                f"`{prefix}purge user @user <amount>`\n"
+                f"`{prefix}purge images <amount>`\n"
+                f"`{prefix}purge links <amount>`\n"
+                f"`{prefix}purge startswith <word> <amount>`\n"
+                f"`{prefix}purge endswith <word> <amount>`\n"
+                f"`{prefix}purge match <word> <amount>`"
+            )
+            examples = f"`{prefix}purge match ball 50`\n`{prefix}purge bots 100`\n`{prefix}purge user @User 20`"
 
         elif cmd.name == "slowmode":
             description = "Current text channel ka message sending cooldown timer change karne ke liye."
