@@ -9,6 +9,7 @@ import aiohttp
 import topgg
 from flask import Flask, request, jsonify
 from threading import Thread
+import shutil
 
 try:
     from dotenv import load_dotenv
@@ -22,10 +23,12 @@ try:
     OWNER_ID = getattr(config, 'OWNER_ID', 727718500663033897)
     BOT_TOKEN = getattr(config, 'BOT_TOKEN', os.getenv("BOT_TOKEN"))
     TOPGG_TOKEN = getattr(config, 'TOPGG_TOKEN', os.getenv("TOPGG_TOKEN"))
+    BACKUP_CHANNEL_ID = getattr(config, 'BACKUP_CHANNEL_ID', os.getenv("BACKUP_CHANNEL_ID"))
 except (ImportError, AttributeError):
     OWNER_ID = 727718500663033897  # Permanent backup
     BOT_TOKEN = os.getenv("BOT_TOKEN")
     TOPGG_TOKEN = os.getenv("TOPGG_TOKEN")
+    BACKUP_CHANNEL_ID = os.getenv("BACKUP_CHANNEL_ID")
 
 # Web Server ke liye setup (For Render 24/7)
 app = Flask('')
@@ -49,8 +52,27 @@ def topgg_webhook():
         rep_amount = 2 if data.get('isWeekend') else 1
         
         cursor.execute("UPDATE reps SET rep_points = rep_points + ? WHERE user_id = ?", (rep_amount, user_id))
+        
+        cursor.execute("SELECT rep_points FROM reps WHERE user_id = ?", (user_id,))
+        total_rep = cursor.fetchone()[0]
         db.commit()
         db.close()
+        
+        # Send DM asynchronously
+        try:
+            user_id_int = int(user_id)
+            async def send_dm():
+                try:
+                    user = bot.get_user(user_id_int) or await bot.fetch_user(user_id_int)
+                    if user:
+                        await user.send(f"Thanks for the vote and you got a rep and your total rep is for now {total_rep}.\n\nEarn more reps by voting the bot!")
+                except Exception as e:
+                    print(f"Failed to send DM for vote: {e}")
+
+            if bot.loop and bot.is_ready():
+                asyncio.run_coroutine_threadsafe(send_dm(), bot.loop)
+        except Exception as e:
+            print(f"Error preparing DM for vote: {e}")
         
         return jsonify({"status": "success", "user": user_id, "reps_added": rep_amount}), 200
         
@@ -137,7 +159,57 @@ class SpaceXBot(commands.Bot):
         await self.wait_until_ready()
         await self.post_topgg_stats()
 
+    @tasks.loop(minutes=60)
+    async def backup_db_task(self):
+        await self.wait_until_ready()
+        if not BACKUP_CHANNEL_ID:
+            return
+            
+        try:
+            channel = self.get_channel(int(BACKUP_CHANNEL_ID)) or await self.fetch_channel(int(BACKUP_CHANNEL_ID))
+            if channel:
+                shutil.copy2("warnings.db", "warnings_backup.db")
+                file = discord.File("warnings_backup.db", filename="warnings.db")
+                await channel.send(content=f"Database Backup at <t:{int(time.time())}:F>", file=file)
+                os.remove("warnings_backup.db")
+                print("-> ✅ DB Backup successfully uploaded to Discord!")
+        except Exception as e:
+            print(f"⚠️ Failed to upload DB backup: {e}")
+
+    async def download_db_backup(self):
+        if not BACKUP_CHANNEL_ID:
+            print("⚠️ BACKUP_CHANNEL_ID not set. Skipping DB backup download.")
+            return
+            
+        print("-> Checking for DB backups in the cloud channel...")
+        try:
+            url = f"https://discord.com/api/v10/channels/{BACKUP_CHANNEL_ID}/messages?limit=10"
+            headers = {"Authorization": f"Bot {BOT_TOKEN}"}
+            
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url, headers=headers) as resp:
+                    if resp.status == 200:
+                        messages = await resp.json()
+                        for msg in messages:
+                            if msg.get("attachments"):
+                                for att in msg["attachments"]:
+                                    if att["filename"] == "warnings.db":
+                                        print(f"-> Found warnings.db backup! Downloading...")
+                                        async with session.get(att["url"]) as file_resp:
+                                            if file_resp.status == 200:
+                                                with open("warnings.db", "wb") as f:
+                                                    f.write(await file_resp.read())
+                                                print("-> ✅ Successfully restored warnings.db from the cloud!")
+                                                return
+                    else:
+                        print(f"⚠️ Failed to fetch backups. Status: {resp.status}")
+        except Exception as e:
+            print(f"⚠️ Error downloading DB backup: {e}")
+
     async def setup_hook(self):
+        # ⚡ RESTORE CLOUD DATABASE FIRST
+        await self.download_db_backup()
+
         # ⚡ PERSISTENT CONNECTION MATRIX
         self.db = sqlite3.connect("warnings.db", check_same_thread=False)
         cursor = self.db.cursor()
@@ -261,6 +333,11 @@ class SpaceXBot(commands.Bot):
                 print(f"⚠️ Top.gg task start failed: {e}")
         else:
             print("⚠️ TOPGG_TOKEN missing. Top.gg stats posting is disabled.")
+
+        # 🚀 START BACKUP TASK
+        if BACKUP_CHANNEL_ID:
+            self.backup_db_task.start()
+            print("-> DB Cloud Backup task started (60m interval)!")
 
         print('Modules load ho rahe hain...')
         if os.path.exists('./cogs'):

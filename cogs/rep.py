@@ -51,7 +51,7 @@ class RepSystem(commands.Cog):
             if member:
                 embed.set_thumbnail(url=member.display_avatar.url)
 
-            await ctx.send(embed=embed)
+            await ctx.send(content=f"<@{user_id}>", embed=embed)
 
     @rep.command(name="lb")
     async def rep_lb(self, ctx, scope: str = "global"):
