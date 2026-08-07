@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import { config } from '../config';
+import logoUrl from '../assets/logo.jpg';
 
 export function Navbar() {
   const location = useLocation();
@@ -10,7 +11,8 @@ export function Navbar() {
   return (
     <nav className="navbar">
       <div className="container nav-content">
-        <Link to="/" className="logo">
+        <Link to="/" className="logo" style={{ display: 'flex', alignItems: 'center' }}>
+          <img src={logoUrl} alt="SpaceX Logo" style={{ width: '48px', height: '48px', borderRadius: '12px', marginRight: '12px', objectFit: 'cover' }} />
           {config.BOT_NAME}
         </Link>
         
