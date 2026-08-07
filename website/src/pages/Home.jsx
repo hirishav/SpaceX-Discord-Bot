@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Shield, Ticket, Wallet, Smile, Plus, UserPlus, Star, Send, Image, Users, Code, Ghost, Briefcase, MessageSquare } from 'lucide-react';
 import { config } from '../config';
+import heroImg from '../assets/hero.png';
 import './Home.css';
 
 export function Home() {
@@ -45,8 +46,8 @@ export function Home() {
           </div>
         </div>
         <div className="hero-visual">
-          {/* PLACEHOLDER for an actual help command screenshot or bot dashboard */}
-          <img src="/images/hero-ss.png" alt="SpaceX Interface" onError={(e) => {
+          {/* Hero visual */}
+          <img src={heroImg} alt="SpaceX Interface" style={{ width: '100%', borderRadius: '12px', boxShadow: '0 8px 24px rgba(0,0,0,0.2)' }} onError={(e) => {
             e.target.style.display = 'none';
             e.target.parentElement.classList.add('visual-placeholder');
           }} />
@@ -192,31 +193,31 @@ export function Home() {
           
           <div className="social-links-grid">
             <a href="https://discord.com" target="_blank" rel="noopener noreferrer" className="social-card" onClick={(e) => { e.preventDefault(); alert('Discord ID: phrenic_rishav'); }}>
-              <MessageSquare size={28} />
+              <img src="https://cdn.simpleicons.org/discord/5865F2" alt="Discord" style={{ width: '28px', height: '28px' }} />
               <span>Discord</span>
             </a>
             <a href="https://www.instagram.com/phrenic_rishav/" target="_blank" rel="noopener noreferrer" className="social-card">
-              <Image size={28} />
+              <img src="https://cdn.simpleicons.org/instagram/E4405F" alt="Instagram" style={{ width: '28px', height: '28px' }} />
               <span>Instagram</span>
             </a>
             <a href="https://www.facebook.com/people/Rishav-Das/61578312563981/" target="_blank" rel="noopener noreferrer" className="social-card">
-              <Users size={28} />
+              <img src="https://cdn.simpleicons.org/facebook/1877F2" alt="Facebook" style={{ width: '28px', height: '28px' }} />
               <span>Facebook</span>
             </a>
             <a href="https://t.me/phrenic_rishav" target="_blank" rel="noopener noreferrer" className="social-card">
-              <Send size={28} />
+              <img src="https://cdn.simpleicons.org/telegram/26A5E4" alt="Telegram" style={{ width: '28px', height: '28px' }} />
               <span>Telegram</span>
             </a>
             <a href="https://www.snapchat.com/@phrenic_rishav?share_id=Pd322-KLTv0&locale=en-US" target="_blank" rel="noopener noreferrer" className="social-card">
-              <Ghost size={28} />
+              <img src="https://cdn.simpleicons.org/snapchat/FFFC00" alt="Snapchat" style={{ width: '28px', height: '28px' }} />
               <span>Snapchat</span>
             </a>
             <a href="https://www.linkedin.com/in/rishav-rd/" target="_blank" rel="noopener noreferrer" className="social-card">
-              <Briefcase size={28} />
+              <img src="https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png" alt="LinkedIn" style={{ width: '28px', height: '28px' }} />
               <span>LinkedIn</span>
             </a>
             <a href="https://github.com/hirishav/" target="_blank" rel="noopener noreferrer" className="social-card">
-              <Code size={28} />
+              <img src="https://cdn.simpleicons.org/github/white" alt="GitHub" style={{ width: '28px', height: '28px' }} />
               <span>GitHub</span>
             </a>
           </div>
