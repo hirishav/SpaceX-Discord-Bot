@@ -65,7 +65,14 @@ def topgg_webhook():
                 try:
                     user = bot.get_user(user_id_int) or await bot.fetch_user(user_id_int)
                     if user:
-                        await user.send(f"Thanks for the vote and you got a rep and your total rep is for now {total_rep}.\n\nEarn more reps by voting the bot!")
+                        embed = discord.Embed(
+                            title="🎉 Vote ke liye Sukriya! 🎉",
+                            description=f"Aapke vote ke liye bahut bahut dhanyawad! ❤️\n\nIske inaam mein aapko mila hai **{rep_amount} Rep Point**! ✨\n**Total Rep Points:** `{total_rep}`\n\nAise hi support karte rahiye aur aur bhi rep points kamate rahiye! 🚀",
+                            color=discord.Color.brand_green()
+                        )
+                        embed.set_footer(text="SpaceX Bot Team")
+                        embed.set_thumbnail(url=bot.user.display_avatar.url)
+                        await user.send(embed=embed)
                 except Exception as e:
                     print(f"Failed to send DM for vote: {e}")
 
