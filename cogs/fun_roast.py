@@ -148,29 +148,16 @@ class FunRoast(commands.Cog):
         ]
 
     @commands.hybrid_command(name="roast")
-    async def roast(self, ctx, *, target: typing.Union[discord.Member, str] = None):
+    async def roast(self, ctx, member: discord.Member = None):
         """Kisi ki dosto ke beech witty Hinglish roasts ke sath taang kheenchte hain."""
+        member = member or ctx.author
         
-        if target is None:
-            final_target = ctx.author.mention
-        elif isinstance(target, discord.Member):
-            if target.id in self.bot.owner_ids or "rishav" in target.display_name.lower() or "rishav" in target.name.lower():
-                final_target = ctx.author.mention
-            else:
-                final_target = target.mention
-        else:
-            if "rishav" in target.lower():
-                final_target = ctx.author.mention
-            else:
-                final_target = target
-                # Check if any owner ID is in the string
-                for owner_id in self.bot.owner_ids:
-                    if str(owner_id) in target:
-                        final_target = ctx.author.mention
-                        break
-        
+        # UNO reverse if the target is the bot owner or their name contains 'rishav'
+        if member.id in self.bot.owner_ids or "rishav" in member.display_name.lower() or "rishav" in member.name.lower():
+            member = ctx.author
+            
         roast_text = random.choice(self.roasts)
-        await ctx.send(f"🔥 {final_target}, {roast_text}")
+        await ctx.send(f"🔥 {member.mention}, {roast_text}")
 
 async def setup(bot):
     await bot.add_cog(FunRoast(bot))
