@@ -381,9 +381,14 @@ class Help(commands.Cog):
             examples = f"`{prefix}removemoney @User 4e5`\n`{prefix}removemoney ID half`"
 
         elif cmd.name == "maintenance":
-            description = "🚨 Global Bot Locking Engine! Pure bot commands block karne ke liye (Owner Only)."
-            usage = f"`{prefix}maintenance <duration>`\n👉 Unlock karne ke liye duration `off` daalein."
-            examples = f"`{prefix}maintenance 1h`"
+            description = "🚨 Global/Server Bot Locking Engine! Pure bot ya specific server me commands block karne ke liye (Owner Only)."
+            usage = f"`{prefix}maintenance <duration> [server_id/name]`\n👉 Unlock karne ke liye duration `off` daalein."
+            examples = f"`{prefix}maintenance 1h`\n`{prefix}maintenance 2h 1234567890`"
+
+        elif cmd.name in ["restorebackup", "loadbackup"]:
+            description = "🔄 Cloud se manually backup load karke live database update karne ke liye bina bot restart kiye (Owner Only)."
+            usage = f"`{prefix}restorebackup`"
+            examples = f"`{prefix}restorebackup`""
 
         elif cmd.name == "warn":
             description = "Kisi member ko officially warn karne ke liye aur unke DM me notice bhejne ke liye."
