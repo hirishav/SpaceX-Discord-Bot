@@ -511,6 +511,11 @@ class Help(commands.Cog):
             usage = f"`{prefix}modlogs @user/ID`"
             examples = f"`{prefix}modlogs @User`"
 
+        elif cmd.name in ["profile", "userinfo", "pr"]:
+            description = "👤 Kisi user ki puri profile (badges, net worth, warnings aur account age) dekhne ke liye."
+            usage = f"`{prefix}profile [@user]`"
+            examples = f"`{prefix}profile`\n`{prefix}profile @User`"
+
         elif cmd.name in ["balance", "bal"]:
             description = "Aapka wallet aur bank balance check karne ke liye."
             usage = f"`{prefix}bal`"
