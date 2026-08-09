@@ -60,7 +60,12 @@ class EcoWork(commands.Cog):
         conn.commit()
         conn.close()
 
-        await ctx.send(f"💼 {ctx.author.mention}, aapne **{job}** aur badle me aapko **🪙 {earnings}** coins mile!")
+        embed = discord.Embed(
+            title="💼 Work Completed!",
+            description=f"{ctx.author.mention}, aapne **{job}** aur badle me aapko **🪙 {earnings}** coins mile!",
+            color=discord.Color.green()
+        )
+        await ctx.send(embed=embed)
 
 async def setup(bot):
     await bot.add_cog(EcoWork(bot))

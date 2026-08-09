@@ -237,10 +237,10 @@ class Help(commands.Cog):
         embed = discord.Embed(
             title=f"✦ {bot.user.name} Command Center ✦",
             description=(
-                f"Welcome **{ctx.author.display_name}**! I am **{bot.user.name}**, your advanced multipurpose assistant.\n\n"
-                f"**Navigation:**\n"
-                f"> 📂 Select a module from the dropdown menu below.\n"
-                f"> 🔍 Or use `{prefix}help <command>` for specifics.\n"
+                f"Swagat hai **{ctx.author.display_name}** bhai! Main hoon **{bot.user.name}**, tera all-in-one assistant.\n\n"
+                f"**Kaise use karein:**\n"
+                f"> 📂 Niche diye gaye menu se ek module select karo.\n"
+                f"> 🔍 Ya fir kisi command ke baare me janne ke liye `{prefix}help <command>` likho.\n"
                 f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
             ),
             color=EMBED_COLOR,

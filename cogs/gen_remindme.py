@@ -74,7 +74,7 @@ class GenRemindme(commands.Cog):
 
         embed = discord.Embed(
             title="⏰ Reminder Set Successfully!",
-            description=f"Thik hai buddy, main aapko **{time_str}** baad yaad dila dunga.\n\n📌 **Task:** {task}",
+            description=f"Done bhai! Main tujhe **{time_str}** baad pakka yaad dila dunga.\n\n📌 **Kaam:** {task}",
             color=discord.Color.blue()
         )
         embed.set_footer(text=f"Requested by {ctx.author.name}", icon_url=ctx.author.display_avatar.url)

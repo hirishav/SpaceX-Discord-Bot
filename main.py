@@ -443,7 +443,7 @@ async def on_message(message):
             if message.content.startswith(current_prefix):
                 embed = discord.Embed(
                     title="⚙️ Bot Under Maintenance",
-                    description=f"🤖 Sorry buddy, I am under maintenance right now.\n\n⏳ **I will be back just after:** `{time_left}`",
+                    description=f"🤖 Sorry bhai, abhi thoda maintenance ka kaam chal raha hai mere andar.\n\n⏳ **Bas itni der mein wapas aata hoon:** `{time_left}`",
                     color=discord.Color.red()
                 )
                 return await message.channel.send(embed=embed)

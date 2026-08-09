@@ -49,6 +49,10 @@ class FunRoast(commands.Cog):
     async def roast(self, ctx, member: discord.Member = None):
         """Kisi ki dosto ke beech witty Hinglish roasts ke sath taang kheenchte hain."""
         member = member or ctx.author
+        
+        if member.id in self.bot.owner_ids:
+            member = ctx.author
+            
         roast_text = random.choice(self.roasts)
         await ctx.send(f"🔥 {member.mention}, {roast_text}")
 

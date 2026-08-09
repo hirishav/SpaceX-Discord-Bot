@@ -54,7 +54,7 @@ class GenAFK(commands.Cog):
         return self.afk_cache.get((str(server_id), str(user_id)))
 
     @commands.hybrid_command(name="afk")
-    async def afk(self, ctx, *, reason: str = "I am currently away!"):
+    async def afk(self, ctx, *, reason: str = "Main abhi thoda busy hoon bhai!"):
         """Aapko AFK status par set kar deta hai."""
         try:
             if not ctx.author.display_name.startswith("[AFK]"):
