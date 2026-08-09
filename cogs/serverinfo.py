@@ -36,6 +36,10 @@ class ServerInfo(commands.Cog):
         managers_str = ", ".join(managers) if managers else "No Managers"
         mods_str = ", ".join(moderators) if moderators else "No Moderators"
 
+        if len(admins_str) > 1024: admins_str = admins_str[:1020] + "..."
+        if len(managers_str) > 1024: managers_str = managers_str[:1020] + "..."
+        if len(mods_str) > 1024: mods_str = mods_str[:1020] + "..."
+
         created_at = guild.created_at.strftime("%d %B %Y")
 
         embed = discord.Embed(

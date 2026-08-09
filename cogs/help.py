@@ -388,7 +388,7 @@ class Help(commands.Cog):
         elif cmd.name in ["restorebackup", "loadbackup"]:
             description = "🔄 Cloud se manually backup load karke live database update karne ke liye bina bot restart kiye (Owner Only)."
             usage = f"`{prefix}restorebackup`"
-            examples = f"`{prefix}restorebackup`""
+            examples = f"`{prefix}restorebackup`"
 
         elif cmd.name == "warn":
             description = "Kisi member ko officially warn karne ke liye aur unke DM me notice bhejne ke liye."
