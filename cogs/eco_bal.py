@@ -28,8 +28,18 @@ class EcoBal(commands.Cog):
         member = member or ctx.author
         wallet, bank = self.get_user_balance(str(member.id))
         total = wallet + bank
+        
+        # Fetch badges
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        cursor.execute("SELECT badge FROM user_badges WHERE user_id = ?", (str(member.id),))
+        badges = [row[0] for row in cursor.fetchall()]
+        conn.close()
 
         embed = discord.Embed(title=f"💰 {member.name}'s Global Balance", color=discord.Color.green())
+        if badges:
+            embed.description = " | ".join(badges)
+            
         embed.set_thumbnail(url=member.display_avatar.url)
         embed.add_field(name="👛 Wallet (Cash)", value=f"🪙 `{wallet:,}` coins", inline=True)
         embed.add_field(name="🏦 Bank Account", value=f"🪙 `{bank:,}` coins", inline=True)

@@ -302,6 +302,22 @@ class SpaceXBot(commands.Bot):
         )
         """)
 
+        # USER BADGES TABLE
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS user_badges (
+            user_id TEXT,
+            badge TEXT,
+            PRIMARY KEY (user_id, badge)
+        )
+        """)
+
+        # BLACKLISTED SERVERS TABLE
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS blacklisted_servers (
+            server_id TEXT PRIMARY KEY
+        )
+        """)
+
         # PREMIUM SERVERS TABLE
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS premium_servers (
@@ -382,6 +398,14 @@ async def on_ready():
 
 @bot.event
 async def on_guild_join(guild):
+    # Check if blacklisted
+    cursor = bot.db.cursor()
+    cursor.execute("SELECT server_id FROM blacklisted_servers WHERE server_id = ?", (str(guild.id),))
+    if cursor.fetchone():
+        print(f"-> Left blacklisted server automatically: {guild.name}")
+        await guild.leave()
+        return
+
     print(f"-> Joined new server: {guild.name} (Total: {len(bot.guilds)})")
     await bot.post_topgg_stats()
 

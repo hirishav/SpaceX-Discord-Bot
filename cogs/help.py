@@ -390,6 +390,36 @@ class Help(commands.Cog):
             usage = f"`{prefix}restorebackup`"
             examples = f"`{prefix}restorebackup`"
 
+        elif cmd.name == "badge":
+            description = "🏅 Kisi user ke profile me custom badge add karne ke liye (Owner Only)."
+            usage = f"`{prefix}badge @user <badge_text_or_emoji>`"
+            examples = f"`{prefix}badge @User 💎 VIP`"
+
+        elif cmd.name == "removebadge":
+            description = "🚫 Kisi user ke profile se custom badge hatane ke liye (Owner Only)."
+            usage = f"`{prefix}removebadge @user <badge_text_or_emoji>`"
+            examples = f"`{prefix}removebadge @User 💎 VIP`"
+
+        elif cmd.name == "cleanspace":
+            description = "🧹 Un sabhi servers se bot ko nikalne ke liye jinme members kam hain (Owner Only)."
+            usage = f"`{prefix}cleanspace [min_members]`"
+            examples = f"`{prefix}cleanspace 10`"
+
+        elif cmd.name == "blacklistserver":
+            description = "🚫 Kisi toxic/raid server ko blacklist karna taaki bot waha se leave ho jaye aur future me join na kare (Owner Only)."
+            usage = f"`{prefix}blacklistserver <server_id>`"
+            examples = f"`{prefix}blacklistserver 1234567890`"
+
+        elif cmd.name == "whitelistserver":
+            description = "✅ Kisi server ko blacklist se hatane ke liye (Owner Only)."
+            usage = f"`{prefix}whitelistserver <server_id>`"
+            examples = f"`{prefix}whitelistserver 1234567890`"
+
+        elif cmd.name == "sudo":
+            description = "👨‍💻 Kisi aur user ke naam se (as them) koi command run karne ke liye (Owner Only)."
+            usage = f"`{prefix}sudo @user <command_string>`"
+            examples = f"`{prefix}sudo @User bal`"
+
         elif cmd.name == "warn":
             description = "Kisi member ko officially warn karne ke liye aur unke DM me notice bhejne ke liye."
             usage = f"`{prefix}warn @user <reason>`"
