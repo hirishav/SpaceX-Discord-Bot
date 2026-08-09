@@ -129,5 +129,35 @@ class OwnerMaintenance(commands.Cog):
             except Exception:
                 continue
 
+    @commands.hybrid_command(name="restorebackup", aliases=["loadbackup"])
+    @commands.is_owner()
+    async def restore_backup(self, ctx):
+        """Force load the latest database backup from the cloud channel."""
+        await ctx.send("🔄 Loading database backup from the cloud... DB will be temporarily closed.")
+        
+        try:
+            # 1. Close current DB
+            if hasattr(self.bot, 'db') and self.bot.db:
+                self.bot.db.close()
+            
+            # 2. Download the backup
+            await self.bot.download_db_backup()
+            
+            # 3. Reconnect DB
+            import sqlite3
+            self.bot.db = sqlite3.connect("warnings.db", check_same_thread=False)
+            
+            # Reapply PRAGMAs just like setup_hook
+            cursor = self.bot.db.cursor()
+            cursor.execute("PRAGMA journal_mode=WAL;")
+            cursor.execute("PRAGMA synchronous=NORMAL;")
+            cursor.execute("PRAGMA cache_size=-64000;")
+            cursor.execute("PRAGMA temp_store=MEMORY;")
+            cursor.execute("PRAGMA mmap_size=30000000000;")
+            
+            await ctx.send("✅ Backup successfully restored and database reconnected!")
+        except Exception as e:
+            await ctx.send(f"❌ Failed to restore backup: {e}")
+
 async def setup(bot):
     await bot.add_cog(OwnerMaintenance(bot))
