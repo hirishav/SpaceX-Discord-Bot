@@ -9,8 +9,12 @@ class ServerInfo(commands.Cog):
     @commands.hybrid_command(name="serverinfo", aliases=["si", "guildinfo"])
     async def serverinfo(self, ctx):
         """Server ki poori jankari dikhata hai (Command text delete nahi hoga)."""
+        print(f"DEBUG: serverinfo command triggered by {ctx.author} in {ctx.guild}")
         
         guild = ctx.guild
+        if not guild:
+            return await ctx.send("Ye command sirf servers me chalta hai!")
+            
         total_members = guild.member_count
         bot_count = sum(1 for member in guild.members if member.bot)
         human_count = total_members - bot_count
@@ -49,7 +53,7 @@ class ServerInfo(commands.Cog):
         if guild.icon:
             embed.set_thumbnail(url=guild.icon.url)
 
-        embed.add_field(name="👑 Server Owner", value=f"{guild.owner.mention} ({guild.owner.name})", inline=False)
+        embed.add_field(name="👑 Server Owner", value=f"<@{guild.owner_id}>", inline=False)
         embed.add_field(name="📅 Creation Date", value=f"**{created_at}**", inline=True)
         embed.add_field(name="🆔 Server ID", value=f"`{guild.id}`", inline=True)
         
@@ -63,7 +67,11 @@ class ServerInfo(commands.Cog):
         embed.set_footer(text=f"Requested by {ctx.author.name}", icon_url=ctx.author.display_avatar.url)
         
         # BADAL DIYA: Isme se bhi message delete karne ka jhanjhat saaf!
-        await ctx.send(embed=embed)
+        try:
+            await ctx.send(embed=embed)
+            print("DEBUG: serverinfo embed sent successfully!")
+        except Exception as e:
+            print(f"DEBUG ERROR in serverinfo send: {e}")
 
 async def setup(bot):
     await bot.add_cog(ServerInfo(bot))
