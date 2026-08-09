@@ -123,6 +123,7 @@ class SpaceXBot(commands.Bot):
         # 🔥 MAINTENANCE GLOBALS
         self.maintenance_mode = False
         self.maintenance_end = 0
+        self.server_maintenance = {} # Format: {server_id: end_time}
         self.interrupted_users = {} # Format: {user_id: channel_id}
         
         self.prefix_cache = {}
@@ -433,12 +434,30 @@ async def on_message(message):
 
     # 1. 🔥 MAINTENANCE SYSTEM PEHRA
     is_owner = message.author.id in bot.owner_ids
-    if bot.maintenance_mode and not is_owner:
-        if int(time.time()) >= bot.maintenance_end:
-            bot.maintenance_mode = False
-        else:
+    if not is_owner:
+        is_maintenance = False
+        end_time = 0
+        guild_id = message.guild.id if message.guild else None
+        
+        # Check global maintenance
+        if bot.maintenance_mode:
+            if int(time.time()) >= bot.maintenance_end:
+                bot.maintenance_mode = False
+            else:
+                is_maintenance = True
+                end_time = bot.maintenance_end
+                
+        # Check server maintenance
+        if not is_maintenance and guild_id and hasattr(bot, 'server_maintenance') and guild_id in bot.server_maintenance:
+            if int(time.time()) >= bot.server_maintenance[guild_id]:
+                del bot.server_maintenance[guild_id]
+            else:
+                is_maintenance = True
+                end_time = bot.server_maintenance[guild_id]
+
+        if is_maintenance:
             bot.interrupted_users[message.author.id] = message.channel.id
-            time_left = get_remaining_time_str(bot.maintenance_end)
+            time_left = get_remaining_time_str(end_time)
             
             if message.content.startswith(current_prefix):
                 embed = discord.Embed(

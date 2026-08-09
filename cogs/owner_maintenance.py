@@ -10,22 +10,43 @@ class OwnerMaintenance(commands.Cog):
 
     @commands.hybrid_command(name="maintenance", aliases=["mm"])
     @commands.is_owner()
-    async def maintenance(self, ctx, duration_str: str = None):
-        """Bot ko global maintenance lockdown engine par lagane ke liye."""
+    async def maintenance(self, ctx, duration_str: str = None, *, server_query: str = None):
+        """Bot ko global ya per-server maintenance lockdown engine par lagane ke liye."""
         
         # Turn off status handler trigger
         if duration_str == "0" or (duration_str and duration_str.lower() == "off"):
-            if not self.bot.maintenance_mode:
-                return await ctx.send("❌ Bot pehle se hi normal mode par chal raha hai bhai!")
-            
-            self.bot.maintenance_mode = False
-            self.bot.maintenance_end = 0
-            await ctx.send("✅ **Maintenance Manual Override:** Bot ko online mode par shift kiya jaa raha hai...")
-            await self.notify_users()
-            return
+            if server_query:
+                target_guild = None
+                if server_query.isdigit():
+                    target_guild = self.bot.get_guild(int(server_query))
+                
+                if not target_guild:
+                    for guild in self.bot.guilds:
+                        if guild.name.lower() == server_query.lower():
+                            target_guild = guild
+                            break
+                            
+                if not target_guild:
+                    return await ctx.send("❌ Server nahi mila! ID ya exact naam check karein.")
+                    
+                if hasattr(self.bot, 'server_maintenance') and target_guild.id in self.bot.server_maintenance:
+                    del self.bot.server_maintenance[target_guild.id]
+                    await ctx.send(f"✅ **Maintenance Manual Override:** `{target_guild.name}` server ko online mode par shift kiya jaa raha hai...")
+                else:
+                    await ctx.send(f"❌ `{target_guild.name}` server pehle se hi normal mode par chal raha hai bhai!")
+                return
+            else:
+                if not self.bot.maintenance_mode:
+                    return await ctx.send("❌ Bot pehle se hi normal mode par chal raha hai bhai!")
+                
+                self.bot.maintenance_mode = False
+                self.bot.maintenance_end = 0
+                await ctx.send("✅ **Maintenance Manual Override:** Bot ko global online mode par shift kiya jaa raha hai...")
+                await self.notify_users()
+                return
 
         if not duration_str:
-            return await ctx.send(f"❌ Sahi format: `{ctx.prefix}maintenance <30s/1m/2h>`\n👉 Band karne ke liye: `{ctx.prefix}maintenance off`")
+            return await ctx.send(f"❌ Sahi format: `{ctx.prefix}maintenance <30s/1m/2h> [server name/id]`\n👉 Band karne ke liye: `{ctx.prefix}maintenance off`")
 
         # Time layout converter parser matrix
         time_multipliers = {'s': 1, 'm': 60, 'h': 3600}
@@ -47,16 +68,35 @@ class OwnerMaintenance(commands.Cog):
             return await ctx.send("❌ Galat format! Format limits: `s` (seconds), `m` (minutes), `h` (hours).")
 
         calculated_seconds = amount * time_multipliers[unit]
+        end_time = int(time.time()) + calculated_seconds
         
-        # Globals loading parameters register tracking
-        self.bot.maintenance_mode = True
-        self.bot.maintenance_end = int(time.time()) + calculated_seconds
-        self.bot.interrupted_users = {} # Reset metrics logs queue
-
-        await ctx.send(f"🚨 **GLOBAL LOCKDOWN:** Bot ko **{duration_str}** ke liye Maintenance Mode par daal diya gaya hai!")
-        
-        # Run notification execution trigger loop handler thread background asynchronously
-        self.bot.loop.create_task(self.maintenance_timer_check(calculated_seconds))
+        if server_query:
+            target_guild = None
+            if server_query.isdigit():
+                target_guild = self.bot.get_guild(int(server_query))
+            
+            if not target_guild:
+                for guild in self.bot.guilds:
+                    if guild.name.lower() == server_query.lower():
+                        target_guild = guild
+                        break
+                        
+            if not target_guild:
+                return await ctx.send("❌ Server nahi mila! ID ya exact naam check karein.")
+                
+            if not hasattr(self.bot, 'server_maintenance'):
+                self.bot.server_maintenance = {}
+            self.bot.server_maintenance[target_guild.id] = end_time
+            await ctx.send(f"🚨 **SERVER LOCKDOWN:** `{target_guild.name}` ko **{duration_str}** ke liye Maintenance Mode par daal diya gaya hai!")
+        else:
+            # Globals loading parameters register tracking
+            self.bot.maintenance_mode = True
+            self.bot.maintenance_end = end_time
+            self.bot.interrupted_users = {} # Reset metrics logs queue
+            await ctx.send(f"🚨 **GLOBAL LOCKDOWN:** Bot ko **{duration_str}** ke liye Maintenance Mode par daal diya gaya hai!")
+            
+            # Run notification execution trigger loop handler thread background asynchronously
+            self.bot.loop.create_task(self.maintenance_timer_check(calculated_seconds))
 
     async def maintenance_timer_check(self, delay):
         await asyncio.sleep(delay)

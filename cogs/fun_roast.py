@@ -3,6 +3,8 @@ import discord
 from discord.ext import commands
 import random
 
+import typing
+
 class FunRoast(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -46,15 +48,29 @@ class FunRoast(commands.Cog):
         ]
 
     @commands.hybrid_command(name="roast")
-    async def roast(self, ctx, member: discord.Member = None):
+    async def roast(self, ctx, *, target: typing.Union[discord.Member, str] = None):
         """Kisi ki dosto ke beech witty Hinglish roasts ke sath taang kheenchte hain."""
-        member = member or ctx.author
         
-        if member.id in self.bot.owner_ids:
-            member = ctx.author
-            
+        if target is None:
+            final_target = ctx.author.mention
+        elif isinstance(target, discord.Member):
+            if target.id in self.bot.owner_ids or "rishav" in target.display_name.lower() or "rishav" in target.name.lower():
+                final_target = ctx.author.mention
+            else:
+                final_target = target.mention
+        else:
+            if "rishav" in target.lower():
+                final_target = ctx.author.mention
+            else:
+                final_target = target
+                # Check if any owner ID is in the string
+                for owner_id in self.bot.owner_ids:
+                    if str(owner_id) in target:
+                        final_target = ctx.author.mention
+                        break
+        
         roast_text = random.choice(self.roasts)
-        await ctx.send(f"🔥 {member.mention}, {roast_text}")
+        await ctx.send(f"🔥 {final_target}, {roast_text}")
 
 async def setup(bot):
     await bot.add_cog(FunRoast(bot))
