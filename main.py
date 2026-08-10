@@ -130,7 +130,27 @@ class SpaceXBot(commands.Bot):
         self.prefixless_cache = set()
         self.blacklist_cache = {}
         self.premium_cache = set()
+        self.disabled_commands_cache = {}
         self.topgg_client = None
+        self.add_check(self.check_disabled_commands)
+
+    async def check_disabled_commands(self, ctx):
+        if getattr(ctx, 'is_sudo', False):
+            return True
+        if not ctx.guild or not ctx.command:
+            return True
+        if ctx.command.name == "command": # prevent disabling the command that manages this
+            return True
+        if ctx.guild.id in self.disabled_commands_cache:
+            if ctx.command.name in self.disabled_commands_cache[ctx.guild.id]:
+                embed = discord.Embed(
+                    title="Command Disabled",
+                    description=f"❌ The `{ctx.command.name}` command is disabled in this server.",
+                    color=discord.Color.red()
+                )
+                await ctx.send(embed=embed)
+                return False
+        return True
 
     async def post_topgg_stats(self):
         """Top.gg API me direct live server count post karta hai (zero dependency on topgg-py)."""
@@ -325,6 +345,15 @@ class SpaceXBot(commands.Bot):
         )
         """)
         
+        # DISABLED COMMANDS TABLE
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS disabled_commands (
+            server_id TEXT,
+            command_name TEXT,
+            PRIMARY KEY (server_id, command_name)
+        )
+        """)
+        
         self.db.commit()
         
         # 🧠 WARM UP CACHE ENGINE: Memory hydration on startup
@@ -345,6 +374,13 @@ class SpaceXBot(commands.Bot):
         cursor.execute("SELECT server_id FROM premium_servers")
         for (s_id,) in cursor.fetchall():
             self.premium_cache.add(int(s_id))
+            
+        cursor.execute("SELECT server_id, command_name FROM disabled_commands")
+        for s_id, cmd_name in cursor.fetchall():
+            s_id_int = int(s_id)
+            if s_id_int not in self.disabled_commands_cache:
+                self.disabled_commands_cache[s_id_int] = set()
+            self.disabled_commands_cache[s_id_int].add(cmd_name)
             
         print("-> Database Connected & Speed Cache Engines Synchronized!")
         
