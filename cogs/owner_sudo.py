@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 import copy
+import typing
 
 class SudoContext(commands.Context):
     is_sudo = True
@@ -14,8 +15,8 @@ class OwnerSudo(commands.Cog):
 
     @commands.command(name="sudo")
     @commands.is_owner()
-    async def sudo(self, ctx, *, command_string: str):
-        """Run a command bypassing all permission checks."""
+    async def sudo(self, ctx, target: typing.Optional[discord.User] = None, *, command_string: str):
+        """Run a command bypassing all permission checks, optionally as another user."""
         msg = copy.copy(ctx.message)
         msg.content = f"{ctx.prefix}{command_string}"
         
@@ -34,7 +35,8 @@ class OwnerSudo(commands.Cog):
             def guild_permissions(self):
                 return discord.Permissions.all()
                 
-        new_ctx.author = SudoAuthor(new_ctx.author)
+        actual_target = target or new_ctx.author
+        new_ctx.author = SudoAuthor(actual_target)
         
         await self.bot.invoke(new_ctx)
 
