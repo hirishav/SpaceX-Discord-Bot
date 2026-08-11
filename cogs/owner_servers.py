@@ -75,7 +75,7 @@ class OwnerServers(commands.Cog):
             cursor.execute("INSERT INTO premium_servers (server_id) VALUES (?)", (str(server_id),))
             self.bot.db.commit()
             self.bot.premium_cache.add(server_id)
-            await ctx.send(f"✅ Server `{server_id}` ko successfully **Premium** access de diya gaya hai!")
+            await ctx.send(f"<a:verified_tick:837551087786393710> Server `{server_id}` ko successfully **Premium** access de diya gaya hai!")
         except Exception as e:
             await ctx.send(f"❌ Error while adding premium: {e}")
 
@@ -91,7 +91,7 @@ class OwnerServers(commands.Cog):
             cursor.execute("DELETE FROM premium_servers WHERE server_id = ?", (str(server_id),))
             self.bot.db.commit()
             self.bot.premium_cache.remove(server_id)
-            await ctx.send(f"✅ Server `{server_id}` ka **Premium** access remove kar diya gaya hai!")
+            await ctx.send(f"<a:verified_tick:837551087786393710> Server `{server_id}` ka **Premium** access remove kar diya gaya hai!")
         except Exception as e:
             await ctx.send(f"❌ Error while removing premium: {e}")
 

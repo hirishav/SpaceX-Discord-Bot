@@ -17,9 +17,9 @@ class OwnerBlacklist(commands.Cog):
             guild = self.bot.get_guild(int(server_id))
             if guild:
                 await guild.leave()
-                await ctx.send(f"✅ Blacklisted server `{guild.name}` ({server_id}) and left it immediately!")
+                await ctx.send(f"<a:verified_tick:837551087786393710> Blacklisted server `{guild.name}` ({server_id}) and left it immediately!")
             else:
-                await ctx.send(f"✅ Blacklisted server ID `{server_id}` for future invites!")
+                await ctx.send(f"<a:verified_tick:837551087786393710> Blacklisted server ID `{server_id}` for future invites!")
         except Exception as e:
             await ctx.send(f"❌ Error (maybe already blacklisted?): {e}")
 
@@ -30,7 +30,7 @@ class OwnerBlacklist(commands.Cog):
         cursor = self.bot.db.cursor()
         cursor.execute("DELETE FROM blacklisted_servers WHERE server_id = ?", (server_id,))
         self.bot.db.commit()
-        await ctx.send(f"✅ Removed server ID `{server_id}` from blacklist!")
+        await ctx.send(f"<a:verified_tick:837551087786393710> Removed server ID `{server_id}` from blacklist!")
 
 async def setup(bot):
     await bot.add_cog(OwnerBlacklist(bot))

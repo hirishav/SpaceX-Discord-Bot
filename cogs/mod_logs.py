@@ -63,7 +63,7 @@ class ModLogs(commands.Cog):
                 log_text += f"🆔 ID: `{w_id}` | ⏰ *{ts}*\n📝 Reason: `{reason}`\n\n"
 
         if not log_text:
-            embed.description = "✅ Is user ka koi purana moderation record nahi mila. Ekdum sharif banda hai!"
+            embed.description = "<a:verified_tick:837551087786393710> Is user ka koi purana moderation record nahi mila. Ekdum sharif banda hai!"
             embed.color = discord.Color.green()
         else:
             # Discord limit handle karne ke liye slicing

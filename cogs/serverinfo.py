@@ -15,6 +15,13 @@ class ServerInfo(commands.Cog):
         if not guild:
             return await ctx.send("Ye command sirf servers me chalta hai!")
             
+        # Ensure all members are cached before counting to get accurate bot/human counts
+        if not guild.chunked:
+            try:
+                await guild.chunk()
+            except Exception as e:
+                print(f"DEBUG: Failed to chunk guild: {e}")
+                
         total_members = guild.member_count
         bot_count = sum(1 for member in guild.members if member.bot)
         human_count = total_members - bot_count

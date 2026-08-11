@@ -200,7 +200,7 @@ class SpaceXBot(commands.Bot):
                 file = discord.File("warnings_backup.db", filename="warnings.db")
                 await channel.send(content=f"Database Backup at <t:{int(time.time())}:F>", file=file)
                 os.remove("warnings_backup.db")
-                print("-> ✅ DB Backup successfully uploaded to Discord!")
+                print("-> <a:verified_tick:837551087786393710> DB Backup successfully uploaded to Discord!")
         except Exception as e:
             print(f"⚠️ Failed to upload DB backup: {e}")
 
@@ -227,7 +227,7 @@ class SpaceXBot(commands.Bot):
                                             if file_resp.status == 200:
                                                 with open("warnings.db", "wb") as f:
                                                     f.write(await file_resp.read())
-                                                print("-> ✅ Successfully restored warnings.db from the cloud!")
+                                                print("-> <a:verified_tick:837551087786393710> Successfully restored warnings.db from the cloud!")
                                                 return
                     else:
                         print(f"⚠️ Failed to fetch backups. Status: {resp.status}")

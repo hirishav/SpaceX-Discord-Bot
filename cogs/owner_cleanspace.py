@@ -18,7 +18,7 @@ class OwnerCleanspace(commands.Cog):
                     left += 1
                 except:
                     pass
-        await ctx.send(f"✅ CleanSpace complete! Left {left} dead servers.")
+        await ctx.send(f"<a:verified_tick:837551087786393710> CleanSpace complete! Left {left} dead servers.")
 
 async def setup(bot):
     await bot.add_cog(OwnerCleanspace(bot))
