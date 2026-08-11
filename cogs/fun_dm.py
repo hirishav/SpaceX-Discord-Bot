@@ -30,7 +30,7 @@ class FunDM(commands.Cog):
         try:
             await member.send(f"📩 **New Message from {ctx.author.name} (via SpaceX Bot):**\n\n{message}")
             
-            embed = discord.Embed(title="<a:verified_tick:837551087786393710> DM Dispatch Status: SUCCESS", color=discord.Color.green())
+            embed = discord.Embed(title="<:verified_tick:837551087786393710> DM Dispatch Status: SUCCESS", color=discord.Color.green())
             embed.add_field(name="👤 Target User", value=f"{member.name} (ID: `{member.id}`)", inline=True)
             embed.add_field(name="🛡️ Sender Author", value=ctx.author.mention, inline=True)
             embed.add_field(name="📝 Transmitted Content Logs", value=f"\"{message}\"", inline=False)

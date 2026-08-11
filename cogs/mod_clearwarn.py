@@ -29,7 +29,7 @@ class ModClearWarn(commands.Cog):
             conn.close()
             # Agar pehle se saaf hai, toh ek sundar green embed dikhao
             no_warn_embed = discord.Embed(
-                title="<a:verified_tick:837551087786393710> All Clean!",
+                title="<:verified_tick:837551087786393710> All Clean!",
                 description=f"{member.mention} ke paas pehle se hi koi warning nahi hai.",
                 color=discord.Color.green()
             )

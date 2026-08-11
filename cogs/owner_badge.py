@@ -13,7 +13,7 @@ class OwnerBadge(commands.Cog):
         try:
             cursor.execute("INSERT INTO user_badges (user_id, badge) VALUES (?, ?)", (str(user.id), badge))
             self.bot.db.commit()
-            await ctx.send(f"<a:verified_tick:837551087786393710> Added badge {badge} to **{user.name}**!")
+            await ctx.send(f"<:verified_tick:837551087786393710> Added badge {badge} to **{user.name}**!")
         except Exception as e:
             await ctx.send(f"❌ Error adding badge (maybe they already have it?): {e}")
 
@@ -24,7 +24,7 @@ class OwnerBadge(commands.Cog):
         cursor = self.bot.db.cursor()
         cursor.execute("DELETE FROM user_badges WHERE user_id = ? AND badge = ?", (str(user.id), badge))
         self.bot.db.commit()
-        await ctx.send(f"<a:verified_tick:837551087786393710> Removed badge {badge} from **{user.name}**!")
+        await ctx.send(f"<:verified_tick:837551087786393710> Removed badge {badge} from **{user.name}**!")
 
 async def setup(bot):
     await bot.add_cog(OwnerBadge(bot))

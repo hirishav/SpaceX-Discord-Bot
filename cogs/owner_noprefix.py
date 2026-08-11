@@ -23,7 +23,7 @@ class OwnerNoPrefix(commands.Cog):
             if hasattr(self.bot, 'prefixless_cache'):
                 self.bot.prefixless_cache.add(member.id)
             
-            await ctx.send(f"<a:verified_tick:837551087786393710> **{member.name}** ko prefixless access de diya gaya hai! Ab ye launda bina prefix ke aag laga sakta hai. 😎")
+            await ctx.send(f"<:verified_tick:837551087786393710> **{member.name}** ko prefixless access de diya gaya hai! Ab ye launda bina prefix ke aag laga sakta hai. 😎")
         except Exception:
             # Handle standard unique integrity violation array checks
             await ctx.send("❌ Yeh banda pehle se hi whitelisted hai bhai!")

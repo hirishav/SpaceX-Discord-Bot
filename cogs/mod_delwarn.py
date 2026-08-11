@@ -46,7 +46,7 @@ class ModDelWarn(commands.Cog):
 
         # Chat me confirmation embed bhejna
         embed = discord.Embed(
-            title="<a:verified_tick:837551087786393710> Warning Removed",
+            title="<:verified_tick:837551087786393710> Warning Removed",
             description=f"{member.mention} ki **Warning #{warn_num}** kamyabi se mita di gayi hai.",
             color=discord.Color.green()
         )

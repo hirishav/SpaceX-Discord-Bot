@@ -30,7 +30,7 @@ class ModWarnings(commands.Cog):
         if not rows:
             clean_embed = discord.Embed(
                 title="😇 Clean Record!",
-                description=f"{member.mention} ke paas koi warning nahi hai! Ekdum shareef banda hai. <a:verified_tick:837551087786393710>",
+                description=f"{member.mention} ke paas koi warning nahi hai! Ekdum shareef banda hai. <:verified_tick:837551087786393710>",
                 color=discord.Color.green()
             )
             clean_embed.set_thumbnail(url=member.display_avatar.url)

@@ -51,7 +51,7 @@ class FunConfess(commands.Cog):
                 await ctx.message.delete()
             except Exception:
                 pass
-            await ctx.send("<a:verified_tick:837551087786393710> Aapka confession anonymously bhej diya gaya hai!", delete_after=5)
+            await ctx.send("<:verified_tick:837551087786393710> Aapka confession anonymously bhej diya gaya hai!", delete_after=5)
         except discord.Forbidden:
             await ctx.send(f"❌ Mera paas {channel.mention} me message bhejne ki permission nahi hai!")
 

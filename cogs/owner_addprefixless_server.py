@@ -59,7 +59,7 @@ class OwnerAddPrefixlessServer(commands.Cog):
             self.bot.prefixless_servers_cache[server_id_int] = expires_at
 
         embed = discord.Embed(
-            title="<a:verified_tick:837551087786393710> Prefixless Server Added", 
+            title="<:verified_tick:837551087786393710> Prefixless Server Added", 
             description=f"Server ID **{server_id}** ab prefixless list me add ho gaya hai!", 
             color=discord.Color.green()
         )

@@ -47,12 +47,12 @@ class OwnerSync(commands.Cog):
                 if synced_count == 0 and 'first_error' in locals():
                     await msg.edit(content=f"❌ **Failed to sync!** All 79 servers rejected the slash commands.\n**Reason:** `{first_error}`\n*(If this says 403 Forbidden, the bot is missing the `applications.commands` invite permission in those servers!)*")
                 else:
-                    await msg.edit(content=f"<a:verified_tick:837551087786393710> **Success!** Forcefully synced slash commands to **{synced_count}/{len(self.bot.guilds)}** servers! Everyone should see them instantly now.")
+                    await msg.edit(content=f"<:verified_tick:837551087786393710> **Success!** Forcefully synced slash commands to **{synced_count}/{len(self.bot.guilds)}** servers! Everyone should see them instantly now.")
                 return
             else:
                 synced = await ctx.bot.tree.sync()
 
-            await ctx.send(f"<a:verified_tick:837551087786393710> Synced {len(synced)} commands {'globally' if spec is None else 'to this server'}.")
+            await ctx.send(f"<:verified_tick:837551087786393710> Synced {len(synced)} commands {'globally' if spec is None else 'to this server'}.")
             return
 
         ret = 0
@@ -64,7 +64,7 @@ class OwnerSync(commands.Cog):
             else:
                 ret += 1
 
-        await ctx.send(f"<a:verified_tick:837551087786393710> Synced the tree to {ret}/{len(guilds)} servers.")
+        await ctx.send(f"<:verified_tick:837551087786393710> Synced the tree to {ret}/{len(guilds)} servers.")
 
 async def setup(bot):
     await bot.add_cog(OwnerSync(bot))
