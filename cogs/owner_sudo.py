@@ -15,11 +15,13 @@ class OwnerSudo(commands.Cog):
 
     @commands.command(name="sudo")
     @commands.is_owner()
-    async def sudo(self, ctx, target: typing.Optional[discord.User] = None, *, command_string: str):
+    async def sudo(self, ctx, target: typing.Optional[typing.Union[discord.Member, discord.User]] = None, *, command_string: str):
         """Run a command bypassing all permission checks, optionally as another user."""
         msg = copy.copy(ctx.message)
         msg.content = f"{ctx.prefix}{command_string}"
-        
+        if target:
+            msg.author = target
+            
         new_ctx = await self.bot.get_context(msg, cls=SudoContext)
         
         if not new_ctx.command:
@@ -32,13 +34,19 @@ class OwnerSudo(commands.Cog):
             def __getattr__(self, name):
                 return getattr(self._member, name)
             @property
+            def __class__(self):
+                return self._member.__class__
+            @property
             def guild_permissions(self):
                 return discord.Permissions.all()
                 
         actual_target = target or new_ctx.author
         new_ctx.author = SudoAuthor(actual_target)
         
-        await self.bot.invoke(new_ctx)
+        try:
+            await self.bot.invoke(new_ctx)
+        except commands.CommandError as e:
+            await ctx.send(f"⚠️ Sudo execution resulted in an error: {e}")
 
 async def setup(bot):
     await bot.add_cog(OwnerSudo(bot))

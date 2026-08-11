@@ -54,7 +54,7 @@ class Welcome(commands.Cog):
         cursor = conn.cursor()
         current = self.get_config(guild_id)
         if not current:
-            cursor.execute("INSERT INTO welcome_config (guild_id) VALUES (?)", (str(guild_id),))
+            cursor.execute("INSERT OR IGNORE INTO welcome_config (guild_id) VALUES (?)", (str(guild_id),))
             current = {
                 "channel_id": None,
                 "message": "Welcome {user} to {server}! 🎉",
@@ -158,9 +158,11 @@ class Welcome(commands.Cog):
                 embed.set_footer(text=f"SpaceX Welcome System • Member #{counter}")
 
             await channel.send(content=member.mention if mention_on else None, embed=embed, allowed_mentions=allowed)
-        except Exception:
-            # Welcome error should never crash bot
-            pass
+        except Exception as e:
+            import traceback
+            print(f"⚠️ Welcome error in {member.guild.name}: {e}")
+            traceback.print_exc()
+
 
     # ─────────────────────────────────────────────────────────────
     # ⌨️ WELCOME COMMANDS (MODERATOR ONLY)
@@ -320,6 +322,10 @@ class Welcome(commands.Cog):
             await ctx.send("❌ Ye command sirf moderators use kar sakte hain.")
         elif isinstance(error, commands.MissingRequiredArgument):
             await ctx.send(f"❌ Sahi tarika: `{ctx.prefix}welcome <command>` — Dekhein `{ctx.prefix}welcome`")
+        else:
+            import traceback
+            traceback.print_exception(type(error), error, error.__traceback__)
+            await ctx.send(f"⚠️ Ek error aaya: `{error}`")
 
 
 async def setup(bot):
