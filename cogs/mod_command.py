@@ -37,7 +37,7 @@ class ModCommand(commands.Cog):
             
             embed = discord.Embed(
                 title="Command Enabled",
-                description=f"<:verified_tick:837551087786393710> The `{command_name}` command has been successfully **enabled** in this server.",
+                description=f"<a:giveaway:686211362548088858> The `{command_name}` command has been successfully **enabled** in this server.",
                 color=discord.Color.green()
             )
             await ctx.send(embed=embed)

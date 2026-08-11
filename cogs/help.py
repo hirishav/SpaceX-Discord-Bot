@@ -411,7 +411,7 @@ class Help(commands.Cog):
             examples = f"`{prefix}blacklistserver 1234567890`"
 
         elif cmd.name == "whitelistserver":
-            description = "<:verified_tick:837551087786393710> Kisi server ko blacklist se hatane ke liye (Owner Only)."
+            description = "<a:giveaway:686211362548088858> Kisi server ko blacklist se hatane ke liye (Owner Only)."
             usage = f"`{prefix}whitelistserver <server_id>`"
             examples = f"`{prefix}whitelistserver 1234567890`"
 

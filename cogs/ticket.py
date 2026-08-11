@@ -314,7 +314,7 @@ class Ticket(commands.Cog):
         await ticket_chan.send(content=mention_str, embed=embed, view=TicketControlView(self.bot))
         await self.log_action(guild, ticket_chan.id, user.id, "Ticket Created", f"Ticket #{counter} open kiya gaya.")
 
-        await interaction.response.send_message(f"<:verified_tick:837551087786393710> Ticket successfully create ho gaya! Check karo: {ticket_chan.mention}", ephemeral=True)
+        await interaction.response.send_message(f"<a:giveaway:686211362548088858> Ticket successfully create ho gaya! Check karo: {ticket_chan.mention}", ephemeral=True)
 
     async def close_ticket_logic(self, interaction: discord.Interaction, reason: str = "Closed via button/command"):
         channel = interaction.channel
@@ -359,7 +359,7 @@ class Ticket(commands.Cog):
         await channel.send(embed=embed, view=TicketClosedView(self.bot))
         await self.log_action(guild, channel.id, user.id, "Ticket Closed", f"Reason: {reason}")
         if not interaction.response.is_done():
-            await interaction.response.send_message("<:verified_tick:837551087786393710> Ticket close ho gaya hai.", ephemeral=True)
+            await interaction.response.send_message("<a:giveaway:686211362548088858> Ticket close ho gaya hai.", ephemeral=True)
 
     async def reopen_ticket_logic(self, interaction: discord.Interaction):
         channel = interaction.channel
@@ -401,7 +401,7 @@ class Ticket(commands.Cog):
         await channel.send(embed=embed, view=TicketControlView(self.bot))
         await self.log_action(guild, channel.id, user.id, "Ticket Reopened", "Ticket was reopened by staff.")
         if not interaction.response.is_done():
-            await interaction.response.send_message("<:verified_tick:837551087786393710> Ticket reopen ho gaya hai.", ephemeral=True)
+            await interaction.response.send_message("<a:giveaway:686211362548088858> Ticket reopen ho gaya hai.", ephemeral=True)
 
     async def delete_ticket_logic(self, interaction: discord.Interaction):
         channel = interaction.channel
@@ -463,7 +463,7 @@ class Ticket(commands.Cog):
         await channel.send(embed=embed)
         await self.log_action(guild, channel.id, user.id, "Ticket Claimed", f"Claimed by {user.name}")
         if not interaction.response.is_done():
-            await interaction.response.send_message("<:verified_tick:837551087786393710> Aapne ye ticket claim kar liya hai.", ephemeral=True)
+            await interaction.response.send_message("<a:giveaway:686211362548088858> Aapne ye ticket claim kar liya hai.", ephemeral=True)
 
     async def transcript_ticket_logic(self, interaction: discord.Interaction):
         channel = interaction.channel
@@ -550,7 +550,7 @@ class Ticket(commands.Cog):
             log_channel_id=log_channel.id if log_channel else None
         )
         embed = discord.Embed(
-            title="<:verified_tick:837551087786393710> Ticket System Setup Done!",
+            title="<a:giveaway:686211362548088858> Ticket System Setup Done!",
             description="Is server ke liye SpaceX Ticket System successfully configure ho gaya hai.",
             color=discord.Color.green()
         )
@@ -659,7 +659,7 @@ class Ticket(commands.Cog):
 
         await ticket_chan.send(content=mention_str, embed=embed, view=TicketControlView(self.bot))
         await self.log_action(ctx.guild, ticket_chan.id, ctx.author.id, "Ticket Created", f"Ticket #{counter} open kiya gaya.")
-        await ctx.send(f"<:verified_tick:837551087786393710> Ticket successfully create ho gaya! Check karo: {ticket_chan.mention}")
+        await ctx.send(f"<a:giveaway:686211362548088858> Ticket successfully create ho gaya! Check karo: {ticket_chan.mention}")
 
     @ticket.command(name="close")
     async def close(self, ctx, *, reason: str = "Closed via command"):
@@ -843,7 +843,7 @@ class Ticket(commands.Cog):
 
         try:
             await ctx.channel.set_permissions(member, view_channel=True, read_messages=True, send_messages=True)
-            await ctx.send(f"<:verified_tick:837551087786393710> **{member.display_name}** ({member.mention}) ko is ticket me add kar diya gaya hai!")
+            await ctx.send(f"<a:giveaway:686211362548088858> **{member.display_name}** ({member.mention}) ko is ticket me add kar diya gaya hai!")
             await self.log_action(ctx.guild, ctx.channel.id, ctx.author.id, "User Added", f"Added member: {member.name} ({member.id})")
         except discord.Forbidden:
             await ctx.send("❌ Mere paas permissions modify karne ka power nahi hai!")
@@ -947,7 +947,7 @@ class Ticket(commands.Cog):
         rows = cursor.fetchall()
 
         if not rows:
-            return await ctx.send("<:verified_tick:837551087786393710> Is server me abhi tak koi ticket log record nahi hai.")
+            return await ctx.send("<a:giveaway:686211362548088858> Is server me abhi tak koi ticket log record nahi hai.")
 
         embed = discord.Embed(
             title="📋 Server Ticket Logs",

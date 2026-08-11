@@ -49,7 +49,7 @@ class ModBlacklist(commands.Cog):
             conn.close()
             if int(user_id) in self.bot.blacklist_cache:
                 del self.bot.blacklist_cache[int(user_id)]
-            return await ctx.send(f"<:verified_tick:837551087786393710> **Globally Un-blacklisted:** **{username}** (ID: `{user_id}`) ab bot use kar sakta hai!")
+            return await ctx.send(f"<a:giveaway:686211362548088858> **Globally Un-blacklisted:** **{username}** (ID: `{user_id}`) ab bot use kar sakta hai!")
 
         # 3. ⏱️ TIME PARSER (30s, 1m, 7d, 30d, 1yr)
         time_multipliers = {

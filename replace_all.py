@@ -1,7 +1,7 @@
 import os
+import re
 
-target_string = "<:verified_tick:837551087786393710>"
-replacement_string = "<:verified_tick:837551087786393710>"
+replacement_string = "<a:giveaway:686211362548088858>"
 
 def replace_in_files(directory):
     for root, dirs, files in os.walk(directory):
@@ -11,8 +11,10 @@ def replace_in_files(directory):
                 with open(filepath, 'r', encoding='utf-8') as f:
                     content = f.read()
                 
-                if target_string in content:
-                    new_content = content.replace(target_string, replacement_string)
+                # Replace both animated and non-animated variants just in case
+                new_content = re.sub(r'<a?:verified_tick:\d+>', replacement_string, content)
+                
+                if new_content != content:
                     with open(filepath, 'w', encoding='utf-8') as f:
                         f.write(new_content)
                     print(f"Replaced in: {filepath}")
