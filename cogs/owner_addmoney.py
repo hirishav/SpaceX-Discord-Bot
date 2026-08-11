@@ -60,7 +60,7 @@ class OwnerAddMoney(commands.Cog):
         conn.commit()
         conn.close()
 
-        await ctx.send(f"<a:owner:1453608135104270498> **Owner Action:** **{username}** ke **{target_type.upper()}** me <a:owner:1453608135104270498> `{amount:,}` coins add ho gaye!")
+        await ctx.send(f"<a:owner:1453608135104270498> **Owner Action:** **{username}** ke **{target_type.upper()}** me 🪙 `{amount:,}` coins add ho gaye!")
 
 async def setup(bot):
     await bot.add_cog(OwnerAddMoney(bot))

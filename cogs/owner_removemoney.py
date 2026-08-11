@@ -85,7 +85,7 @@ class OwnerRemoveMoney(commands.Cog):
         conn.commit()
         conn.close()
 
-        display_amt = f"Pura Account (Reset)" if mode == "all" else f"<a:owner:1453608135104270498> `{amount_to_remove:,}` coins"
+        display_amt = f"Pura Account (Reset)" if mode == "all" else f"🪙 `{amount_to_remove:,}` coins"
         await ctx.send(f"<a:owner:1453608135104270498> **Owner Action:** **{username}** ke account se **{display_amt}** remove kar diye gaye!")
 
 async def setup(bot):
