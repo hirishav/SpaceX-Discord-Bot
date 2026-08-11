@@ -16,7 +16,7 @@ class GiveawayView(discord.ui.View):
         self.required_role = None if str(required_role).lower() == "none" else required_role
         self.prize_name = prize_name
 
-    @discord.ui.button(label="Join Giveaway! <a:giveaway:686211362548088858>", style=discord.ButtonStyle.green, custom_id="join_giveaway_btn")
+    @discord.ui.button(label="Join Giveaway! ✅", style=discord.ButtonStyle.green, custom_id="join_giveaway_btn")
     async def join_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         user = interaction.user
         
@@ -38,7 +38,7 @@ class GiveawayView(discord.ui.View):
             return await interaction.response.send_message("❌ Bhai, tum pehle se hi is giveaway me joined ho!", ephemeral=True)
         
         self.entrants.add(user.id)
-        await interaction.response.send_message("<a:giveaway:686211362548088858> **Mubarak ho!** Tumne giveaway kamyabi se join kar liya hai. Ek baar apna DM check karo!", ephemeral=True)
+        await interaction.response.send_message("✅ **Mubarak ho!** Tumne giveaway kamyabi se join kar liya hai. Ek baar apna DM check karo!", ephemeral=True)
         
         try:
             dm_embed = discord.Embed(
@@ -126,7 +126,7 @@ class ModGiveaway(commands.Cog):
         embed.set_footer(text="Niche diye gaye button par click karke join karein!")
 
         view = GiveawayView(required_role=parsed_role, prize_name=prize)
-        g_msg = await ctx.send(content="<a:giveaway:686211362548088858> **GIVEAWAY LIVE** <a:giveaway:686211362548088858>", embed=embed, view=view)
+        g_msg = await ctx.send(content="✅ **GIVEAWAY LIVE** ✅", embed=embed, view=view)
 
         # Config dictionary map registers end time directly
         ACTIVE_GIVEAWAYS[current_g_id] = {
@@ -171,14 +171,14 @@ class ModGiveaway(commands.Cog):
         winner_mention = winner.mention if winner else f"<@{winner_id}>"
 
         embed_win = discord.Embed(
-            title="<a:giveaway:686211362548088858> GIVEAWAY WINNER! <a:giveaway:686211362548088858>",
+            title="✅ GIVEAWAY WINNER! ✅",
             description=f"### 🏆 Prize: **{prize}**\n\n👑 Winner: {winner_mention}\n📊 Total Participants: `{len(view.entrants)}`",
             color=discord.Color.green()
         )
         embed_win.set_footer(text="Mubarak ho bhai!")
         
-        await g_msg.edit(content="<a:giveaway:686211362548088858> **GIVEAWAY ENDED** <a:giveaway:686211362548088858>", embed=embed_win, view=None)
-        await channel.send(f"<a:giveaway:686211362548088858> **Mubarak ho {winner_mention}!** Tumne **{prize}** ka giveaway jeet liya hai! {g_msg.jump_url}")
+        await g_msg.edit(content="🎉 **GIVEAWAY ENDED** 🎉", embed=embed_win, view=None)
+        await channel.send(f"🥳 **Mubarak ho {winner_mention}!** Tumne **{prize}** ka giveaway jeet liya hai! {g_msg.jump_url}")
         
         if winner:
             try:
@@ -214,7 +214,7 @@ class ModGiveaway(commands.Cog):
             except Exception: winner = self.bot.get_user(winner_id)
             
         winner_mention = winner.mention if winner else f"<@{winner_id}>"
-        await ctx.send(f"🎲 **Reroll Action:** {winner_mention} naye winner chune gaye hain **{prize}** ke liye! <a:giveaway:686211362548088858>")
+        await ctx.send(f"🎲 **Reroll Action:** {winner_mention} naye winner chune gaye hain **{prize}** ke liye! ✅")
 
 async def setup(bot):
     await bot.add_cog(ModGiveaway(bot))

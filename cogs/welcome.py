@@ -26,7 +26,7 @@ class Welcome(commands.Cog):
         CREATE TABLE IF NOT EXISTS welcome_config (
             guild_id TEXT PRIMARY KEY,
             channel_id TEXT,
-            message TEXT DEFAULT 'Welcome {user} to {server}! <a:giveaway:686211362548088858>',
+            message TEXT DEFAULT 'Welcome {user} to {server}! ✅',
             mention INTEGER DEFAULT 1,
             enabled INTEGER DEFAULT 1,
             member_counter INTEGER DEFAULT 0
@@ -43,7 +43,7 @@ class Welcome(commands.Cog):
             return None
         return {
             "channel_id": int(row[0]) if row[0] else None,
-            "message": row[1] or "Welcome {user} to {server}! <a:giveaway:686211362548088858>",
+            "message": row[1] or "Welcome {user} to {server}! ✅",
             "mention": bool(row[2]),
             "enabled": bool(row[3]),
             "member_counter": row[4] or 0
@@ -57,7 +57,7 @@ class Welcome(commands.Cog):
             cursor.execute("INSERT OR IGNORE INTO welcome_config (guild_id) VALUES (?)", (str(guild_id),))
             current = {
                 "channel_id": None,
-                "message": "Welcome {user} to {server}! <a:giveaway:686211362548088858>",
+                "message": "Welcome {user} to {server}! ✅",
                 "mention": True,
                 "enabled": True,
                 "member_counter": 0
@@ -119,7 +119,7 @@ class Welcome(commands.Cog):
         return formatted
 
     # ─────────────────────────────────────────────────────────────
-    # <a:giveaway:686211362548088858> EVENT LISTENER — MEMBER JOIN
+    # ✅ EVENT LISTENER — MEMBER JOIN
     # ─────────────────────────────────────────────────────────────
 
     @commands.Cog.listener()
@@ -143,7 +143,7 @@ class Welcome(commands.Cog):
             allowed = discord.AllowedMentions(users=True) if mention_on else discord.AllowedMentions(users=False)
 
             embed = discord.Embed(
-                title=f"<a:giveaway:686211362548088858> Welcome to {member.guild.name}!",
+                title=f"👋 Welcome to {member.guild.name}!",
                 description=msg_text,
                 color=discord.Color.from_rgb(24, 26, 40),
                 timestamp=datetime.now(timezone.utc)
@@ -174,13 +174,13 @@ class Welcome(commands.Cog):
         cfg = self.get_config(ctx.guild.id)
         prefix = ctx.prefix
 
-        status_str = "ENABLED <a:giveaway:686211362548088858>" if (cfg and cfg["enabled"]) else "DISABLED ❌"
+        status_str = "ENABLED ✅" if (cfg and cfg["enabled"]) else "DISABLED ❌"
         channel_str = f"<#{cfg['channel_id']}>" if (cfg and cfg.get("channel_id")) else "Not Set"
         mention_str = "ON (@User tag)" if (cfg and cfg.get("mention", True)) else "OFF (Sirf naam)"
-        msg_str = cfg["message"] if cfg else "Welcome {user} to {server}! <a:giveaway:686211362548088858>"
+        msg_str = cfg["message"] if cfg else "Welcome {user} to {server}! ✅"
 
         embed = discord.Embed(
-            title="<a:giveaway:686211362548088858> SpaceX Welcome System",
+            title="👋 SpaceX Welcome System",
             description=f"Server me naye members ka custom swagat karne ke saare settings:\n\n**Current Status:** `{status_str}`\n**Welcome Channel:** {channel_str}\n**Mention Mode:** `{mention_str}`\n**Custom Message:** `{msg_str}`",
             color=discord.Color.from_rgb(24, 26, 40)
         )
@@ -211,7 +211,7 @@ class Welcome(commands.Cog):
         """Welcome messages bhejne ke liye text channel set karein."""
         self.update_config(ctx.guild.id, channel_id=channel.id, enabled=True)
         embed = discord.Embed(
-            title="<a:giveaway:686211362548088858> Welcome Channel Set!",
+            title="✅ Welcome Channel Set!",
             description=f"Is server me ab welcome messages **{channel.mention}** me bheje jayenge.",
             color=discord.Color.green()
         )
@@ -229,7 +229,7 @@ class Welcome(commands.Cog):
         preview = self.format_welcome_text(message, ctx.author, cfg)
 
         embed = discord.Embed(
-            title="<a:giveaway:686211362548088858> Custom Welcome Message Updated!",
+            title="✅ Custom Welcome Message Updated!",
             description=f"Aapka naya welcome message save ho gaya hai.\n\n**📝 Raw Template:**\n`{message}`\n\n**🔍 Live Preview:**\n{preview}",
             color=discord.Color.green()
         )
@@ -242,10 +242,10 @@ class Welcome(commands.Cog):
         opt = option.lower().strip()
         if opt in ["on", "true", "yes", "enable", "1"]:
             self.update_config(ctx.guild.id, mention=True)
-            await ctx.send("<a:giveaway:686211362548088858> Welcome mention ab **ON** ho gaya hai! (@User tag hoga)")
+            await ctx.send("✅ Welcome mention ab **ON** ho gaya hai! (@User tag hoga)")
         elif opt in ["off", "false", "no", "disable", "0"]:
             self.update_config(ctx.guild.id, mention=False)
-            await ctx.send("<a:giveaway:686211362548088858> Welcome mention ab **OFF** ho gaya hai! (Sirf display name dikhega, tag nahi hoga)")
+            await ctx.send("✅ Welcome mention ab **OFF** ho gaya hai! (Sirf display name dikhega, tag nahi hoga)")
         else:
             await ctx.send(f"❌ Sahi tarika: `{ctx.prefix}welcome mention on` ya `{ctx.prefix}welcome mention off`")
 
@@ -254,7 +254,7 @@ class Welcome(commands.Cog):
     async def enable(self, ctx):
         """Server me welcome messages enable karein."""
         self.update_config(ctx.guild.id, enabled=True)
-        await ctx.send("<a:giveaway:686211362548088858> Welcome system is server me **ENABLE** kar diya gaya hai!")
+        await ctx.send("✅ Welcome system is server me **ENABLE** kar diya gaya hai!")
 
     @welcome.command(name="disable", aliases=["off"])
     @commands.has_permissions(manage_guild=True)
@@ -284,7 +284,7 @@ class Welcome(commands.Cog):
         allowed = discord.AllowedMentions(users=True) if mention_on else discord.AllowedMentions(users=False)
 
         embed = discord.Embed(
-            title=f"<a:giveaway:686211362548088858> Welcome to {ctx.guild.name}! (TEST)",
+            title=f"👋 Welcome to {ctx.guild.name}! (TEST)",
             description=msg_text,
             color=discord.Color.from_rgb(24, 26, 40),
             timestamp=datetime.now(timezone.utc)

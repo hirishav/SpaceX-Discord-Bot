@@ -9,7 +9,7 @@ class OwnerServers(commands.Cog):
     @commands.hybrid_command(name="servers", aliases=["guilds", "serverlist"], hidden=True)
     @commands.is_owner()
     async def servers_list(self, ctx):
-        """<a:owner:1453608135104270498> Sirf Bot Owner ke liye - Saare servers ki list nikalne ke liye jahan bot add hai."""
+        """👑 Sirf Bot Owner ke liye - Saare servers ki list nikalne ke liye jahan bot add hai."""
         
         # Async framework check for guilds tracking array matrix
         if not self.bot.guilds:
@@ -29,7 +29,7 @@ class OwnerServers(commands.Cog):
                 # Agar cache fail ho toh temporary text override lagao
                 server_owner = "`Fetch Failed (Cache Boundary Exception)`"
             
-            guild_string = f"**{index}. {server_name}**\n🆔 ID: `{server_id}`\n<a:owner:1453608135104270498> Owner: {server_owner}\n👥 Members: `{member_count:,}`\n"
+            guild_string = f"**{index}. {server_name}**\n🆔 ID: `{server_id}`\n👑 Owner: {server_owner}\n👥 Members: `{member_count:,}`\n"
             guilds_data.append(guild_string)
 
         # 📦 FIELD CONSTRAINT FIX: String manipulation chunk matrix setup
@@ -66,7 +66,7 @@ class OwnerServers(commands.Cog):
     @commands.hybrid_command(name="addpremium", aliases=["apremium"], hidden=True)
     @commands.is_owner()
     async def add_premium(self, ctx, server_id: int):
-        """<a:owner:1453608135104270498> Sirf Bot Owner ke liye - Kisi server ko premium status dene ke liye."""
+        """👑 Sirf Bot Owner ke liye - Kisi server ko premium status dene ke liye."""
         if server_id in self.bot.premium_cache:
             return await ctx.send(f"❌ Server `{server_id}` pehle se hi premium hai!")
         
@@ -75,14 +75,14 @@ class OwnerServers(commands.Cog):
             cursor.execute("INSERT INTO premium_servers (server_id) VALUES (?)", (str(server_id),))
             self.bot.db.commit()
             self.bot.premium_cache.add(server_id)
-            await ctx.send(f"<a:giveaway:686211362548088858> Server `{server_id}` ko successfully **Premium** access de diya gaya hai!")
+            await ctx.send(f"✅ Server `{server_id}` ko successfully **Premium** access de diya gaya hai!")
         except Exception as e:
             await ctx.send(f"❌ Error while adding premium: {e}")
 
     @commands.hybrid_command(name="removepremium", aliases=["rpremium"], hidden=True)
     @commands.is_owner()
     async def remove_premium(self, ctx, server_id: int):
-        """<a:owner:1453608135104270498> Sirf Bot Owner ke liye - Kisi server ka premium status hatane ke liye."""
+        """👑 Sirf Bot Owner ke liye - Kisi server ka premium status hatane ke liye."""
         if server_id not in self.bot.premium_cache:
             return await ctx.send(f"❌ Server `{server_id}` premium nahi hai!")
         
@@ -91,7 +91,7 @@ class OwnerServers(commands.Cog):
             cursor.execute("DELETE FROM premium_servers WHERE server_id = ?", (str(server_id),))
             self.bot.db.commit()
             self.bot.premium_cache.remove(server_id)
-            await ctx.send(f"<a:giveaway:686211362548088858> Server `{server_id}` ka **Premium** access remove kar diya gaya hai!")
+            await ctx.send(f"✅ Server `{server_id}` ka **Premium** access remove kar diya gaya hai!")
         except Exception as e:
             await ctx.send(f"❌ Error while removing premium: {e}")
 

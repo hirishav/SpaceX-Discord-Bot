@@ -40,7 +40,7 @@ class OwnerStatus(commands.Cog):
             activity = None
 
         await self.bot.change_presence(status=status, activity=activity)
-        await ctx.send(f"<a:giveaway:686211362548088858> Status badal kar **{status_type.upper()}** kar diya gaya hai!")
+        await ctx.send(f"✅ Status badal kar **{status_type.upper()}** kar diya gaya hai!")
 
     @setstatus.error
     async def status_error(self, ctx, error):
@@ -55,7 +55,7 @@ class OwnerStatus(commands.Cog):
         success, details = await self.bot.post_topgg_stats()
         if success:
             embed = discord.Embed(
-                title="<a:giveaway:686211362548088858> Top.gg Server Count Updated!",
+                title="✅ Top.gg Server Count Updated!",
                 description=f"**Servers Posted:** `{len(self.bot.guilds)}`\n**API Response:** `{details}`",
                 color=discord.Color.green()
             )

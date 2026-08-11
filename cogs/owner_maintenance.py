@@ -31,7 +31,7 @@ class OwnerMaintenance(commands.Cog):
                     
                 if hasattr(self.bot, 'server_maintenance') and target_guild.id in self.bot.server_maintenance:
                     del self.bot.server_maintenance[target_guild.id]
-                    await ctx.send(f"<a:giveaway:686211362548088858> **Maintenance Manual Override:** `{target_guild.name}` server ko online mode par shift kiya jaa raha hai...")
+                    await ctx.send(f"✅ **Maintenance Manual Override:** `{target_guild.name}` server ko online mode par shift kiya jaa raha hai...")
                 else:
                     await ctx.send(f"❌ `{target_guild.name}` server pehle se hi normal mode par chal raha hai bhai!")
                 return
@@ -41,7 +41,7 @@ class OwnerMaintenance(commands.Cog):
                 
                 self.bot.maintenance_mode = False
                 self.bot.maintenance_end = 0
-                await ctx.send("<a:giveaway:686211362548088858> **Maintenance Manual Override:** Bot ko global online mode par shift kiya jaa raha hai...")
+                await ctx.send("✅ **Maintenance Manual Override:** Bot ko global online mode par shift kiya jaa raha hai...")
                 await self.notify_users()
                 return
 
@@ -155,7 +155,7 @@ class OwnerMaintenance(commands.Cog):
             cursor.execute("PRAGMA temp_store=MEMORY;")
             cursor.execute("PRAGMA mmap_size=30000000000;")
             
-            await ctx.send("<a:giveaway:686211362548088858> Backup successfully restored and database reconnected!")
+            await ctx.send("✅ Backup successfully restored and database reconnected!")
         except Exception as e:
             await ctx.send(f"❌ Failed to restore backup: {e}")
 

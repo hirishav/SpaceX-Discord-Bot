@@ -55,7 +55,7 @@ class StocksBuy(commands.Cog):
         conn.commit()
         conn.close()
 
-        embed = discord.Embed(title="<a:giveaway:686211362548088858> Shares Purchased!", color=discord.Color.green())
+        embed = discord.Embed(title="✅ Shares Purchased!", color=discord.Color.green())
         embed.description = f"🥳 Tumne **{amount}** shares khareed liye hain **{ticker}** ke!\n💰 Total Deducted: **{total_cost} Coins**."
         await ctx.send(embed=embed)
 

@@ -10,7 +10,7 @@ class OwnerSpam(commands.Cog):
     @commands.hybrid_command(name="spam", hidden=True)
     @commands.is_owner() # 🔥 STRICT LOCK: Sirf Rishav bhai (Owner) hi chala sakte hain!
     async def owner_spam_command(self, ctx, channel: discord.TextChannel = None, amount: int = None, *, message_content: str = None):
-        """<a:owner:1453608135104270498> STRICT OWNER ONLY: Server ke kisi bhi channel me specified amount me fast spamming karne ke liye."""
+        """👑 STRICT OWNER ONLY: Server ke kisi bhi channel me specified amount me fast spamming karne ke liye."""
         
         # --- CASE 1: Sahi formatting check matrix ---
         if not channel or not amount or not message_content:

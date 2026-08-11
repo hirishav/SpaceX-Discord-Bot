@@ -32,7 +32,7 @@ class OwnerAddPrefixlessServer(commands.Cog):
     @commands.command(name="addprefixless_server", aliases=["addprefixlessserver", "aps"])
     @commands.is_owner()
     async def add_prefixless_server(self, ctx, duration: str = None, server_id: str = None):
-        """<a:owner:1453608135104270498> Owner Only: Kisi server me sabhi members ko prefixless access dene ke liye."""
+        """👑 Owner Only: Kisi server me sabhi members ko prefixless access dene ke liye."""
         if not duration or not server_id:
             return await ctx.send(f"❌ Sahi tarika: `{ctx.prefix}addprefixless_server unlimited/1d/1h/10m <serverid>`")
         
@@ -59,7 +59,7 @@ class OwnerAddPrefixlessServer(commands.Cog):
             self.bot.prefixless_servers_cache[server_id_int] = expires_at
 
         embed = discord.Embed(
-            title="<a:giveaway:686211362548088858> Prefixless Server Added", 
+            title="✅ Prefixless Server Added", 
             description=f"Server ID **{server_id}** ab prefixless list me add ho gaya hai!", 
             color=discord.Color.green()
         )

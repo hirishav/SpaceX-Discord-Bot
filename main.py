@@ -66,7 +66,7 @@ def topgg_webhook():
                     user = bot.get_user(user_id_int) or await bot.fetch_user(user_id_int)
                     if user:
                         embed = discord.Embed(
-                            title="<a:giveaway:686211362548088858> Vote ke liye Sukriya! <a:giveaway:686211362548088858>",
+                            title="✅ Vote ke liye Sukriya! ✅",
                             description=f"Aapke vote ke liye bahut bahut dhanyawad! ❤️\n\nIske inaam mein aapko mila hai **{rep_amount} Rep Point**! ✨\n**Total Rep Points:** `{total_rep}`\n\nAise hi support karte rahiye aur aur bhi rep points kamate rahiye! 🚀",
                             color=discord.Color.brand_green()
                         )
@@ -201,7 +201,7 @@ class SpaceXBot(commands.Bot):
                 file = discord.File("warnings_backup.db", filename="warnings.db")
                 await channel.send(content=f"Database Backup at <t:{int(time.time())}:F>", file=file)
                 os.remove("warnings_backup.db")
-                print("-> <a:giveaway:686211362548088858> DB Backup successfully uploaded to Discord!")
+                print("-> ✅ DB Backup successfully uploaded to Discord!")
         except Exception as e:
             print(f"⚠️ Failed to upload DB backup: {e}")
 
@@ -228,7 +228,7 @@ class SpaceXBot(commands.Bot):
                                             if file_resp.status == 200:
                                                 with open("warnings.db", "wb") as f:
                                                     f.write(await file_resp.read())
-                                                print("-> <a:giveaway:686211362548088858> Successfully restored warnings.db from the cloud!")
+                                                print("-> ✅ Successfully restored warnings.db from the cloud!")
                                                 return
                     else:
                         print(f"⚠️ Failed to fetch backups. Status: {resp.status}")
@@ -439,7 +439,7 @@ bot = SpaceXBot()
 async def on_ready():
     print("---------------------------------------")
     print(f'Mubarak ho! Bot ka naam hai: {bot.user.name}')
-    print('Bot successfully online aa gaya hai! <a:giveaway:686211362548088858>')
+    print('Bot successfully online aa gaya hai! ✅')
     print("---------------------------------------")
     
     # 📈 TOP.GG GUILD COUNT POSTING (DIRECT)

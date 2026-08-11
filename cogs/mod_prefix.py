@@ -33,7 +33,7 @@ class ModPrefix(commands.Cog):
             self.bot.prefix_cache[ctx.guild.id] = new_prefix
 
             embed = discord.Embed(
-                title="<a:giveaway:686211362548088858> Prefix Updated!",
+                title="✅ Prefix Updated!",
                 description=f"Is server me SpaceX Bot ka prefix ab badalkar **`{new_prefix}`** ho gaya hai.",
                 color=discord.Color.green()
             )

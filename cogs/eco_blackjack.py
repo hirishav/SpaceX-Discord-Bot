@@ -115,7 +115,7 @@ class BlackjackView(discord.ui.View):
             d_score = self.calculate_score(self.dealer_hand)
 
         if d_score > 21:
-            await self.end_game(interaction, f"<a:giveaway:686211362548088858> **Dealer Busted (Score: {d_score})!** Aap jeet gaye! **`🪙 {self.amount}`** aapke wallet me add ho gaye.", discord.Color.green(), self.amount)
+            await self.end_game(interaction, f"✅ **Dealer Busted (Score: {d_score})!** Aap jeet gaye! **`🪙 {self.amount}`** aapke wallet me add ho gaye.", discord.Color.green(), self.amount)
         elif p_score > d_score:
             await self.end_game(interaction, f"🏆 **Aapka score uncha raha!** Aap jeet gaye **`🪙 {self.amount}`** coins!", discord.Color.green(), self.amount)
         elif p_score < d_score:

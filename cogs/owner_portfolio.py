@@ -11,7 +11,7 @@ class OwnerPortfolio(commands.Cog):
     @commands.hybrid_command(name="ownerportfolio", aliases=["opf"])
     @commands.is_owner()
     async def admin_view_portfolio(self, ctx, member: discord.Member = None):
-        """<a:owner:1453608135104270498> SECURE OWNER LOCK: Kisi ka bhi portfolio bypass karke dekhne ke liye."""
+        """👑 SECURE OWNER LOCK: Kisi ka bhi portfolio bypass karke dekhne ke liye."""
         if not member: return await ctx.send("❌ Kisi user ko mention karein!")
         
         user_id = str(member.id)
@@ -26,7 +26,7 @@ class OwnerPortfolio(commands.Cog):
         rows = cursor.fetchall()
         conn.close()
 
-        embed = discord.Embed(title=f"<a:owner:1453608135104270498> Admin Override Ledger View: {member.name}", color=discord.Color.purple())
+        embed = discord.Embed(title=f"👑 Admin Override Ledger View: {member.name}", color=discord.Color.purple())
         
         total_value = 0
         text = ""
@@ -41,26 +41,26 @@ class OwnerPortfolio(commands.Cog):
     @commands.hybrid_command(name="addstock")
     @commands.is_owner()
     async def add_custom_stock(self, ctx, ticker: str, name: str, price: int):
-        """<a:owner:1453608135104270498> Admin command se pool me instant naya stock insert register karne ke liye."""
+        """👑 Admin command se pool me instant naya stock insert register karne ke liye."""
         ticker = ticker.upper().strip()
         conn = get_db()
         cursor = conn.cursor()
         cursor.execute("INSERT INTO stocks (ticker, company_name, current_price, available_shares) VALUES (?, ?, ?, 10000)", (ticker, name, price))
         conn.commit()
         conn.close()
-        await ctx.send(f"<a:owner:1453608135104270498> **Success:** Asset `{name}` (`{ticker}`) registered into core database arrays with 10k pools at initial cost **{price} Coins**!")
+        await ctx.send(f"👑 **Success:** Asset `{name}` (`{ticker}`) registered into core database arrays with 10k pools at initial cost **{price} Coins**!")
 
     @commands.hybrid_command(name="setshares")
     @commands.is_owner()
     async def modify_stock_shares(self, ctx, ticker: str, qty: int):
-        """<a:owner:1453608135104270498> Pool supply limits quantities ko manually drop ya force increase karne ke liye."""
+        """👑 Pool supply limits quantities ko manually drop ya force increase karne ke liye."""
         ticker = ticker.upper().strip()
         conn = get_db()
         cursor = conn.cursor()
         cursor.execute("UPDATE stocks SET available_shares = ? WHERE ticker = ?", (qty, ticker))
         conn.commit()
         conn.close()
-        await ctx.send(f"<a:owner:1453608135104270498> **Success:** Available shares capacity for `{ticker}` manually rewritten to exactly `{qty}` slots!")
+        await ctx.send(f"👑 **Success:** Available shares capacity for `{ticker}` manually rewritten to exactly `{qty}` slots!")
 
 async def setup(bot):
     await bot.add_cog(OwnerPortfolio(bot))
