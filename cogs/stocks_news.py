@@ -52,7 +52,7 @@ class StocksNews(commands.Cog):
             {
                 "ticker": "BTC", 
                 "type": "good", 
-                "title": "🐋 CRYPTO SUPREME PUMP: BITCOIN TO THE MOON! 🪙",
+                "title": "🐋 CRYPTO SUPREME PUMP: BITCOIN TO THE MOON! <a:money:852408387185672213>",
                 "text": "🚀 BULL RUN CONFIRMED: US Government ne Bitcoin ko officially safe reserve asset ledger me whitelist kiya! Absolute green candle launch!"
             },
             {

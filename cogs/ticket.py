@@ -298,7 +298,7 @@ class Ticket(commands.Cog):
         embed = discord.Embed(
             title=f"🎫 Support Ticket #{counter}",
             description=(
-                f"Namaste **{user.display_name}** bhai! Aapka support ticket open ho gaya hai. 🎉\n\n"
+                f"Namaste **{user.display_name}** bhai! Aapka support ticket open ho gaya hai. <a:giveaway:686211362548088858>\n\n"
                 f"› Aapka jo bhi sawal ya problem hai, yahan detail me batayein.\n"
                 f"› Staff jald hi aapse aakar baat karega.\n"
                 f"› Jab kaam ho jaye toh neeche **Close Ticket** button dabayein."
@@ -644,7 +644,7 @@ class Ticket(commands.Cog):
         embed = discord.Embed(
             title=f"🎫 Support Ticket #{counter}",
             description=(
-                f"Namaste **{ctx.author.display_name}** bhai! Aapka support ticket open ho gaya hai. 🎉\n\n"
+                f"Namaste **{ctx.author.display_name}** bhai! Aapka support ticket open ho gaya hai. <a:giveaway:686211362548088858>\n\n"
                 f"› Aapka jo bhi sawal ya problem hai, yahan detail me batayein.\n"
                 f"› Staff jald hi aapse aakar baat karega.\n"
                 f"› Jab kaam ho jaye toh neeche **Close Ticket** button dabayein."

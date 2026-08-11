@@ -66,7 +66,7 @@ def topgg_webhook():
                     user = bot.get_user(user_id_int) or await bot.fetch_user(user_id_int)
                     if user:
                         embed = discord.Embed(
-                            title="🎉 Vote ke liye Sukriya! 🎉",
+                            title="<a:giveaway:686211362548088858> Vote ke liye Sukriya! <a:giveaway:686211362548088858>",
                             description=f"Aapke vote ke liye bahut bahut dhanyawad! ❤️\n\nIske inaam mein aapko mila hai **{rep_amount} Rep Point**! ✨\n**Total Rep Points:** `{total_rep}`\n\nAise hi support karte rahiye aur aur bhi rep points kamate rahiye! 🚀",
                             color=discord.Color.brand_green()
                         )
@@ -426,7 +426,7 @@ bot = SpaceXBot()
 async def on_ready():
     print("---------------------------------------")
     print(f'Mubarak ho! Bot ka naam hai: {bot.user.name}')
-    print('Bot successfully online aa gaya hai! 🎉')
+    print('Bot successfully online aa gaya hai! <a:giveaway:686211362548088858>')
     print("---------------------------------------")
     
     # 📈 TOP.GG GUILD COUNT POSTING (DIRECT)

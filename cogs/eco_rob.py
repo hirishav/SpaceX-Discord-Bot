@@ -65,13 +65,13 @@ class EcoRob(commands.Cog):
             stolen = random.randint(100, int(target_wallet * 0.5)) # Up to 50% of target cash
             cursor.execute("UPDATE economy SET wallet = wallet + ? WHERE user_id = ?", (stolen, str(ctx.author.id)))
             cursor.execute("UPDATE economy SET wallet = wallet - ? WHERE user_id = ?", (stolen, str(member.id)))
-            await ctx.send(f"🥷 **Chori Kamyab!** {ctx.author.mention} ne chupke se {member.mention} ke pocket se **🪙 {stolen}** coins uda liye!")
+            await ctx.send(f"🥷 **Chori Kamyab!** {ctx.author.mention} ne chupke se {member.mention} ke pocket se **<a:money:852408387185672213> {stolen}** coins uda liye!")
         else:
             fine = random.randint(100, 300)
             if fine > author_wallet: fine = author_wallet
             cursor.execute("UPDATE economy SET wallet = wallet - ? WHERE user_id = ?", (fine, str(ctx.author.id)))
             cursor.execute("UPDATE economy SET wallet = wallet + ? WHERE user_id = ?", (fine, str(member.id)))
-            await ctx.send(f"💥 **Chori Na-kamyab!** {ctx.author.mention}, {member.mention} ne aapko rrange hatho pakad liya aur fine ke taur par **🪙 {fine}** aapse le liye!")
+            await ctx.send(f"💥 **Chori Na-kamyab!** {ctx.author.mention}, {member.mention} ne aapko rrange hatho pakad liya aur fine ke taur par **<a:money:852408387185672213> {fine}** aapse le liye!")
 
         conn.commit()
         conn.close()

@@ -35,7 +35,7 @@ CATEGORY_META = {
         "blurb": "Server ko control aur safe rakhne ke liye saare moderation tools.",
     },
     "economy": {
-        "emoji": "💰",
+        "emoji": "<a:money:852408387185672213>",
         "label": "Economy & Gaming",
         "aliases": ["eco", "economy", "gaming", "casino", "money", "stocks", "stock"],
         "blurb": "Wallet, casino games aur live stock market — sab kuch ek jagah.",
@@ -612,7 +612,7 @@ class Help(commands.Cog):
             examples = f"`{prefix}lb server`"
 
         elif cmd.name in ["giveaway", "gstart"]:
-            description = "🎉 Advance Interactive Button wala automatic giveaway engine framework toggle karne ke liye."
+            description = "<a:giveaway:686211362548088858> Advance Interactive Button wala automatic giveaway engine framework toggle karne ke liye."
             usage = f'`{prefix}gstart <time> "<requirements_text>" <@role/none> <prize>`'
             examples = f'`{prefix}gstart 10m "Must have Fans role" @Fans Spotify`'
 
@@ -666,7 +666,7 @@ class Help(commands.Cog):
             examples = f"`{prefix}buystock NIFTY 5`"
 
         elif cmd.name == "sellstock":
-            description = "💰 Owned portfolio shares ko current live market value pricing par profit/loss ke sath instant wallet cash me swap karne ke liye."
+            description = "<a:money:852408387185672213> Owned portfolio shares ko current live market value pricing par profit/loss ke sath instant wallet cash me swap karne ke liye."
             usage = f"`{prefix}sellstock <TICKER> <quantity>`"
             examples = f"`{prefix}sellstock SMSNG 2`"
 
@@ -767,7 +767,7 @@ class Help(commands.Cog):
         elif cmd.name == "welcome":
             description = "👋 Server me naye members ka custom swagat aur join messages configure karne ke liye."
             usage = f"`{prefix}welcome setchannel #channel`\n`{prefix}welcome setmessage <msg>`\n`{prefix}welcome mention <on/off>`\n`{prefix}welcome test`"
-            examples = f"`{prefix}welcome setchannel #welcome`\n`{prefix}welcome setmessage Welcome {{user}} to {{server}}! 🎉`"
+            examples = f"`{prefix}welcome setchannel #welcome`\n`{prefix}welcome setmessage Welcome {{user}} to {{server}}! <a:giveaway:686211362548088858>`"
 
         elif cmd.name == "rep":
             description = "⭐ Apna ya kisi doosre user ka rep points check karne aur leaderboard dekhne ke liye."

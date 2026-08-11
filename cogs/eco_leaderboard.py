@@ -29,7 +29,7 @@ class EcoLeaderboard(commands.Cog):
         conn.close()
 
         if not rows:
-            return await ctx.send("🪙 Abhi economy database khali hai! Thoda game khelo pehle.")
+            return await ctx.send("<a:money:852408387185672213> Abhi economy database khali hai! Thoda game khelo pehle.")
 
         embed = discord.Embed(color=discord.Color.gold())
         lb_text = ""
@@ -53,7 +53,7 @@ class EcoLeaderboard(commands.Cog):
                     elif rank == 3: emoji = "🥉"
                     else: emoji = f"`#{rank}`"
                     
-                    lb_text += f"{emoji} **{member.name}** — 🪙 `{total_money:,}` coins\n"
+                    lb_text += f"{emoji} **{member.name}** — <a:money:852408387185672213> `{total_money:,}` coins\n"
                     rank += 1
                     
                 if rank > 10: # Top 10 members hi dikhayenge screen space ke liye
@@ -77,7 +77,7 @@ class EcoLeaderboard(commands.Cog):
                     elif rank == 3: emoji = "🥉"
                     else: emoji = f"`#{rank}`"
                     
-                    lb_text += f"{emoji} **{user.name}** — 🪙 `{total_money:,}` coins\n"
+                    lb_text += f"{emoji} **{user.name}** — <a:money:852408387185672213> `{total_money:,}` coins\n"
                     rank += 1
                     
                 if rank > 10: # Global top 10 giants

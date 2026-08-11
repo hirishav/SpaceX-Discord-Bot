@@ -47,12 +47,12 @@ class EcoCrime(commands.Cog):
         if success:
             earnings = random.randint(500, 1500)
             cursor.execute("UPDATE economy SET wallet = wallet + ? WHERE user_id = ?", (earnings, str(ctx.author.id)))
-            await ctx.send(f"🥷 {ctx.author.mention}, aapne bank loot liya aur chupke se **🪙 {earnings}** uda le gye! Pura master-mind lagaya!")
+            await ctx.send(f"🥷 {ctx.author.mention}, aapne bank loot liya aur chupke se **<a:money:852408387185672213> {earnings}** uda le gye! Pura master-mind lagaya!")
         else:
             fine = random.randint(400, 1000)
             if fine > wallet: fine = wallet
             cursor.execute("UPDATE economy SET wallet = wallet - ? WHERE user_id = ?", (fine, str(ctx.author.id)))
-            await ctx.send(f"🚨 {ctx.author.mention}, ATM ukhadte waqt alarm baj gya! Aapko bhaari fine bharna pada: **🪙 {fine}**! 💀")
+            await ctx.send(f"🚨 {ctx.author.mention}, ATM ukhadte waqt alarm baj gya! Aapko bhaari fine bharna pada: **<a:money:852408387185672213> {fine}**! 💀")
 
         conn.commit()
         conn.close()

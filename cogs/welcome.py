@@ -26,7 +26,7 @@ class Welcome(commands.Cog):
         CREATE TABLE IF NOT EXISTS welcome_config (
             guild_id TEXT PRIMARY KEY,
             channel_id TEXT,
-            message TEXT DEFAULT 'Welcome {user} to {server}! 🎉',
+            message TEXT DEFAULT 'Welcome {user} to {server}! <a:giveaway:686211362548088858>',
             mention INTEGER DEFAULT 1,
             enabled INTEGER DEFAULT 1,
             member_counter INTEGER DEFAULT 0
@@ -43,7 +43,7 @@ class Welcome(commands.Cog):
             return None
         return {
             "channel_id": int(row[0]) if row[0] else None,
-            "message": row[1] or "Welcome {user} to {server}! 🎉",
+            "message": row[1] or "Welcome {user} to {server}! <a:giveaway:686211362548088858>",
             "mention": bool(row[2]),
             "enabled": bool(row[3]),
             "member_counter": row[4] or 0
@@ -57,7 +57,7 @@ class Welcome(commands.Cog):
             cursor.execute("INSERT OR IGNORE INTO welcome_config (guild_id) VALUES (?)", (str(guild_id),))
             current = {
                 "channel_id": None,
-                "message": "Welcome {user} to {server}! 🎉",
+                "message": "Welcome {user} to {server}! <a:giveaway:686211362548088858>",
                 "mention": True,
                 "enabled": True,
                 "member_counter": 0
@@ -119,7 +119,7 @@ class Welcome(commands.Cog):
         return formatted
 
     # ─────────────────────────────────────────────────────────────
-    # 🎉 EVENT LISTENER — MEMBER JOIN
+    # <a:giveaway:686211362548088858> EVENT LISTENER — MEMBER JOIN
     # ─────────────────────────────────────────────────────────────
 
     @commands.Cog.listener()
@@ -177,7 +177,7 @@ class Welcome(commands.Cog):
         status_str = "ENABLED <a:verified_tick:837551087786393710>" if (cfg and cfg["enabled"]) else "DISABLED ❌"
         channel_str = f"<#{cfg['channel_id']}>" if (cfg and cfg.get("channel_id")) else "Not Set"
         mention_str = "ON (@User tag)" if (cfg and cfg.get("mention", True)) else "OFF (Sirf naam)"
-        msg_str = cfg["message"] if cfg else "Welcome {user} to {server}! 🎉"
+        msg_str = cfg["message"] if cfg else "Welcome {user} to {server}! <a:giveaway:686211362548088858>"
 
         embed = discord.Embed(
             title="👋 SpaceX Welcome System",
