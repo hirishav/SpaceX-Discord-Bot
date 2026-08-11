@@ -178,7 +178,7 @@ class ModGiveaway(commands.Cog):
         embed_win.set_footer(text="Mubarak ho bhai!")
         
         await g_msg.edit(content="<a:giveaway:686211362548088858> **GIVEAWAY ENDED** <a:giveaway:686211362548088858>", embed=embed_win, view=None)
-        await channel.send(f"🥳 **Mubarak ho {winner_mention}!** Tumne **{prize}** ka giveaway jeet liya hai! {g_msg.jump_url}")
+        await channel.send(f"<a:giveaway:686211362548088858> **Mubarak ho {winner_mention}!** Tumne **{prize}** ka giveaway jeet liya hai! {g_msg.jump_url}")
         
         if winner:
             try:

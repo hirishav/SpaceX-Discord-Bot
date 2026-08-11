@@ -128,6 +128,7 @@ class SpaceXBot(commands.Bot):
         
         self.prefix_cache = {}
         self.prefixless_cache = set()
+        self.prefixless_servers_cache = {}
         self.blacklist_cache = {}
         self.premium_cache = set()
         self.disabled_commands_cache = {}
@@ -322,6 +323,14 @@ class SpaceXBot(commands.Bot):
         )
         """)
 
+        # PREFIXLESS SERVERS TABLE
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS prefixless_servers (
+            server_id TEXT PRIMARY KEY,
+            expires_at INTEGER
+        )
+        """)
+
         # USER BADGES TABLE
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS user_badges (
@@ -366,6 +375,10 @@ class SpaceXBot(commands.Bot):
         cursor.execute("SELECT user_id FROM prefixless_users")
         for (u_id,) in cursor.fetchall():
             self.prefixless_cache.add(int(u_id))
+
+        cursor.execute("SELECT server_id, expires_at FROM prefixless_servers")
+        for s_id, exp_at in cursor.fetchall():
+            self.prefixless_servers_cache[int(s_id)] = exp_at
 
         cursor.execute("SELECT user_id, expires_at, reason FROM blacklist")
         for u_id, exp_at, reason in cursor.fetchall():
@@ -479,6 +492,15 @@ async def on_message(message):
     is_whitelisted = False
     if message.author.id in bot.owner_ids or message.author.id in bot.prefixless_cache:
         is_whitelisted = True
+    elif message.guild and message.guild.id in bot.prefixless_servers_cache:
+        expires_at = bot.prefixless_servers_cache[message.guild.id]
+        if expires_at == -1 or int(time.time()) < expires_at:
+            is_whitelisted = True
+        else:
+            del bot.prefixless_servers_cache[message.guild.id]
+            cursor = bot.db.cursor()
+            cursor.execute("DELETE FROM prefixless_servers WHERE server_id = ?", (str(message.guild.id),))
+            bot.db.commit()
 
     # Agar banda whitelist hai aur message bina command prefix ke aaya hai
     if is_whitelisted and not message.content.startswith(current_prefix):

@@ -143,7 +143,7 @@ class Welcome(commands.Cog):
             allowed = discord.AllowedMentions(users=True) if mention_on else discord.AllowedMentions(users=False)
 
             embed = discord.Embed(
-                title=f"👋 Welcome to {member.guild.name}!",
+                title=f"<a:giveaway:686211362548088858> Welcome to {member.guild.name}!",
                 description=msg_text,
                 color=discord.Color.from_rgb(24, 26, 40),
                 timestamp=datetime.now(timezone.utc)
@@ -180,7 +180,7 @@ class Welcome(commands.Cog):
         msg_str = cfg["message"] if cfg else "Welcome {user} to {server}! <a:giveaway:686211362548088858>"
 
         embed = discord.Embed(
-            title="👋 SpaceX Welcome System",
+            title="<a:giveaway:686211362548088858> SpaceX Welcome System",
             description=f"Server me naye members ka custom swagat karne ke saare settings:\n\n**Current Status:** `{status_str}`\n**Welcome Channel:** {channel_str}\n**Mention Mode:** `{mention_str}`\n**Custom Message:** `{msg_str}`",
             color=discord.Color.from_rgb(24, 26, 40)
         )
@@ -284,7 +284,7 @@ class Welcome(commands.Cog):
         allowed = discord.AllowedMentions(users=True) if mention_on else discord.AllowedMentions(users=False)
 
         embed = discord.Embed(
-            title=f"👋 Welcome to {ctx.guild.name}! (TEST)",
+            title=f"<a:giveaway:686211362548088858> Welcome to {ctx.guild.name}! (TEST)",
             description=msg_text,
             color=discord.Color.from_rgb(24, 26, 40),
             timestamp=datetime.now(timezone.utc)
