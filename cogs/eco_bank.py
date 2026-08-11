@@ -44,7 +44,7 @@ class EcoBank(commands.Cog):
         if amount <= 0:
             return await ctx.send("❌ Amount 0 se bada hona chahiye bhai!")
         if amount > wallet:
-            return await ctx.send(f"❌ Aapke wallet me itne paise nahi hain! Current Wallet: <a:money:852408387185672213> `{wallet}`")
+            return await ctx.send(f"❌ Aapke wallet me itne paise nahi hain! Current Wallet: 🪙 `{wallet}`")
 
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
@@ -52,7 +52,7 @@ class EcoBank(commands.Cog):
         conn.commit()
         conn.close()
 
-        await ctx.send(f"🏦 {ctx.author.mention} ne **<a:money:852408387185672213> {amount:,}** coins apne bank me safe deposit kar diye!")
+        await ctx.send(f"🏦 {ctx.author.mention} ne **🪙 {amount:,}** coins apne bank me safe deposit kar diye!")
 
     @commands.hybrid_command(name="withdraw", aliases=["with"])
     async def withdraw(self, ctx, amount_str: str = None):
@@ -78,7 +78,7 @@ class EcoBank(commands.Cog):
         if amount <= 0:
             return await ctx.send("❌ Amount 0 se bada hona chahiye bhai!")
         if amount > bank:
-            return await ctx.send(f"❌ Bank me itne coins nahi hain! Current Bank: <a:money:852408387185672213> `{bank}`")
+            return await ctx.send(f"❌ Bank me itne coins nahi hain! Current Bank: 🪙 `{bank}`")
 
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
@@ -86,7 +86,7 @@ class EcoBank(commands.Cog):
         conn.commit()
         conn.close()
 
-        await ctx.send(f"<a:money:852408387185672213> {ctx.author.mention} ne **<a:money:852408387185672213> {amount:,}** coins bank se nikal kar wallet me daal liye!")
+        await ctx.send(f"💰 {ctx.author.mention} ne **🪙 {amount:,}** coins bank se nikal kar wallet me daal liye!")
 
 async def setup(bot):
     await bot.add_cog(EcoBank(bot))

@@ -43,7 +43,7 @@ class OwnerRep(commands.Cog):
         conn.commit()
         conn.close()
 
-        await ctx.send(f"👑 **Owner Action:** Added `{amount}` rep points to **{username}**!")
+        await ctx.send(f"<a:owner:1453608135104270498> **Owner Action:** Added `{amount}` rep points to **{username}**!")
 
     @commands.hybrid_command(name="removerep", hidden=True)
     @commands.is_owner()
@@ -61,7 +61,7 @@ class OwnerRep(commands.Cog):
 
         if amount_str.lower() == "all":
             cursor.execute("UPDATE reps SET rep_points = 0 WHERE user_id = ?", (user_id,))
-            msg = f"👑 **Owner Action:** Removed all rep points from **{username}**!"
+            msg = f"<a:owner:1453608135104270498> **Owner Action:** Removed all rep points from **{username}**!"
         else:
             if not amount_str.isdigit():
                 conn.close()
@@ -78,7 +78,7 @@ class OwnerRep(commands.Cog):
                 amount = result[0] if result else 0
                 
             cursor.execute("UPDATE reps SET rep_points = rep_points - ? WHERE user_id = ?", (amount, user_id))
-            msg = f"👑 **Owner Action:** Removed `{amount}` rep points from **{username}**!"
+            msg = f"<a:owner:1453608135104270498> **Owner Action:** Removed `{amount}` rep points from **{username}**!"
 
         conn.commit()
         conn.close()

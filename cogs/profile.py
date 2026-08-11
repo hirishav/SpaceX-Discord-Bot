@@ -45,7 +45,7 @@ class UserProfile(commands.Cog):
             embed.description = "*No badges yet.*"
 
         # Economy Details
-        embed.add_field(name="<a:money:852408387185672213> Net Worth", value=f"✨ `{total_wealth:,}` coins\n(Wallet: {wallet:,} | Bank: {bank:,})", inline=False)
+        embed.add_field(name="💰 Net Worth", value=f"✨ `{total_wealth:,}` coins\n(Wallet: {wallet:,} | Bank: {bank:,})", inline=False)
         
         # Account Info
         joined_server = member.joined_at.strftime("%d %b %Y") if member.joined_at else "Unknown"

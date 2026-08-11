@@ -45,10 +45,10 @@ class EcoCoinflip(commands.Cog):
 
         if user_choice == bot_flip:
             cursor.execute("UPDATE economy SET wallet = wallet + ? WHERE user_id = ?", (amount, str(ctx.author.id)))
-            embed = discord.Embed(title="<a:money:852408387185672213> Coinflip - JEET GAYE!", description=f"Coin par **{bot_flip.upper()}** aaya!\nAapne lagaaye the `<a:money:852408387185672213> {amount}` aur aap **`<a:money:852408387185672213> {amount}`** coins jeet gaye! <a:giveaway:686211362548088858>", color=discord.Color.green())
+            embed = discord.Embed(title="🪙 Coinflip - JEET GAYE!", description=f"Coin par **{bot_flip.upper()}** aaya!\nAapne lagaaye the `🪙 {amount}` aur aap **`🪙 {amount}`** coins jeet gaye! <a:giveaway:686211362548088858>", color=discord.Color.green())
         else:
             cursor.execute("UPDATE economy SET wallet = wallet - ? WHERE user_id = ?", (amount, str(ctx.author.id)))
-            embed = discord.Embed(title="<a:money:852408387185672213> Coinflip - HAR GAYE!", description=f"Coin par **{bot_flip.upper()}** aaya!\nAapne kismat me `<a:money:852408387185672213> {amount}` coins gawa diye! 💀", color=discord.Color.red())
+            embed = discord.Embed(title="🪙 Coinflip - HAR GAYE!", description=f"Coin par **{bot_flip.upper()}** aaya!\nAapne kismat me `🪙 {amount}` coins gawa diye! 💀", color=discord.Color.red())
 
         conn.commit()
         conn.close()

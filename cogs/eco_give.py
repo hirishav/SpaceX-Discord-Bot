@@ -50,7 +50,7 @@ class EcoGive(commands.Cog):
         if amount <= 0:
             return await ctx.send("❌ Amount 0 se bada hona chahiye!")
         if amount > author_wallet:
-            return await ctx.send(f"❌ Aapke paas itne coins nahi hain! Current wallet: <a:money:852408387185672213> `{author_wallet}`")
+            return await ctx.send(f"❌ Aapke paas itne coins nahi hain! Current wallet: 🪙 `{author_wallet}`")
 
         # Update Database
         conn = sqlite3.connect(self.db_path)
@@ -60,7 +60,7 @@ class EcoGive(commands.Cog):
         conn.commit()
         conn.close()
 
-        await ctx.send(f"<a:money:852408387185672213> {ctx.author.mention} ne {member.mention} ko <a:money:852408387185672213> `{amount:,}` coins transfer kar diye!")
+        await ctx.send(f"💸 {ctx.author.mention} ne {member.mention} ko 🪙 `{amount:,}` coins transfer kar diye!")
 
 async def setup(bot):
     await bot.add_cog(EcoGive(bot))

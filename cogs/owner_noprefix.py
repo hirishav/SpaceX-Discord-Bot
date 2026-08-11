@@ -9,7 +9,7 @@ class OwnerNoPrefix(commands.Cog):
     @commands.hybrid_command(name="addprefixless", hidden=True)
     @commands.is_owner()
     async def add_prefixless(self, ctx, member: discord.Member = None):
-        """👑 Owner Only: Kisi member ko bina prefix ke bot use karne ki permission dene ke liye."""
+        """<a:owner:1453608135104270498> Owner Only: Kisi member ko bina prefix ke bot use karne ki permission dene ke liye."""
         if not member:
             return await ctx.send(f"❌ Sahi tarika: `{ctx.prefix}addprefixless @user`")
 
@@ -23,7 +23,7 @@ class OwnerNoPrefix(commands.Cog):
             if hasattr(self.bot, 'prefixless_cache'):
                 self.bot.prefixless_cache.add(member.id)
             
-            await ctx.send(f"<a:verified_tick:837551087786393710> **{member.name}** ko prefixless access de diya gaya hai! Ab ye launda bina prefix ke aag laga sakta hai. 😎")
+            await ctx.send(f"<a:owner:1453608135104270498> **{member.name}** ko prefixless access de diya gaya hai! Ab ye launda bina prefix ke aag laga sakta hai. 😎")
         except Exception:
             # Handle standard unique integrity violation array checks
             await ctx.send("❌ Yeh banda pehle se hi whitelisted hai bhai!")
@@ -31,7 +31,7 @@ class OwnerNoPrefix(commands.Cog):
     @commands.hybrid_command(name="removeprefixless", aliases=["rp"], hidden=True)
     @commands.is_owner()
     async def remove_prefixless(self, ctx, member: discord.Member = None):
-        """👑 Owner Only: Kisi user ka prefixless access wapas chheen ne ke liye."""
+        """<a:owner:1453608135104270498> Owner Only: Kisi user ka prefixless access wapas chheen ne ke liye."""
         if not member:
             return await ctx.send(f"❌ Sahi tarika: `{ctx.prefix}removeprefixless @user`")
 
@@ -52,7 +52,7 @@ class OwnerNoPrefix(commands.Cog):
     @commands.hybrid_command(name="listprefixless", aliases=["lp"], hidden=True)
     @commands.is_owner()
     async def list_prefixless(self, ctx):
-        """👑 Owner Only: Saare whitelisted logo ki absolute matrix list dekhne ke liye."""
+        """<a:owner:1453608135104270498> Owner Only: Saare whitelisted logo ki absolute matrix list dekhne ke liye."""
         cursor = self.bot.db.cursor()
         cursor.execute("SELECT user_id FROM prefixless_users")
         rows = cursor.fetchall()

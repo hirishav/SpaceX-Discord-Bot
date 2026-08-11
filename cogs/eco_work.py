@@ -62,7 +62,7 @@ class EcoWork(commands.Cog):
 
         embed = discord.Embed(
             title="💼 Work Completed!",
-            description=f"{ctx.author.mention}, aapne **{job}** aur badle me aapko **<a:money:852408387185672213> {earnings}** coins mile!",
+            description=f"{ctx.author.mention}, aapne **{job}** aur badle me aapko **🪙 {earnings}** coins mile!",
             color=discord.Color.green()
         )
         await ctx.send(embed=embed)

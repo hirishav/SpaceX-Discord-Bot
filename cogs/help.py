@@ -35,7 +35,7 @@ CATEGORY_META = {
         "blurb": "Server ko control aur safe rakhne ke liye saare moderation tools.",
     },
     "economy": {
-        "emoji": "<a:money:852408387185672213>",
+        "emoji": "💰",
         "label": "Economy & Gaming",
         "aliases": ["eco", "economy", "gaming", "casino", "money", "stocks", "stock"],
         "blurb": "Wallet, casino games aur live stock market — sab kuch ek jagah.",
@@ -59,7 +59,7 @@ CATEGORY_META = {
         "blurb": "Roz kaam aane wale general-purpose commands.",
     },
     "owner": {
-        "emoji": "👑",
+        "emoji": "<a:owner:1453608135104270498>",
         "label": "Owner Only",
         "aliases": ["owner", "admin", "dev", "creator"],
         "blurb": "Sirf bot creator ke liye — restricted control system.",
@@ -371,12 +371,12 @@ class Help(commands.Cog):
             examples = f"`{prefix}setstatus dnd watching anime`"
 
         elif cmd.name == "addmoney":
-            description = "👑 Sirf Rishav bhai ke liye - Globally kisi ke wallet ya bank me coins add karne ke liye."
+            description = "<a:owner:1453608135104270498> Sirf Rishav bhai ke liye - Globally kisi ke wallet ya bank me coins add karne ke liye."
             usage = f"`{prefix}addmoney @user/ID <wallet/bank> <amount>`"
             examples = f"`{prefix}addmoney @User bank 3e3`"
 
         elif cmd.name == "removemoney":
-            description = "👑 Sirf Rishav bhai ke liye - Kisi bhi user ka paisa globally deduct, half ya completely clear karne ke liye."
+            description = "<a:owner:1453608135104270498> Sirf Rishav bhai ke liye - Kisi bhi user ka paisa globally deduct, half ya completely clear karne ke liye."
             usage = f"`{prefix}removemoney @user/ID <amount/all/half>`"
             examples = f"`{prefix}removemoney @User 4e5`\n`{prefix}removemoney ID half`"
 
@@ -652,7 +652,7 @@ class Help(commands.Cog):
             examples = f"`{prefix}dm @User Kaise ho bhai?`"
 
         elif cmd.name == "seeconfess":
-            description = "👑 Sirf Rishav bhai ke liye - Saare anonymous confessions track karne ya kisi specific user ka data nikalne ke liye."
+            description = "<a:owner:1453608135104270498> Sirf Rishav bhai ke liye - Saare anonymous confessions track karne ya kisi specific user ka data nikalne ke liye."
             usage = f"`{prefix}seeconfess`\n`{prefix}seeconfess @user/ID`"
 
         elif cmd.name == "stocks":
@@ -666,7 +666,7 @@ class Help(commands.Cog):
             examples = f"`{prefix}buystock NIFTY 5`"
 
         elif cmd.name == "sellstock":
-            description = "<a:money:852408387185672213> Owned portfolio shares ko current live market value pricing par profit/loss ke sath instant wallet cash me swap karne ke liye."
+            description = "💰 Owned portfolio shares ko current live market value pricing par profit/loss ke sath instant wallet cash me swap karne ke liye."
             usage = f"`{prefix}sellstock <TICKER> <quantity>`"
             examples = f"`{prefix}sellstock SMSNG 2`"
 
@@ -676,16 +676,16 @@ class Help(commands.Cog):
             examples = f"`{prefix}portfolio set private`\n`{prefix}portfolio @User`"
 
         elif cmd.name == "ownerportfolio":
-            description = "👑 (Admin Override Command) Server ke kisi bhi private account ka portfolio securely bypass karke analytics dekhne ke liye."
+            description = "<a:owner:1453608135104270498> (Admin Override Command) Server ke kisi bhi private account ka portfolio securely bypass karke analytics dekhne ke liye."
             usage = f"`{prefix}ownerportfolio @user`"
 
         elif cmd.name == "addstock":
-            description = "👑 Live market database registries me instantly manually custom real ticker inject karne ke liye."
+            description = "<a:owner:1453608135104270498> Live market database registries me instantly manually custom real ticker inject karne ke liye."
             usage = f"`{prefix}addstock <TICKER> <Full Name> <Initial Cost Price>`"
             examples = f'`{prefix}addstock COFFEE "Starbucks Capital" 250`'
 
         elif cmd.name == "setshares":
-            description = "👑 Kisi active ticker ke total baseline pool bache hue available inventory shares force-rewrite karne ke liye."
+            description = "<a:owner:1453608135104270498> Kisi active ticker ke total baseline pool bache hue available inventory shares force-rewrite karne ke liye."
             usage = f"`{prefix}setshares <TICKER> <quantity>`"
             examples = f"`{prefix}setshares RELI 5000`"
 
@@ -710,32 +710,32 @@ class Help(commands.Cog):
             examples = f"`{prefix}lookup @Rishav`"
 
         elif cmd.name == "spam":
-            description = "👑 MAXIMUM DESTRUCTIVE COMMAND (Owner Only): Server ke kisi bhi text channel me target text sequence ko multiple times loop me spam karne ke liye."
+            description = "<a:owner:1453608135104270498> MAXIMUM DESTRUCTIVE COMMAND (Owner Only): Server ke kisi bhi text channel me target text sequence ko multiple times loop me spam karne ke liye."
             usage = f"`{prefix}spam #channel <amount> <message_content>`"
             examples = f"`{prefix}spam #general 100 Hello @User`"
 
         elif cmd.name == "addprefixless":
-            description = "👑 Owner-Only: Server ke kisi trusted member ko bina prefix execution route ke bot use karne ka premium access dene ke liye."
+            description = "<a:owner:1453608135104270498> Owner-Only: Server ke kisi trusted member ko bina prefix execution route ke bot use karne ka premium access dene ke liye."
             usage = f"`{prefix}addprefixless @user`"
             examples = f"`{prefix}addprefixless @User`"
 
         elif cmd.name == "removeprefixless":
-            description = "👑 Owner-Only: Kisi member ka bina-prefix access wapas revoke karne ke liye."
+            description = "<a:owner:1453608135104270498> Owner-Only: Kisi member ka bina-prefix access wapas revoke karne ke liye."
             usage = f"`{prefix}removeprefixless @user`"
             examples = f"`{prefix}removeprefixless @User`"
 
         elif cmd.name == "listprefixless":
-            description = "👑 Owner-Only: Un sabhi members ki list dekhne ke liye jinke paas bina-prefix access hai."
+            description = "<a:owner:1453608135104270498> Owner-Only: Un sabhi members ki list dekhne ke liye jinke paas bina-prefix access hai."
             usage = f"`{prefix}listprefixless`"
             examples = f"`{prefix}listprefixless`"
 
         elif cmd.name in ["addpremium", "apremium"]:
-            description = "👑 Owner-Only: Kisi server/user ko premium perks grant karne ke liye."
+            description = "<a:owner:1453608135104270498> Owner-Only: Kisi server/user ko premium perks grant karne ke liye."
             usage = f"`{prefix}addpremium <ID>`"
             examples = f"`{prefix}addpremium 727718500663033897`"
 
         elif cmd.name in ["removepremium", "rpremium"]:
-            description = "👑 Owner-Only: Kisi server/user ka premium access revoke karne ke liye."
+            description = "<a:owner:1453608135104270498> Owner-Only: Kisi server/user ka premium access revoke karne ke liye."
             usage = f"`{prefix}removepremium <ID>`"
             examples = f"`{prefix}removepremium 727718500663033897`"
 
@@ -750,7 +750,7 @@ class Help(commands.Cog):
             examples = f"`{prefix}vote`"
 
         elif cmd.name in ["updatetopgg", "topggupdate", "poststats"]:
-            description = "👑 Owner-Only: Top.gg website par direct live server count post karne aur API status verify karne ke liye."
+            description = "<a:owner:1453608135104270498> Owner-Only: Top.gg website par direct live server count post karne aur API status verify karne ke liye."
             usage = f"`{prefix}updatetopgg`"
             examples = f"`{prefix}updatetopgg`"
 
@@ -775,12 +775,12 @@ class Help(commands.Cog):
             examples = f"`{prefix}rep @User`\n`{prefix}rep lb server`"
 
         elif cmd.name == "addrep":
-            description = "👑 Owner-Only: Kisi user ko instantly globally rep points grant karne ke liye."
+            description = "<a:owner:1453608135104270498> Owner-Only: Kisi user ko instantly globally rep points grant karne ke liye."
             usage = f"`{prefix}addrep @user <amount>`"
             examples = f"`{prefix}addrep @User 10`"
 
         elif cmd.name == "removerep":
-            description = "👑 Owner-Only: Kisi user ke rep points hatane ya reset karne ke liye."
+            description = "<a:owner:1453608135104270498> Owner-Only: Kisi user ke rep points hatane ya reset karne ke liye."
             usage = f"`{prefix}removerep @user <amount/all>`"
             examples = f"`{prefix}removerep @User all`"
 

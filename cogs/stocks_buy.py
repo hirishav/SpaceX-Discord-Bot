@@ -56,7 +56,7 @@ class StocksBuy(commands.Cog):
         conn.close()
 
         embed = discord.Embed(title="<a:verified_tick:837551087786393710> Shares Purchased!", color=discord.Color.green())
-        embed.description = f"🥳 Tumne **{amount}** shares khareed liye hain **{ticker}** ke!\n<a:money:852408387185672213> Total Deducted: **{total_cost} Coins**."
+        embed.description = f"🥳 Tumne **{amount}** shares khareed liye hain **{ticker}** ke!\n💰 Total Deducted: **{total_cost} Coins**."
         await ctx.send(embed=embed)
 
 async def setup(bot):

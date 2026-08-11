@@ -36,13 +36,13 @@ class EcoBal(commands.Cog):
         badges = [row[0] for row in cursor.fetchall()]
         conn.close()
 
-        embed = discord.Embed(title=f"<a:money:852408387185672213> {member.name}'s Global Balance", color=discord.Color.green())
+        embed = discord.Embed(title=f"💰 {member.name}'s Global Balance", color=discord.Color.green())
         if badges:
             embed.description = " | ".join(badges)
             
         embed.set_thumbnail(url=member.display_avatar.url)
-        embed.add_field(name="👛 Wallet (Cash)", value=f"<a:money:852408387185672213> `{wallet:,}` coins", inline=True)
-        embed.add_field(name="🏦 Bank Account", value=f"<a:money:852408387185672213> `{bank:,}` coins", inline=True)
+        embed.add_field(name="👛 Wallet (Cash)", value=f"🪙 `{wallet:,}` coins", inline=True)
+        embed.add_field(name="🏦 Bank Account", value=f"🪙 `{bank:,}` coins", inline=True)
         embed.add_field(name="📊 Total Net Worth", value=f"✨ `{total:,}` coins", inline=False)
         embed.set_footer(text="SpaceX Economy • Global System")
         
