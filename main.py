@@ -48,8 +48,8 @@ def topgg_webhook():
         cursor = db.cursor()
         cursor.execute("INSERT OR IGNORE INTO reps (user_id, rep_points) VALUES (?, 0)", (user_id,))
         
-        # Determine rep points: e.g., 2 points for weekend votes, 1 for normal
-        rep_amount = 2 if data.get('isWeekend') else 1
+        # Determine rep points: e.g., 1 point for normal and weekend votes
+        rep_amount = 1
         
         cursor.execute("UPDATE reps SET rep_points = rep_points + ? WHERE user_id = ?", (rep_amount, user_id))
         
@@ -134,6 +134,27 @@ class SpaceXBot(commands.Bot):
         self.disabled_commands_cache = {}
         self.topgg_client = None
         self.add_check(self.check_disabled_commands)
+        self.tree.interaction_check = self.tree_interaction_check
+
+    async def tree_interaction_check(self, interaction: discord.Interaction):
+        if not interaction.guild or not interaction.command:
+            return True
+            
+        command_name = interaction.command.name
+        
+        if command_name == "command": 
+            return True
+            
+        if interaction.guild.id in self.disabled_commands_cache:
+            if command_name in self.disabled_commands_cache[interaction.guild.id]:
+                embed = discord.Embed(
+                    title="Command Disabled",
+                    description=f"❌ The `{command_name}` command is disabled in this server.",
+                    color=discord.Color.red()
+                )
+                await interaction.response.send_message(embed=embed, ephemeral=True)
+                return False
+        return True
 
     async def check_disabled_commands(self, ctx):
         if getattr(ctx, 'is_sudo', False):
