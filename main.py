@@ -95,14 +95,38 @@ def keep_alive():
 
 # ⚙️ DYNAMIC CUSTOM PREFIX FETCH ENGINE (OPTIMIZED)
 def get_prefix(bot, message):
+    base_prefix = '!!'
     if not message.guild:
-        return '!!'
+        return base_prefix
     
     # ⚡ Cache se instantly uthao (0.000ms Latency)
     if hasattr(bot, 'prefix_cache') and message.guild.id in bot.prefix_cache:
-        return bot.prefix_cache[message.guild.id]
+        base_prefix = bot.prefix_cache[message.guild.id]
         
-    return '!!'
+    is_whitelisted = False
+    if message.author.id in bot.owner_ids or (hasattr(bot, 'prefixless_cache') and message.author.id in bot.prefixless_cache):
+        is_whitelisted = True
+    elif hasattr(bot, 'prefixless_servers_cache') and message.guild.id in bot.prefixless_servers_cache:
+        expires_at = bot.prefixless_servers_cache[message.guild.id]
+        if expires_at == -1 or int(time.time()) < expires_at:
+            is_whitelisted = True
+
+    if is_whitelisted and message.content:
+        tokens = message.content.split()
+        if tokens:
+            first_word = tokens[0].lower()
+            if not hasattr(bot, 'all_commands_cache'):
+                all_cmds = set()
+                for cmd in bot.commands:
+                    all_cmds.add(cmd.name)
+                    for alias in cmd.aliases:
+                        all_cmds.add(alias)
+                bot.all_commands_cache = all_cmds
+            
+            if first_word in bot.all_commands_cache:
+                return (base_prefix, "")
+                
+    return base_prefix
 
 # Discord Bot Setup - Optimized for 512MB RAM
 intents = discord.Intents.default()
@@ -508,6 +532,7 @@ async def on_message(message):
 
     # Cache optimized fast lookup
     current_prefix = get_prefix(bot, message)
+    display_prefix = current_prefix[0] if isinstance(current_prefix, tuple) else current_prefix
 
     # 🚨 STEP A: PREFIXLESS ROUTING LAYER ENGINE (FAST LOOKUP)
     is_whitelisted = False
@@ -522,18 +547,6 @@ async def on_message(message):
             cursor = bot.db.cursor()
             cursor.execute("DELETE FROM prefixless_servers WHERE server_id = ?", (str(message.guild.id),))
             bot.db.commit()
-
-    # Agar banda whitelist hai aur message bina command prefix ke aaya hai
-    if is_whitelisted and not message.content.startswith(current_prefix):
-        tokens = message.content.split()
-        if tokens:
-            first_word = tokens[0].lower()
-            all_commands = [cmd.name for cmd in bot.commands]
-            for cmd in bot.commands:
-                all_commands.extend(cmd.aliases)
-            
-            if first_word in all_commands:
-                message.content = f"{current_prefix}" + message.content
 
     # 1. 🔥 MAINTENANCE SYSTEM PEHRA
     is_owner = message.author.id in bot.owner_ids
@@ -595,7 +608,7 @@ async def on_message(message):
     if bot.user.mentioned_in(message) and len(message.content.strip().split()) == 1:
         embed = discord.Embed(
             title=f"Hello {message.author.name}! 👋",
-            description=f"Is server me mera current prefix **``{current_prefix}``** hai.\nAap commands ko **`{current_prefix}help`** tarike se use kar sakte hain!",
+            description=f"Is server me mera current prefix **``{display_prefix}``** hai.\nAap commands ko **`{display_prefix}help`** tarike se use kar sakte hain!",
             color=discord.Color.blue()
         )
         return await message.channel.send(embed=embed)
