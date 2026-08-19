@@ -45,9 +45,7 @@ class OwnerSpam(commands.Cog):
 
     @owner_spam_command.error
     async def spam_error(self, ctx, error):
-        if isinstance(error, commands.NotOwner):
-            await ctx.send("❌ **Access Denied!** Yeh ek highly destructive Owner-Only command hai. Aapke bas ki baat nahi hai launde! 😉")
-        elif isinstance(error, commands.ChannelNotFound):
+        if isinstance(error, commands.ChannelNotFound):
             await ctx.send("❌ Mujhe wo channel server me nahi mila bhai. Sahi se mention (#channel) karein.")
 
 async def setup(bot):

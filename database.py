@@ -11,4 +11,4 @@ def connect(db_path="warnings.db", **kwargs):
     """
     Standard SQLite Connection.
     """
-    return sqlite3.connect(db_path, check_same_thread=False)
+    return sqlite3.connect(db_path, check_same_thread=False, timeout=20.0)

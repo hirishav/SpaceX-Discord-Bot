@@ -78,6 +78,34 @@ class TicketClosedView(discord.ui.View):
         await cog.transcript_ticket_logic(interaction)
 
 
+class TicketCloseConfirmView(discord.ui.View):
+    def __init__(self, bot, reason="Closed via command"):
+        super().__init__(timeout=None)
+        self.bot = bot
+        self.reason = reason
+
+    @discord.ui.button(label="Confirm Close", emoji="✅", style=discord.ButtonStyle.danger, custom_id="spacex_ticket_confirm_close_btn")
+    async def confirm_close_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        cog = self.bot.get_cog("Ticket")
+        if not cog:
+            return await interaction.response.send_message("❌ Ticket system not loaded!", ephemeral=True)
+            
+        try:
+            await interaction.message.delete()
+        except discord.NotFound:
+            pass
+            
+        await cog.force_close_ticket_logic(interaction, self.reason)
+
+    @discord.ui.button(label="Cancel", emoji="❌", style=discord.ButtonStyle.secondary, custom_id="spacex_ticket_cancel_close_btn")
+    async def cancel_close_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        try:
+            await interaction.message.delete()
+        except discord.NotFound:
+            pass
+        await interaction.response.send_message("❌ Ticket close operation cancelled.", ephemeral=True)
+
+
 # ─────────────────────────────────────────────────────────────
 # 🎫 TICKET COG
 # ─────────────────────────────────────────────────────────────
@@ -141,12 +169,14 @@ class Ticket(commands.Cog):
         self.bot.add_view(TicketPanelView(self.bot))
         self.bot.add_view(TicketControlView(self.bot))
         self.bot.add_view(TicketClosedView(self.bot))
+        self.bot.add_view(TicketCloseConfirmView(self.bot))
 
     def get_config(self, guild_id: int):
         conn = self.get_connection()
         cursor = conn.cursor()
         cursor.execute("SELECT category_id, support_role_id, log_channel_id, panel_channel_id, panel_message_id, ticket_counter FROM ticket_config WHERE guild_id = ?", (str(guild_id),))
         row = cursor.fetchone()
+        cursor.close()
         if not row:
             return None
         return {
@@ -186,6 +216,7 @@ class Ticket(commands.Cog):
             str(guild_id)
         ))
         conn.commit()
+        cursor.close()
 
     async def log_action(self, guild: discord.Guild, channel_id: int, user_id: int, action: str, reason: str = "N/A"):
         try:
@@ -336,6 +367,39 @@ class Ticket(commands.Cog):
         if str(user.id) != creator_id and not self.is_staff(user, cfg):
             return await interaction.response.send_message("❌ Bhai, aap dusre ka ticket close nahi kar sakte!", ephemeral=True)
 
+        embed = discord.Embed(
+            title="⚠️ Confirm Ticket Close",
+            description="Kya aap sach me is ticket ko close karna chahte hain?",
+            color=discord.Color.orange()
+        )
+        await interaction.response.send_message(embed=embed, view=TicketCloseConfirmView(self.bot, reason))
+
+    async def force_close_ticket_logic(self, interaction: discord.Interaction, reason: str = "Closed via command"):
+        channel = interaction.channel
+        user = interaction.user
+        guild = interaction.guild
+
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT user_id, status FROM ticket_data WHERE guild_id = ? AND channel_id = ?", (str(guild.id), str(channel.id)))
+        row = cursor.fetchone()
+        if not row:
+            if not interaction.response.is_done():
+                return await interaction.response.send_message("❌ Bhai, ye channel koi active ticket channel nahi hai!", ephemeral=True)
+            return
+
+        creator_id, status = row[0], row[1]
+        if status == 'closed':
+            if not interaction.response.is_done():
+                return await interaction.response.send_message("❌ Ye ticket pehle se hi closed hai!", ephemeral=True)
+            return
+
+        cfg = self.get_config(guild.id)
+        if str(user.id) != creator_id and not self.is_staff(user, cfg):
+            if not interaction.response.is_done():
+                return await interaction.response.send_message("❌ Bhai, aap dusre ka ticket close nahi kar sakte!", ephemeral=True)
+            return
+
         cursor.execute("UPDATE ticket_data SET status = 'closed' WHERE channel_id = ?", (str(channel.id),))
         conn.commit()
 
@@ -353,7 +417,7 @@ class Ticket(commands.Cog):
 
         embed = discord.Embed(
             title="🔒 Ticket Closed",
-            description=f"Ye ticket **{user.display_name}** dwara close kar diya गया hai.\n**Reason:** `{reason}`\n\nNeeche diye options se wapas open ya permanent delete kar sakte hain.",
+            description=f"Ye ticket **{user.display_name}** dwara close kar diya gaya hai.\n**Reason:** `{reason}`\n\nNeeche diye options se wapas open ya permanent delete kar sakte hain.",
             color=discord.Color.red()
         )
         await channel.send(embed=embed, view=TicketClosedView(self.bot))
@@ -518,31 +582,71 @@ class Ticket(commands.Cog):
         )
         prefix = ctx.prefix
         embed.add_field(name="⚙️ Admin / Setup", value=(
-            f"`{prefix}ticket setup <category> <support_role> [log_channel]` — Ticket system configure karein\n"
+            f"`{prefix}ticket auto-setup` — Automatic ticket system setup karein\n"
+            f"`{prefix}ticket setup <category> <support_role> [log_channel]` — Ticket system manually configure karein\n"
             f"`{prefix}ticket panel` — Interactive ticket panel channel me bhejein\n"
             f"`{prefix}ticket logs` — Server ke recent ticket activity logs dekhein"
         ), inline=False)
         embed.add_field(name="🎟️ User Commands", value=(
             f"`{prefix}ticket create` — Naya ticket open karein\n"
-            f"`{prefix}ticket close [reason]` — Current ticket close karein\n"
+            f"`{prefix}ticket close [reason]` — Current ticket close karein (warning aayega)\n"
+            f"`{prefix}ticket force-close [reason]` — Current ticket instantly close karein\n"
             f"`{prefix}ticket reopen` — Closed ticket ko wapas open karein\n"
             f"`{prefix}ticket delete` — Ticket channel delete karein"
         ), inline=False)
         embed.add_field(name="🛡️ Staff Commands", value=(
             f"`{prefix}ticket claim` — Ticket claim karein\n"
-            f"`{prefix}ticket unclaim` — Ticket ka claim hatayein\n"
+            f"`{prefix}ticket unclaim` / `{prefix}ticket release` — Ticket ka claim hatayein\n"
+            f"`{prefix}ticket transfer @user` — Ticket ka claim kisi aur staff ko dein\n"
             f"`{prefix}ticket add @user` — Member ko ticket me add karein\n"
             f"`{prefix}ticket remove @user` — Member ko ticket se harayein\n"
             f"`{prefix}ticket rename <name>` — Ticket channel ka naam badlein\n"
+            f"`{prefix}ticket topic <topic>` — Ticket channel ka topic description set karein\n"
             f"`{prefix}ticket transcript` — Ticket chat ka text transcript download karein"
         ), inline=False)
         embed.set_footer(text=f"Requested by {ctx.author.display_name}", icon_url=ctx.author.display_avatar.url)
         await ctx.send(embed=embed)
 
+    @ticket.command(name="auto-setup")
+    @commands.has_permissions(manage_guild=True)
+    async def autosetup(self, ctx):
+        """Ticket system auto-setup karein (Category, Role, aur Log Channel automatically banayega)."""
+        msg = await ctx.send("⚙️ **Ticket system auto-setup ho raha hai, kripya wait karein...**")
+        
+        try:
+            role = await ctx.guild.create_role(name="Ticket Support", color=discord.Color.blue(), reason="Ticket system auto-setup")
+            category = await ctx.guild.create_category("🎫 TICKETS", reason="Ticket system auto-setup")
+            
+            overwrites = {
+                ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False),
+                role: discord.PermissionOverwrite(read_messages=True, send_messages=True)
+            }
+            log_channel = await ctx.guild.create_text_channel("ticket-logs", category=category, overwrites=overwrites, reason="Ticket system auto-setup")
+            
+            self.update_config(
+                ctx.guild.id,
+                category_id=category.id,
+                support_role_id=role.id,
+                log_channel_id=log_channel.id
+            )
+            
+            embed = discord.Embed(
+                title="✅ Ticket System Auto-Setup Done!",
+                description="SpaceX Ticket System automatically configure ho gaya hai.",
+                color=discord.Color.green()
+            )
+            embed.add_field(name="📁 Category", value=category.mention, inline=True)
+            embed.add_field(name="🛡️ Support Role", value=role.mention, inline=True)
+            embed.add_field(name="📋 Log Channel", value=log_channel.mention, inline=True)
+            embed.set_footer(text="Ab aap `!!ticket panel` use karke open ticket ka button bhej sakte hain!")
+            await msg.edit(content=None, embed=embed)
+        except Exception as e:
+            await msg.edit(content=f"❌ Auto-setup me error aayi: {e}")
+
     @ticket.command(name="setup")
     @commands.has_permissions(manage_guild=True)
     async def setup(self, ctx, category: discord.CategoryChannel, support_role: discord.Role, log_channel: discord.TextChannel = None):
-        """Ticket system configure karne ke liye (Category, Support Role, Log Channel)."""
+        """Ticket system manually configure karne ke liye (Category, Support Role, Log Channel)."""
         self.update_config(
             ctx.guild.id,
             category_id=category.id,
@@ -663,7 +767,7 @@ class Ticket(commands.Cog):
 
     @ticket.command(name="close")
     async def close(self, ctx, *, reason: str = "Closed via command"):
-        """Current open ticket ko close karne ke liye."""
+        """Current open ticket ko close karne ke liye (warning aayega)."""
         conn = self.get_connection()
         cursor = conn.cursor()
         cursor.execute("SELECT user_id, status FROM ticket_data WHERE guild_id = ? AND channel_id = ?", (str(ctx.guild.id), str(ctx.channel.id)))
@@ -679,28 +783,32 @@ class Ticket(commands.Cog):
         if str(ctx.author.id) != creator_id and not self.is_staff(ctx.author, cfg):
             return await ctx.send("❌ Bhai, aap dusre ka ticket close nahi kar sakte!")
 
-        cursor.execute("UPDATE ticket_data SET status = 'closed' WHERE channel_id = ?", (str(ctx.channel.id),))
-        conn.commit()
-
-        creator = ctx.guild.get_member(int(creator_id))
-        if creator:
-            try:
-                await ctx.channel.set_permissions(creator, view_channel=True, send_messages=False, read_messages=True)
-            except Exception:
-                pass
-
-        try:
-            await ctx.channel.edit(name=f"closed-{ctx.channel.name}")
-        except Exception:
-            pass
-
         embed = discord.Embed(
-            title="🔒 Ticket Closed",
-            description=f"Ye ticket **{ctx.author.display_name}** dwara close kar diya gaya hai.\n**Reason:** `{reason}`\n\nNeeche diye options se wapas open ya permanent delete kar sakte hain.",
-            color=discord.Color.red()
+            title="⚠️ Confirm Ticket Close",
+            description="Kya aap sach me is ticket ko close karna chahte hain?",
+            color=discord.Color.orange()
         )
-        await ctx.send(embed=embed, view=TicketClosedView(self.bot))
-        await self.log_action(ctx.guild, ctx.channel.id, ctx.author.id, "Ticket Closed", f"Reason: {reason}")
+        await ctx.send(embed=embed, view=TicketCloseConfirmView(self.bot, reason))
+
+    @ticket.command(name="force-close")
+    @commands.has_permissions(manage_messages=True)
+    async def force_close(self, ctx, *, reason: str = "Force closed via command"):
+        """Current ticket ko instantly close karne ke liye (Bina kisi warning ke)."""
+        # Create a mock interaction structure to pass to force_close_ticket_logic
+        class MockInteraction:
+            def __init__(self, ctx):
+                self.channel = ctx.channel
+                self.user = ctx.author
+                self.guild = ctx.guild
+                self.message = None
+                class MockResponse:
+                    def __init__(self):
+                        self.is_done = lambda: True
+                    async def send_message(self, *args, **kwargs):
+                        await ctx.send(*args, **kwargs)
+                self.response = MockResponse()
+
+        await self.force_close_ticket_logic(MockInteraction(ctx), reason)
 
     @ticket.command(name="reopen")
     async def reopen(self, ctx):
@@ -796,7 +904,7 @@ class Ticket(commands.Cog):
         await ctx.send(embed=embed)
         await self.log_action(ctx.guild, ctx.channel.id, ctx.author.id, "Ticket Claimed", f"Claimed by {ctx.author.name}")
 
-    @ticket.command(name="unclaim")
+    @ticket.command(name="unclaim", aliases=["release"])
     async def unclaim(self, ctx):
         """Claim kiye hue ticket ka claim hatane ke liye."""
         conn = self.get_connection()
@@ -826,6 +934,34 @@ class Ticket(commands.Cog):
         )
         await ctx.send(embed=embed)
         await self.log_action(ctx.guild, ctx.channel.id, ctx.author.id, "Ticket Unclaimed", f"Unclaimed by {ctx.author.name}")
+
+    @ticket.command(name="transfer")
+    async def transfer(self, ctx, member: discord.Member):
+        """Ticket ka ownership kisi doosre staff ko transfer karne ke liye."""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT claimed_by FROM ticket_data WHERE guild_id = ? AND channel_id = ?", (str(ctx.guild.id), str(ctx.channel.id)))
+        row = cursor.fetchone()
+        if not row:
+            return await ctx.send("❌ Ye channel ticket channel nahi hai!")
+
+        cfg = self.get_config(ctx.guild.id)
+        if not self.is_staff(ctx.author, cfg):
+            return await ctx.send("❌ Ye command sirf moderators aur staff use kar sakte hain.")
+
+        if not self.is_staff(member, cfg):
+            return await ctx.send(f"❌ **{member.display_name}** staff member nahi hai!")
+
+        cursor.execute("UPDATE ticket_data SET claimed_by = ? WHERE channel_id = ?", (str(member.id), str(ctx.channel.id)))
+        conn.commit()
+
+        embed = discord.Embed(
+            title="🔄 Ticket Transferred",
+            description=f"Is ticket ka control ab {member.mention} ko de diya gaya hai.",
+            color=discord.Color.blue()
+        )
+        await ctx.send(embed=embed)
+        await self.log_action(ctx.guild, ctx.channel.id, ctx.author.id, "Ticket Transferred", f"Transferred to {member.name}")
 
     @ticket.command(name="add")
     async def add_member(self, ctx, member: discord.Member):
@@ -893,6 +1029,27 @@ class Ticket(commands.Cog):
             await self.log_action(ctx.guild, ctx.channel.id, ctx.author.id, "Ticket Renamed", f"Renamed to {clean_name}")
         except discord.Forbidden:
             await ctx.send("❌ Mere paas channel rename karne ki permission nahi hai!")
+
+    @ticket.command(name="topic")
+    async def topic(self, ctx, *, new_topic: str):
+        """Ticket channel ka description (topic) update karne ke liye."""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT user_id FROM ticket_data WHERE guild_id = ? AND channel_id = ?", (str(ctx.guild.id), str(ctx.channel.id)))
+        row = cursor.fetchone()
+        if not row:
+            return await ctx.send("❌ Ye channel ticket channel nahi hai!")
+
+        cfg = self.get_config(ctx.guild.id)
+        if not self.is_staff(ctx.author, cfg) and str(ctx.author.id) != row[0]:
+            return await ctx.send("❌ Sirf staff ya ticket creator topic badal sakte hain!")
+
+        try:
+            await ctx.channel.edit(topic=new_topic)
+            await ctx.send(f"📝 Ticket ka topic update kar diya gaya hai: **{new_topic}**")
+            await self.log_action(ctx.guild, ctx.channel.id, ctx.author.id, "Ticket Topic Changed", f"New topic: {new_topic}")
+        except discord.Forbidden:
+            await ctx.send("❌ Mere paas channel modify karne ki permission nahi hai!")
 
     @ticket.command(name="transcript")
     async def transcript(self, ctx):

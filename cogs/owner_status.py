@@ -42,10 +42,7 @@ class OwnerStatus(commands.Cog):
         await self.bot.change_presence(status=status, activity=activity)
         await ctx.send(f"✅ Status badal kar **{status_type.upper()}** kar diya gaya hai!")
 
-    @setstatus.error
-    async def status_error(self, ctx, error):
-        if isinstance(error, commands.NotOwner):
-            await ctx.send("❌ You cannot use this command. This command belongs to the Owner!")
+
 
     @commands.hybrid_command(name="updatetopgg", aliases=["topggupdate", "poststats"], hidden=True)
     @commands.is_owner()
@@ -68,10 +65,7 @@ class OwnerStatus(commands.Cog):
             )
             await msg.edit(content=None, embed=embed)
 
-    @updatetopgg.error
-    async def updatetopgg_error(self, ctx, error):
-        if isinstance(error, commands.NotOwner):
-            await ctx.send("❌ You cannot use this command. This command belongs to the Owner!")
+
 
 # Is file ka apna alag setup function
 async def setup(bot):

@@ -59,5 +59,40 @@ class ModBan(commands.Cog):
         elif isinstance(error, commands.MissingRequiredArgument):
             await ctx.send(f"❌ Sahi tarika: `{ctx.prefix}ban @user <reason>`")
 
+    @commands.hybrid_command(name="forceban")
+    @commands.has_permissions(ban_members=True)
+    async def forceban(self, ctx, user: discord.User, *, reason: str = "Force banned (not in server)"):
+        """Kisi user ko uske ID se permanent ban karne ke liye (chahe wo server me na ho)."""
+        
+        # Check if the user is actually in the server. If so, apply the same checks as normal ban.
+        member = ctx.guild.get_member(user.id)
+        if member:
+            if member.top_role >= ctx.author.top_role and ctx.author.id != ctx.guild.owner_id:
+                return await ctx.send("❌ Ye user server me hai aur aap apne se unche ya barabar ke role waale member ko ban nahi kar sakte!")
+            if member.top_role >= ctx.guild.me.top_role:
+                return await ctx.send("❌ Mera role is member se niche hai, main ise ban nahi kar sakta!")
+
+        try:
+            await ctx.guild.ban(user, reason=f"Forcebanned by {ctx.author.name} | Reason: {reason}", delete_message_days=1)
+            
+            embed = discord.Embed(
+                title="🔨 User Force Banned",
+                description=f"**{user.name}** ko hamesha ke liye ban kar diya gaya hai.",
+                color=discord.Color.red()
+            )
+            embed.add_field(name="👤 Target", value=f"{user.mention} (`{user.id}`)", inline=True)
+            embed.add_field(name="🛡️ Staff", value=ctx.author.mention, inline=True)
+            embed.add_field(name="📝 Reason", value=reason, inline=False)
+            await ctx.send(embed=embed)
+        except discord.Forbidden:
+            await ctx.send("❌ Main is user ko ban nahi kar sakta! Kripya permissions check karein.")
+
+    @forceban.error
+    async def forceban_error(self, ctx, error):
+        if isinstance(error, commands.MissingPermissions):
+            pass
+        elif isinstance(error, (commands.MissingRequiredArgument, commands.UserNotFound)):
+            await ctx.send(f"❌ Sahi tarika: `{ctx.prefix}forceban <user_id> [reason]`")
+
 async def setup(bot):
     await bot.add_cog(ModBan(bot))

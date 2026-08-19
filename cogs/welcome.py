@@ -39,6 +39,7 @@ class Welcome(commands.Cog):
         cursor = conn.cursor()
         cursor.execute("SELECT channel_id, message, mention, enabled, member_counter FROM welcome_config WHERE guild_id = ?", (str(guild_id),))
         row = cursor.fetchone()
+        cursor.close()
         if not row:
             return None
         return {
@@ -79,6 +80,7 @@ class Welcome(commands.Cog):
             str(guild_id)
         ))
         conn.commit()
+        cursor.close()
 
     def format_account_age(self, created_at: datetime) -> str:
         now = datetime.now(timezone.utc)
@@ -308,6 +310,7 @@ class Welcome(commands.Cog):
         cursor = conn.cursor()
         cursor.execute("DELETE FROM welcome_config WHERE guild_id = ?", (str(ctx.guild.id),))
         conn.commit()
+        cursor.close()
         await ctx.send("♻️ Welcome configuration successfully reset ho gaya hai!")
 
     @setchannel.error

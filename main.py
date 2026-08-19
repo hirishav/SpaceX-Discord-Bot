@@ -155,10 +155,26 @@ class SpaceXBot(commands.Bot):
         self.prefixless_servers_cache = {}
         self.blacklist_cache = {}
         self.premium_cache = set()
-        self.disabled_commands_cache = {}
+        
+        # Disable configs cache
+        self.disabled_commands_cache = {} # server_id -> set of commands
+        self.disabled_commands_channel_cache = {} # channel_id -> set of commands
+        self.disabled_modules_server_cache = {} # server_id -> set of modules
+        self.disabled_modules_channel_cache = {} # channel_id -> set of modules
+        
         self.topgg_client = None
         self.add_check(self.check_disabled_commands)
         self.tree.interaction_check = self.tree_interaction_check
+
+    def _resolve_module(self, cmd) -> str:
+        cog_name = getattr(cmd, 'cog_name', None) or (cmd.cog.__class__.__name__ if getattr(cmd, 'cog', None) else "")
+        if cog_name == "OwnerInfo": return "utility"
+        if getattr(cmd, 'hidden', False) or cog_name.startswith("Owner") or cmd.name in {"blacklist"}: return "owner"
+        if cog_name.startswith("Mod"): return "moderation"
+        if cog_name.startswith("Eco") or cog_name.startswith("Stocks"): return "economy"
+        if cog_name.startswith("Fun"): return "fun"
+        if cog_name.startswith("Gen"): return "general"
+        return "utility"
 
     async def tree_interaction_check(self, interaction: discord.Interaction):
         if not interaction.guild or not interaction.command:
@@ -166,18 +182,33 @@ class SpaceXBot(commands.Bot):
             
         command_name = interaction.command.name
         
-        if command_name == "command": 
+        if command_name in {"disable", "enable"}: 
             return True
             
-        if interaction.guild.id in self.disabled_commands_cache:
-            if command_name in self.disabled_commands_cache[interaction.guild.id]:
-                embed = discord.Embed(
-                    title="Command Disabled",
-                    description=f"❌ The `{command_name}` command is disabled in this server.",
-                    color=discord.Color.red()
-                )
-                await interaction.response.send_message(embed=embed, ephemeral=True)
-                return False
+        guild_id = interaction.guild.id
+        channel_id = interaction.channel_id
+        module_name = self._resolve_module(interaction.command)
+        
+        disabled_reason = None
+        
+        if channel_id in self.disabled_commands_channel_cache and command_name in self.disabled_commands_channel_cache[channel_id]:
+            disabled_reason = f"❌ The `{command_name}` command is disabled in this channel."
+        elif guild_id in self.disabled_commands_cache and command_name in self.disabled_commands_cache[guild_id]:
+            disabled_reason = f"❌ The `{command_name}` command is disabled in this server."
+        elif channel_id in self.disabled_modules_channel_cache and module_name in self.disabled_modules_channel_cache[channel_id]:
+            disabled_reason = f"❌ The `{module_name}` module is disabled in this channel."
+        elif guild_id in self.disabled_modules_server_cache and module_name in self.disabled_modules_server_cache[guild_id]:
+            disabled_reason = f"❌ The `{module_name}` module is disabled in this server."
+            
+        if disabled_reason:
+            embed = discord.Embed(
+                title="Command Disabled",
+                description=disabled_reason,
+                color=discord.Color.red()
+            )
+            await interaction.response.send_message(embed=embed, ephemeral=True)
+            return False
+            
         return True
 
     async def check_disabled_commands(self, ctx):
@@ -185,17 +216,34 @@ class SpaceXBot(commands.Bot):
             return True
         if not ctx.guild or not ctx.command:
             return True
-        if ctx.command.name == "command": # prevent disabling the command that manages this
+        if ctx.command.name in {"disable", "enable"}:
             return True
-        if ctx.guild.id in self.disabled_commands_cache:
-            if ctx.command.name in self.disabled_commands_cache[ctx.guild.id]:
-                embed = discord.Embed(
-                    title="Command Disabled",
-                    description=f"❌ The `{ctx.command.name}` command is disabled in this server.",
-                    color=discord.Color.red()
-                )
-                await ctx.send(embed=embed)
-                return False
+            
+        guild_id = ctx.guild.id
+        channel_id = ctx.channel.id
+        command_name = ctx.command.name
+        module_name = self._resolve_module(ctx.command)
+        
+        disabled_reason = None
+        
+        if channel_id in self.disabled_commands_channel_cache and command_name in self.disabled_commands_channel_cache[channel_id]:
+            disabled_reason = f"❌ The `{command_name}` command is disabled in this channel."
+        elif guild_id in self.disabled_commands_cache and command_name in self.disabled_commands_cache[guild_id]:
+            disabled_reason = f"❌ The `{command_name}` command is disabled in this server."
+        elif channel_id in self.disabled_modules_channel_cache and module_name in self.disabled_modules_channel_cache[channel_id]:
+            disabled_reason = f"❌ The `{module_name}` module is disabled in this channel."
+        elif guild_id in self.disabled_modules_server_cache and module_name in self.disabled_modules_server_cache[guild_id]:
+            disabled_reason = f"❌ The `{module_name}` module is disabled in this server."
+            
+        if disabled_reason:
+            embed = discord.Embed(
+                title="Command Disabled",
+                description=disabled_reason,
+                color=discord.Color.red()
+            )
+            await ctx.send(embed=embed)
+            return False
+            
         return True
 
     async def post_topgg_stats(self):
@@ -242,7 +290,13 @@ class SpaceXBot(commands.Bot):
         try:
             channel = self.get_channel(int(BACKUP_CHANNEL_ID)) or await self.fetch_channel(int(BACKUP_CHANNEL_ID))
             if channel:
-                shutil.copy2("warnings.db", "warnings_backup.db")
+                # Use SQLite backup API to safely flush WAL and snapshot the DB
+                import sqlite3
+                backup_conn = sqlite3.connect("warnings_backup.db")
+                with backup_conn:
+                    self.db.backup(backup_conn)
+                backup_conn.close()
+                
                 file = discord.File("warnings_backup.db", filename="warnings.db")
                 await channel.send(content=f"Database Backup at <t:{int(time.time())}:F>", file=file)
                 os.remove("warnings_backup.db")
@@ -253,6 +307,11 @@ class SpaceXBot(commands.Bot):
     async def download_db_backup(self):
         if not BACKUP_CHANNEL_ID:
             print("⚠️ BACKUP_CHANNEL_ID not set. Skipping DB backup download.")
+            return
+            
+        if os.path.exists("warnings.db") and os.path.getsize("warnings.db") > 0:
+            print("-> Local warnings.db already exists and is not empty. Skipping cloud backup download to prevent data loss.")
+            print("-> Note: Use !!restorebackup command if you really want to force load the cloud backup.")
             return
             
         print("-> Checking for DB backups in the cloud channel...")
@@ -407,6 +466,27 @@ class SpaceXBot(commands.Bot):
             PRIMARY KEY (server_id, command_name)
         )
         """)
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS disabled_commands_channel (
+            channel_id TEXT,
+            command_name TEXT,
+            PRIMARY KEY (channel_id, command_name)
+        )
+        """)
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS disabled_modules_server (
+            server_id TEXT,
+            module_name TEXT,
+            PRIMARY KEY (server_id, module_name)
+        )
+        """)
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS disabled_modules_channel (
+            channel_id TEXT,
+            module_name TEXT,
+            PRIMARY KEY (channel_id, module_name)
+        )
+        """)
         
         self.db.commit()
         
@@ -440,6 +520,28 @@ class SpaceXBot(commands.Bot):
                 self.disabled_commands_cache[s_id_int] = set()
             self.disabled_commands_cache[s_id_int].add(cmd_name)
             
+        cursor.execute("SELECT channel_id, command_name FROM disabled_commands_channel")
+        for c_id, cmd_name in cursor.fetchall():
+            c_id_int = int(c_id)
+            if c_id_int not in self.disabled_commands_channel_cache:
+                self.disabled_commands_channel_cache[c_id_int] = set()
+            self.disabled_commands_channel_cache[c_id_int].add(cmd_name)
+
+        cursor.execute("SELECT server_id, module_name FROM disabled_modules_server")
+        for s_id, mod_name in cursor.fetchall():
+            s_id_int = int(s_id)
+            if s_id_int not in self.disabled_modules_server_cache:
+                self.disabled_modules_server_cache[s_id_int] = set()
+            self.disabled_modules_server_cache[s_id_int].add(mod_name)
+
+        cursor.execute("SELECT channel_id, module_name FROM disabled_modules_channel")
+        for c_id, mod_name in cursor.fetchall():
+            c_id_int = int(c_id)
+            if c_id_int not in self.disabled_modules_channel_cache:
+                self.disabled_modules_channel_cache[c_id_int] = set()
+            self.disabled_modules_channel_cache[c_id_int].add(mod_name)
+
+        cursor.close()    
         print("-> Database Connected & Speed Cache Engines Synchronized!")
         
         # 🚀 TOP.GG API INTEGRATION MATRIX (DIRECT HTTP POST)
@@ -495,7 +597,9 @@ async def on_guild_join(guild):
     # Check if blacklisted
     cursor = bot.db.cursor()
     cursor.execute("SELECT server_id FROM blacklisted_servers WHERE server_id = ?", (str(guild.id),))
-    if cursor.fetchone():
+    row = cursor.fetchone()
+    cursor.close()
+    if row:
         print(f"-> Left blacklisted server automatically: {guild.name}")
         await guild.leave()
         return

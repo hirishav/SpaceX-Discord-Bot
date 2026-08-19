@@ -460,6 +460,11 @@ class Help(commands.Cog):
             usage = f"`{prefix}ban @user [reason]`"
             examples = f"`{prefix}ban @User Raid Attempt`"
 
+        elif cmd.name == "forceban":
+            description = "Kisi user ko uske ID se permanent ban karne ke liye (chahe wo server me na ho)."
+            usage = f"`{prefix}forceban <User_ID> [reason]`"
+            examples = f"`{prefix}forceban 727718500663033897 Raid`"
+
         elif cmd.name == "unban":
             description = "Kisi banned user ka ban hatakar use wapas aane dene ke liye."
             usage = f"`{prefix}unban <User_ID>`"
@@ -699,6 +704,11 @@ class Help(commands.Cog):
             usage = f"`{prefix}staffstats` ya `{prefix}staffstats @user`"
             examples = f"`{prefix}staffstats`\n`{prefix}staffstats @Rishav`"
 
+        elif cmd.name == "role":
+            description = "🛡️ Kisi user ko server me role assign ya unse role remove karne ke liye."
+            usage = f"`{prefix}role @user <role>`"
+            examples = f"`{prefix}role @User @Mod`"
+
         elif cmd.name == "roleaudit":
             description = "🛡️ Server security matrix audit. Dangerous administrative permissions (Administrator, Manage Roles) wale logo ki tracking dashboard screen par lane ke liye."
             usage = f"`{prefix}roleaudit`"
@@ -761,8 +771,18 @@ class Help(commands.Cog):
 
         elif cmd.name == "ticket":
             description = "🎫 Server support tickets create aur manage karne ke liye complete system."
-            usage = f"`{prefix}ticket setup #category @SupportRole`\n`{prefix}ticket panel`\n`{prefix}ticket create`\n`{prefix}ticket close [reason]`"
-            examples = f"`{prefix}ticket setup #Support @Mod`\n`{prefix}ticket panel`"
+            usage = (
+                f"`{prefix}ticket auto-setup`\n"
+                f"`{prefix}ticket setup #category #logs @SupportRole`\n"
+                f"`{prefix}ticket panel`\n"
+                f"`{prefix}ticket claim` / `{prefix}ticket unclaim`\n"
+                f"`{prefix}ticket add @user` / `{prefix}ticket remove @user`\n"
+                f"`{prefix}ticket transfer @user`\n"
+                f"`{prefix}ticket rename <name>` / `{prefix}ticket topic <desc>`\n"
+                f"`{prefix}ticket close` / `{prefix}ticket force-close`\n"
+                f"`{prefix}ticket transcript`"
+            )
+            examples = f"`{prefix}ticket auto-setup`\n`{prefix}ticket panel`"
 
         elif cmd.name == "welcome":
             description = "👋 Server me naye members ka custom swagat aur join messages configure karne ke liye."
@@ -783,6 +803,16 @@ class Help(commands.Cog):
             description = "👑 Owner-Only: Kisi user ke rep points hatane ya reset karne ke liye."
             usage = f"`{prefix}removerep @user <amount/all>`"
             examples = f"`{prefix}removerep @User all`"
+
+        elif cmd.name == "disable":
+            description = "🚫 Server ya specific channel me kisi command ya poore module (jaise economy, fun) ko band (disable) karne ke liye."
+            usage = f"`{prefix}disable module <name> [#channel]`\n`{prefix}disable command <name> [#channel]`"
+            examples = f"`{prefix}disable module economy`\n`{prefix}disable command ban #general`"
+
+        elif cmd.name == "enable":
+            description = "✅ Kisi disabled command ya module ko wapas chalu (enable) karne ke liye."
+            usage = f"`{prefix}enable module <name> [#channel]`\n`{prefix}enable command <name> [#channel]`"
+            examples = f"`{prefix}enable module economy`\n`{prefix}enable command ban #general`"
 
         elif cmd.name == "help":
             description = "📖 Bot ke saare commands ki premium, category-wise list dikhata hai."
