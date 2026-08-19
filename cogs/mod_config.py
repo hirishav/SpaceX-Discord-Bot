@@ -26,12 +26,16 @@ class ModConfig(commands.Cog):
         
         if channel:
             channel_id = channel.id
+            if channel_id in getattr(self.bot, 'enabled_modules_channel_cache', {}) and module_name in self.bot.enabled_modules_channel_cache.get(channel_id, set()):
+                self.bot.enabled_modules_channel_cache[channel_id].remove(module_name)
+                
             if channel_id not in self.bot.disabled_modules_channel_cache:
                 self.bot.disabled_modules_channel_cache[channel_id] = set()
             self.bot.disabled_modules_channel_cache[channel_id].add(module_name)
             
             cursor = self.bot.db.cursor()
             try:
+                cursor.execute("DELETE FROM enabled_modules_channel WHERE channel_id = ? AND module_name = ?", (str(channel_id), module_name))
                 cursor.execute("INSERT OR REPLACE INTO disabled_modules_channel (channel_id, module_name) VALUES (?, ?)", (str(channel_id), module_name))
                 self.bot.db.commit()
             finally:
@@ -69,12 +73,16 @@ class ModConfig(commands.Cog):
         
         if channel:
             channel_id = channel.id
+            if channel_id in getattr(self.bot, 'enabled_commands_channel_cache', {}) and command_name in self.bot.enabled_commands_channel_cache.get(channel_id, set()):
+                self.bot.enabled_commands_channel_cache[channel_id].remove(command_name)
+                
             if channel_id not in self.bot.disabled_commands_channel_cache:
                 self.bot.disabled_commands_channel_cache[channel_id] = set()
             self.bot.disabled_commands_channel_cache[channel_id].add(command_name)
             
             cursor = self.bot.db.cursor()
             try:
+                cursor.execute("DELETE FROM enabled_commands_channel WHERE channel_id = ? AND command_name = ?", (str(channel_id), command_name))
                 cursor.execute("INSERT OR REPLACE INTO disabled_commands_channel (channel_id, command_name) VALUES (?, ?)", (str(channel_id), command_name))
                 self.bot.db.commit()
             finally:
@@ -114,7 +122,13 @@ class ModConfig(commands.Cog):
                 channel_id = channel.id
                 if channel_id in self.bot.disabled_modules_channel_cache and module_name in self.bot.disabled_modules_channel_cache[channel_id]:
                     self.bot.disabled_modules_channel_cache[channel_id].remove(module_name)
+                
+                if channel_id not in self.bot.enabled_modules_channel_cache:
+                    self.bot.enabled_modules_channel_cache[channel_id] = set()
+                self.bot.enabled_modules_channel_cache[channel_id].add(module_name)
+                
                 cursor.execute("DELETE FROM disabled_modules_channel WHERE channel_id = ? AND module_name = ?", (str(channel_id), module_name))
+                cursor.execute("INSERT OR REPLACE INTO enabled_modules_channel (channel_id, module_name) VALUES (?, ?)", (str(channel_id), module_name))
                 await ctx.send(f"✅ `{module_name.capitalize()}` module enabled in {channel.mention}.")
             else:
                 if guild_id in self.bot.disabled_modules_server_cache and module_name in self.bot.disabled_modules_server_cache[guild_id]:
@@ -141,7 +155,13 @@ class ModConfig(commands.Cog):
                 channel_id = channel.id
                 if channel_id in self.bot.disabled_commands_channel_cache and command_name in self.bot.disabled_commands_channel_cache[channel_id]:
                     self.bot.disabled_commands_channel_cache[channel_id].remove(command_name)
+                
+                if channel_id not in self.bot.enabled_commands_channel_cache:
+                    self.bot.enabled_commands_channel_cache[channel_id] = set()
+                self.bot.enabled_commands_channel_cache[channel_id].add(command_name)
+                
                 cursor.execute("DELETE FROM disabled_commands_channel WHERE channel_id = ? AND command_name = ?", (str(channel_id), command_name))
+                cursor.execute("INSERT OR REPLACE INTO enabled_commands_channel (channel_id, command_name) VALUES (?, ?)", (str(channel_id), command_name))
                 await ctx.send(f"✅ Command `{command_name}` enabled in {channel.mention}.")
             else:
                 if guild_id in self.bot.disabled_commands_cache and command_name in self.bot.disabled_commands_cache[guild_id]:

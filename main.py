@@ -166,8 +166,10 @@ class SpaceXBot(commands.Bot):
         # Disable configs cache
         self.disabled_commands_cache = {} # server_id -> set of commands
         self.disabled_commands_channel_cache = {} # channel_id -> set of commands
+        self.enabled_commands_channel_cache = {} # channel_id -> set of commands
         self.disabled_modules_server_cache = {} # server_id -> set of modules
         self.disabled_modules_channel_cache = {} # channel_id -> set of modules
+        self.enabled_modules_channel_cache = {} # channel_id -> set of modules
         
         self.topgg_client = None
         self.add_check(self.check_disabled_commands)
@@ -198,22 +200,19 @@ class SpaceXBot(commands.Bot):
         
         disabled_reason = None
         
+        is_cmd_enabled_channel = channel_id in self.enabled_commands_channel_cache and command_name in self.enabled_commands_channel_cache[channel_id]
+        is_mod_enabled_channel = channel_id in self.enabled_modules_channel_cache and module_name in self.enabled_modules_channel_cache[channel_id]
+        
         if channel_id in self.disabled_commands_channel_cache and command_name in self.disabled_commands_channel_cache[channel_id]:
-            disabled_reason = f"❌ The `{command_name}` command is disabled in this channel."
-        elif guild_id in self.disabled_commands_cache and command_name in self.disabled_commands_cache[guild_id]:
-            disabled_reason = f"❌ The `{command_name}` command is disabled in this server."
+            disabled_reason = True
+        elif not is_cmd_enabled_channel and guild_id in self.disabled_commands_cache and command_name in self.disabled_commands_cache[guild_id]:
+            disabled_reason = True
         elif channel_id in self.disabled_modules_channel_cache and module_name in self.disabled_modules_channel_cache[channel_id]:
-            disabled_reason = f"❌ The `{module_name}` module is disabled in this channel."
-        elif guild_id in self.disabled_modules_server_cache and module_name in self.disabled_modules_server_cache[guild_id]:
-            disabled_reason = f"❌ The `{module_name}` module is disabled in this server."
+            disabled_reason = True
+        elif not is_mod_enabled_channel and not is_cmd_enabled_channel and guild_id in self.disabled_modules_server_cache and module_name in self.disabled_modules_server_cache[guild_id]:
+            disabled_reason = True
             
         if disabled_reason:
-            embed = discord.Embed(
-                title="Command Disabled",
-                description=disabled_reason,
-                color=discord.Color.red()
-            )
-            await interaction.response.send_message(embed=embed, ephemeral=True)
             return False
             
         return True
@@ -233,22 +232,19 @@ class SpaceXBot(commands.Bot):
         
         disabled_reason = None
         
+        is_cmd_enabled_channel = channel_id in self.enabled_commands_channel_cache and command_name in self.enabled_commands_channel_cache[channel_id]
+        is_mod_enabled_channel = channel_id in self.enabled_modules_channel_cache and module_name in self.enabled_modules_channel_cache[channel_id]
+        
         if channel_id in self.disabled_commands_channel_cache and command_name in self.disabled_commands_channel_cache[channel_id]:
-            disabled_reason = f"❌ The `{command_name}` command is disabled in this channel."
-        elif guild_id in self.disabled_commands_cache and command_name in self.disabled_commands_cache[guild_id]:
-            disabled_reason = f"❌ The `{command_name}` command is disabled in this server."
+            disabled_reason = True
+        elif not is_cmd_enabled_channel and guild_id in self.disabled_commands_cache and command_name in self.disabled_commands_cache[guild_id]:
+            disabled_reason = True
         elif channel_id in self.disabled_modules_channel_cache and module_name in self.disabled_modules_channel_cache[channel_id]:
-            disabled_reason = f"❌ The `{module_name}` module is disabled in this channel."
-        elif guild_id in self.disabled_modules_server_cache and module_name in self.disabled_modules_server_cache[guild_id]:
-            disabled_reason = f"❌ The `{module_name}` module is disabled in this server."
+            disabled_reason = True
+        elif not is_mod_enabled_channel and not is_cmd_enabled_channel and guild_id in self.disabled_modules_server_cache and module_name in self.disabled_modules_server_cache[guild_id]:
+            disabled_reason = True
             
         if disabled_reason:
-            embed = discord.Embed(
-                title="Command Disabled",
-                description=disabled_reason,
-                color=discord.Color.red()
-            )
-            await ctx.send(embed=embed)
             return False
             
         return True
@@ -494,6 +490,20 @@ class SpaceXBot(commands.Bot):
             PRIMARY KEY (channel_id, module_name)
         )
         """)
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS enabled_commands_channel (
+            channel_id TEXT,
+            command_name TEXT,
+            PRIMARY KEY (channel_id, command_name)
+        )
+        """)
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS enabled_modules_channel (
+            channel_id TEXT,
+            module_name TEXT,
+            PRIMARY KEY (channel_id, module_name)
+        )
+        """)
         
         self.db.commit()
         
@@ -547,6 +557,20 @@ class SpaceXBot(commands.Bot):
             if c_id_int not in self.disabled_modules_channel_cache:
                 self.disabled_modules_channel_cache[c_id_int] = set()
             self.disabled_modules_channel_cache[c_id_int].add(mod_name)
+
+        cursor.execute("SELECT channel_id, command_name FROM enabled_commands_channel")
+        for c_id, cmd_name in cursor.fetchall():
+            c_id_int = int(c_id)
+            if c_id_int not in self.enabled_commands_channel_cache:
+                self.enabled_commands_channel_cache[c_id_int] = set()
+            self.enabled_commands_channel_cache[c_id_int].add(cmd_name)
+
+        cursor.execute("SELECT channel_id, module_name FROM enabled_modules_channel")
+        for c_id, mod_name in cursor.fetchall():
+            c_id_int = int(c_id)
+            if c_id_int not in self.enabled_modules_channel_cache:
+                self.enabled_modules_channel_cache[c_id_int] = set()
+            self.enabled_modules_channel_cache[c_id_int].add(mod_name)
 
         cursor.close()    
         print("-> Database Connected & Speed Cache Engines Synchronized!")
