@@ -5,6 +5,13 @@ import os
 import database as sqlite3
 import time
 import asyncio
+
+try:
+    import uvloop
+    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+except ImportError:
+    pass
+
 import aiohttp
 import topgg
 from flask import Flask, request, jsonify
