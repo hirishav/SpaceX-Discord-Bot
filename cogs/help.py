@@ -789,6 +789,12 @@ class Help(commands.Cog):
             usage = f"`{prefix}welcome setchannel #channel`\n`{prefix}welcome setmessage <msg>`\n`{prefix}welcome mention <on/off>`\n`{prefix}welcome test`"
             examples = f"`{prefix}welcome setchannel #welcome`\n`{prefix}welcome setmessage Welcome {{user}} to {{server}}! ✅`"
 
+        elif cmd.name in ["kiss", "hug", "slap", "spank", "tickle"]:
+            action = cmd.name
+            description = f"🎭 Kisi member ko {action} karne ke liye ek anime reaction GIF ke saath!"
+            usage = f"`{prefix}{action} @user`"
+            examples = f"`{prefix}{action} @User`"
+
         elif cmd.name == "rep":
             description = "⭐ Apna ya kisi doosre user ka rep points check karne aur leaderboard dekhne ke liye."
             usage = f"`{prefix}rep [@user]`\n`{prefix}rep lb global`\n`{prefix}rep lb server`"
