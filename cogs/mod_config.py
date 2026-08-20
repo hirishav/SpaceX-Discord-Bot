@@ -114,6 +114,9 @@ class ModConfig(commands.Cog):
     async def enable_module(self, ctx, module_name: str, channel: discord.TextChannel = None):
         """Enable an entire module globally or for a specific channel."""
         module_name = module_name.lower()
+        if module_name not in VALID_MODULES:
+            return await ctx.send(f"❌ Invalid module! Valid modules hain: `{', '.join(VALID_MODULES)}`")
+            
         guild_id = ctx.guild.id
         
         cursor = self.bot.db.cursor()
@@ -146,7 +149,10 @@ class ModConfig(commands.Cog):
         """Enable a specific command globally or for a specific channel."""
         command_name = command_name.lower()
         cmd = self.bot.get_command(command_name)
-        if cmd: command_name = cmd.name
+        if not cmd:
+            return await ctx.send(f"❌ Command `{command_name}` nahi mila.")
+            
+        command_name = cmd.name
             
         guild_id = ctx.guild.id
         
