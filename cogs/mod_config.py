@@ -129,13 +129,14 @@ class ModConfig(commands.Cog):
                 
                 cursor.execute("DELETE FROM disabled_modules_channel WHERE channel_id = ? AND module_name = ?", (str(channel_id), module_name))
                 cursor.execute("INSERT OR REPLACE INTO enabled_modules_channel (channel_id, module_name) VALUES (?, ?)", (str(channel_id), module_name))
+                self.bot.db.commit()
                 await ctx.send(f"✅ `{module_name.capitalize()}` module enabled in {channel.mention}.")
             else:
                 if guild_id in self.bot.disabled_modules_server_cache and module_name in self.bot.disabled_modules_server_cache[guild_id]:
                     self.bot.disabled_modules_server_cache[guild_id].remove(module_name)
                 cursor.execute("DELETE FROM disabled_modules_server WHERE server_id = ? AND module_name = ?", (str(guild_id), module_name))
+                self.bot.db.commit()
                 await ctx.send(f"✅ `{module_name.capitalize()}` module enabled globally.")
-            self.bot.db.commit()
         finally:
             cursor.close()
 
@@ -162,13 +163,14 @@ class ModConfig(commands.Cog):
                 
                 cursor.execute("DELETE FROM disabled_commands_channel WHERE channel_id = ? AND command_name = ?", (str(channel_id), command_name))
                 cursor.execute("INSERT OR REPLACE INTO enabled_commands_channel (channel_id, command_name) VALUES (?, ?)", (str(channel_id), command_name))
+                self.bot.db.commit()
                 await ctx.send(f"✅ Command `{command_name}` enabled in {channel.mention}.")
             else:
                 if guild_id in self.bot.disabled_commands_cache and command_name in self.bot.disabled_commands_cache[guild_id]:
                     self.bot.disabled_commands_cache[guild_id].remove(command_name)
                 cursor.execute("DELETE FROM disabled_commands WHERE server_id = ? AND command_name = ?", (str(guild_id), command_name))
+                self.bot.db.commit()
                 await ctx.send(f"✅ Command `{command_name}` enabled globally.")
-            self.bot.db.commit()
         finally:
             cursor.close()
 

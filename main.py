@@ -51,7 +51,7 @@ def topgg_webhook():
         user_id = str(data['user'])
         
         # Connect to database
-        db = sqlite3.connect("warnings.db", check_same_thread=False)
+        db = sqlite3.connect("warnings.db", check_same_thread=False, isolation_level=None)
         cursor = db.cursor()
         cursor.execute("INSERT OR IGNORE INTO reps (user_id, rep_points) VALUES (?, 0)", (user_id,))
         
@@ -347,7 +347,7 @@ class SpaceXBot(commands.Bot):
         await self.download_db_backup()
 
         # ⚡ PERSISTENT CONNECTION MATRIX
-        self.db = sqlite3.connect("warnings.db", check_same_thread=False)
+        self.db = sqlite3.connect("warnings.db", check_same_thread=False, isolation_level=None)
         cursor = self.db.cursor()
 
         # 🔥 SQLITE PERFORMANCE PRAGMAS (Ultra-Speed Tweaks)
