@@ -1,0 +1,33 @@
+name: Deploy SpaceX Bot
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to AWS EC2
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.AWS_HOST }}
+          username: ${{ secrets.AWS_USER }}
+          key: ${{ secrets.AWS_KEY }}
+
+          script: |
+            cd /home/ubuntu/spacex/Bot/SpaceX
+
+            echo "Pulling latest code..."
+            git pull origin main
+
+            echo "Updating Python packages..."
+            source venv/bin/activate
+            pip install -r requirements.txt
+
+            echo "Restarting Discord bot..."
+            sudo systemctl restart spacexbot
+
+            echo "Deployment complete!"
