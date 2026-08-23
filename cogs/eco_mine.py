@@ -4,6 +4,11 @@ import database as sqlite3
 import random
 import math
 
+def comb(n, k):
+    if k < 0 or k > n:
+        return 0
+    return math.factorial(n) // (math.factorial(k) * math.factorial(n - k))
+
 def calculate_multiplier(mines: int, revealed: int, total_tiles: int = 20):
     if revealed == 0:
         return 1.0
@@ -11,9 +16,9 @@ def calculate_multiplier(mines: int, revealed: int, total_tiles: int = 20):
     if revealed > safe_tiles:
         return 0.0
     
-    # Using math.comb
-    combinations_safe = math.comb(safe_tiles, revealed)
-    combinations_total = math.comb(total_tiles, revealed)
+    # Using backward compatible comb
+    combinations_safe = comb(safe_tiles, revealed)
+    combinations_total = comb(total_tiles, revealed)
     
     if combinations_safe == 0:
         return 0.0

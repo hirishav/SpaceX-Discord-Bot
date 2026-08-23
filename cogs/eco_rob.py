@@ -3,42 +3,22 @@ import discord
 from discord.ext import commands
 import database as sqlite3
 import random
-import asyncio
 
 class EcoRob(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.db_path = "warnings.db"
-        self.cooldowns = {}
-
-    async def handle_cooldown(self, ctx):
-        user_id = ctx.author.id
-        current_time = asyncio.get_event_loop().time()
-        if user_id in self.cooldowns:
-            remaining = self.cooldowns[user_id] - current_time
-            if remaining > 0:
-                msg = await ctx.send(f"⏳ {ctx.author.mention}, ruko bhai daka dalna itna aasan nhi! Try again after **{int(remaining)} seconds**.")
-                while remaining > 0:
-                    await asyncio.sleep(1)
-                    remaining = self.cooldowns[user_id] - asyncio.get_event_loop().time()
-                    if remaining <= 0: break
-                    try: await msg.edit(content=f"⏳ {ctx.author.mention}, ruko bhai daka dalna itna aasan nhi! Try again after **{int(remaining)} seconds**.")
-                    except discord.NotFound: return False
-                try: await msg.delete()
-                except discord.NotFound: pass
-                return False
-        self.cooldowns[user_id] = current_time + 30
-        return True
 
     @commands.hybrid_command(name="rob", aliases=["steal"])
+    @commands.cooldown(1, 10800, commands.BucketType.user)
     async def rob(self, ctx, member: discord.Member = None):
         """Kisi doosre user ke wallet se chori karne ke liye."""
         if not member:
+            ctx.command.reset_cooldown(ctx)
             return await ctx.send(f"❌ Sahi tarika: `{ctx.prefix}rob @user`")
         if member.id == ctx.author.id:
+            ctx.command.reset_cooldown(ctx)
             return await ctx.send("❌ Khud ke pocket se chori karoge kya?")
-
-        if not await self.handle_cooldown(ctx): return
 
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
@@ -55,7 +35,7 @@ class EcoRob(commands.Cog):
 
         if target_wallet < 200:
             # Revert cooldown because act didn't happen
-            self.cooldowns[ctx.author.id] = 0
+            ctx.command.reset_cooldown(ctx)
             conn.close()
             return await ctx.send(f"❌ {member.mention} pehle se hi bhikari hai, kam se kam wallet me 200 Specie toh hone chahiye lootne ke liye!")
 
@@ -76,5 +56,18 @@ class EcoRob(commands.Cog):
         conn.commit()
         conn.close()
 
+    @rob.error
+    async def rob_error(self, ctx, error):
+        if isinstance(error, commands.CommandOnCooldown):
+            hours, remainder = divmod(int(error.retry_after), 3600)
+            minutes, seconds = divmod(remainder, 60)
+            time_left = ""
+            if hours > 0: time_left += f"{hours}h "
+            if minutes > 0: time_left += f"{minutes}m "
+            time_left += f"{seconds}s"
+            await ctx.send(f"⏳ {ctx.author.mention}, ruko bhai daka dalna itna aasan nhi! Try again after **{time_left}**.")
+        else:
+            raise error
+
 async def setup(bot):
-    await bot.add_cog(EcoRob(bot))
+    await bot.add_cog(EcoRob(bot))
