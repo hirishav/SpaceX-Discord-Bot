@@ -16,18 +16,15 @@ jobs:
           host: ${{ secrets.AWS_HOST }}
           username: ${{ secrets.AWS_USER }}
           key: ${{ secrets.AWS_KEY }}
-
           script: |
+            set -e
+
             cd /home/ubuntu/spacex/Bot/SpaceX
 
-            echo "Pulling latest code..."
-            git pull origin main
+            git fetch origin
+            git reset --hard origin/main
 
-            echo "Updating Python packages..."
             source venv/bin/activate
             pip install -r requirements.txt
 
-            echo "Restarting Discord bot..."
             sudo systemctl restart spacexbot
-
-            echo "Deployment complete!"
