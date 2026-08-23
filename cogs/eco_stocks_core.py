@@ -5,6 +5,23 @@ from cogs.eco_stocks_list import TOP_200_STOCKS
 def get_db():
     return sqlite3.connect("warnings.db")
 
+def get_stock_cap(ticker):
+    if ticker.startswith("STK"):
+        try:
+            stk_num = int(ticker[3:])
+            if stk_num <= 50:
+                return 500
+            elif stk_num <= 100:
+                return 2500
+            else:
+                return 10000
+        except ValueError:
+            return 10000
+    elif ticker in ["NIFTY", "SENSEX", "BTC", "MARUTI", "ULTRAC"]:
+        return 300000
+    else:
+        return 50000
+
 def init_stocks_db():
     conn = get_db()
     cursor = conn.cursor()
@@ -37,6 +54,10 @@ def init_stocks_db():
         INSERT OR IGNORE INTO stocks (ticker, company_name, current_price, available_shares) 
         VALUES (?, ?, ?, 10000)
         """, (ticker, name, price))
+        
+        # Apply cap to correct overly inflated DB prices automatically
+        cap = get_stock_cap(ticker)
+        cursor.execute("UPDATE stocks SET current_price = ? WHERE ticker = ? AND current_price > ?", (cap, ticker, cap))
         
     conn.commit()
     conn.close()

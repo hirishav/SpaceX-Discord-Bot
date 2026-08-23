@@ -598,7 +598,7 @@ class SpaceXBot(commands.Bot):
         if os.path.exists('./cogs'):
             for filename in os.listdir('./cogs'):
                 if filename.endswith('.py'):
-                    if filename in ['stocks_core.py', 'eco_stocks_list.py']:
+                    if filename in ['eco_stocks_core.py', 'eco_stocks_list.py']:
                         print(f'-> Skipped Non-Cog Utility File: {filename}')
                         continue
                         

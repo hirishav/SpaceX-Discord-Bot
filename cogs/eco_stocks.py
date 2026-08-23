@@ -3,7 +3,7 @@ import discord
 from discord.ext import commands, tasks
 import random
 import database as sqlite3
-from cogs.stocks_core import get_db, init_stocks_db
+from cogs.eco_stocks_core import get_db, init_stocks_db, get_stock_cap
 
 # --- 🔢 MODAL POPUP FOR "GO TO PAGE" BUTTON ---
 class GoToPageModal(discord.ui.Modal, title="Jump to Stock Page"):
@@ -32,15 +32,29 @@ class GoToPageModal(discord.ui.Modal, title="Jump to Stock Page"):
 
 # --- 🎛️ PERSISTENT PAGINATION BUTTONS VIEW ---
 class StockPaginationView(discord.ui.View):
-    def __init__(self, ctx, rows, start_page=1, items_per_page=7):
+    def __init__(self, ctx, rows, start_page=1, items_per_page=7, sort_mode=None):
         super().__init__(timeout=120.0) 
         self.ctx = ctx
-        self.rows = rows
         self.items_per_page = items_per_page
-        self.total_pages = (len(rows) + items_per_page - 1) // items_per_page
+        self.sort_mode = sort_mode
+        self.rows = self.sort_rows(rows, sort_mode)
+        self.total_pages = (len(self.rows) + items_per_page - 1) // items_per_page
         
         # Safe boundary clamp for initial startup page configuration
         self.current_page = max(1, min(start_page, self.total_pages))
+        
+    def sort_rows(self, rows, mode):
+        if not mode:
+            return rows
+        if mode == "price_asc":
+            return sorted(rows, key=lambda x: x[2])
+        elif mode == "price_desc":
+            return sorted(rows, key=lambda x: x[2], reverse=True)
+        elif mode == "perf_asc":
+            return sorted(rows, key=lambda x: float(x[3].replace('%', '').replace('+', '')))
+        elif mode == "perf_desc":
+            return sorted(rows, key=lambda x: float(x[3].replace('%', '').replace('+', '')), reverse=True)
+        return rows
 
     async def update_message(self, interaction: discord.Interaction):
         # Dynamically evaluate the button status matrices
@@ -95,19 +109,44 @@ class StockPaginationView(discord.ui.View):
             self.current_page -= 1
             await self.update_message(interaction)
 
-    @discord.ui.button(label="🔢 Go To Page", style=discord.ButtonStyle.success, custom_id="stk_goto")
+    @discord.ui.button(label="Jump", style=discord.ButtonStyle.blurple, custom_id="stk_goto")
     async def btn_goto(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.send_modal(GoToPageModal(self))
 
-    @discord.ui.button(label="Next ▶️", style=discord.ButtonStyle.primary, custom_id="stk_next")
+    @discord.ui.button(label="Next ➡️", style=discord.ButtonStyle.secondary, custom_id="stk_next")
     async def btn_next(self, interaction: discord.Interaction, button: discord.ui.Button):
-        if self.current_page < self.total_pages:
-            self.current_page += 1
-            await self.update_message(interaction)
+        self.current_page += 1
+        await self.update_message(interaction)
 
-    @discord.ui.button(label="Last ⏭️", style=discord.ButtonStyle.secondary, custom_id="stk_last")
+    @discord.ui.button(label="Last ⏭️", style=discord.ButtonStyle.danger, custom_id="stk_last")
     async def btn_last(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.current_page = self.total_pages
+        await self.update_message(interaction)
+
+    @discord.ui.button(label="💲 Sort Price", style=discord.ButtonStyle.secondary, custom_id="stk_sort_price", row=1)
+    async def btn_sort_price(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if self.sort_mode == "price_desc":
+            self.sort_mode = "price_asc"
+            button.label = "💲 Price (Asc)"
+        else:
+            self.sort_mode = "price_desc"
+            button.label = "💲 Price (Desc)"
+            
+        self.rows = self.sort_rows(self.rows, self.sort_mode)
+        self.current_page = 1
+        await self.update_message(interaction)
+
+    @discord.ui.button(label="📈 Sort Perf", style=discord.ButtonStyle.secondary, custom_id="stk_sort_perf", row=1)
+    async def btn_sort_perf(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if self.sort_mode == "perf_desc":
+            self.sort_mode = "perf_asc"
+            button.label = "📉 Perf (Asc)"
+        else:
+            self.sort_mode = "perf_desc"
+            button.label = "📈 Perf (Desc)"
+            
+        self.rows = self.sort_rows(self.rows, self.sort_mode)
+        self.current_page = 1
         await self.update_message(interaction)
 
 
@@ -135,8 +174,9 @@ class EcoStocks(commands.Cog):
             factor = 1 + (change / 100)
             new_price = max(10, int(price * factor)) 
             
-            if new_price > 300000:
-                new_price = 300000
+            cap = get_stock_cap(ticker)
+            if new_price > cap:
+                new_price = cap
             
             sign = "+" if change > 0 else ""
             change_str = f"{sign}{change}%"

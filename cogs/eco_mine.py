@@ -35,27 +35,32 @@ class MineButton(discord.ui.Button):
         self.is_revealed = False
 
     async def callback(self, interaction: discord.Interaction):
-        view: EcoMineView = self.view
-        if interaction.user.id != view.user_id:
-            return await interaction.response.send_message("❌ Yeh game aapka nahi hai!", ephemeral=True)
-            
-        if self.is_revealed or view.is_finished:
-            return await interaction.response.defer()
+        try:
+            view: EcoMineView = self.view
+            if interaction.user.id != view.user_id:
+                return await interaction.response.send_message("❌ Yeh game aapka nahi hai!", ephemeral=True)
+                
+            if self.is_revealed or view.is_finished:
+                return await interaction.response.defer()
 
-        self.is_revealed = True
-        self.disabled = True
+            self.is_revealed = True
+            self.disabled = True
 
-        if self.is_mine:
-            self.style = discord.ButtonStyle.danger
-            self.emoji = "💥"
-            self.label = None
-            await view.game_over(interaction, won=False)
-        else:
-            self.style = discord.ButtonStyle.success
-            self.emoji = "💎"
-            self.label = None
-            view.revealed_count += 1
-            await view.update_game(interaction)
+            if self.is_mine:
+                self.style = discord.ButtonStyle.danger
+                self.emoji = "💥"
+                self.label = ""
+                await view.game_over(interaction, won=False)
+            else:
+                self.style = discord.ButtonStyle.success
+                self.emoji = "💎"
+                self.label = ""
+                view.revealed_count += 1
+                await view.update_game(interaction)
+        except Exception as e:
+            await interaction.channel.send(f"⚠️ Debug Mine Error: {e}")
+            import traceback
+            traceback.print_exc()
 
 class CashOutButton(discord.ui.Button):
     def __init__(self):

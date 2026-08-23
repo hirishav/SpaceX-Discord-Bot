@@ -8,13 +8,7 @@ bot = commands.Bot(command_prefix='!', intents=discord.Intents.default())
 
 async def load():
     cogs = [
-        'cogs.eco_work',
-        'cogs.eco_crime',
-        'cogs.eco_slut',
-        'cogs.eco_rob',
-        'cogs.eco_mine',
-        'cogs.eco_daily',
-        'cogs.eco_weekly'
+        'cogs.eco_mine'
     ]
     for ext in cogs:
         try:
