@@ -602,7 +602,7 @@ class SpaceXBot(commands.Bot):
                         await self.load_extension(f'cogs.{filename[:-3]}')
                         print(f'-> Successfully Loaded: {filename}')
                     except Exception as e:
-                        print(f'💥 Failed to Load Extension {filename}: {e}')
+                        print(f'-> Failed to Load Extension {filename}: {e}')
 
         print('Syncing slash commands...')
         try:
