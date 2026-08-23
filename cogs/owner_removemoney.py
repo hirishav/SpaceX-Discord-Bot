@@ -44,7 +44,7 @@ class OwnerRemoveMoney(commands.Cog):
     @commands.hybrid_command(name="removemoney", aliases=["delmoney", "clearcoins"], hidden=True)
     @commands.is_owner()
     async def remove_money(self, ctx, user_str: str = None, amount_input: str = None):
-        """Sirf Rishav bhai ke liye - Globally coins remove karne ke liye."""
+        """Sirf Rishav bhai ke liye - Globally Specie remove karne ke liye."""
         if not user_str or not amount_input:
             return await ctx.send(f"❌ Sahi tarika: `{ctx.prefix}removemoney @user/ID <amount/all/half>`")
 
@@ -85,7 +85,7 @@ class OwnerRemoveMoney(commands.Cog):
         conn.commit()
         conn.close()
 
-        display_amt = f"Pura Account (Reset)" if mode == "all" else f"🪙 `{amount_to_remove:,}` coins"
+        display_amt = f"Pura Account (Reset)" if mode == "all" else f"💠 `{amount_to_remove:,}` Specie"
         await ctx.send(f"👑 **Owner Action:** **{username}** ke account se **{display_amt}** remove kar diye gaye!")
 
 async def setup(bot):

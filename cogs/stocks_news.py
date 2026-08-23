@@ -35,7 +35,7 @@ class StocksNews(commands.Cog):
                 "ticker": "NIFTY", 
                 "type": "bad", 
                 "title": "📉 NIFTY 50 HEAVY CRASH: SEVERE LIQUIDATION PANIC! 🔻",
-                "text": "🚨 CRASH WATCH: Regulatory transaction taxes badhne ke darr se operators ne index companies se billions of coins dump kiye! Market heavily red zone me!"
+                "text": "🚨 CRASH WATCH: Regulatory transaction taxes badhne ke darr se operators ne index companies se billions of Specie dump kiye! Market heavily red zone me!"
             },
             {
                 "ticker": "APPL", 
@@ -52,7 +52,7 @@ class StocksNews(commands.Cog):
             {
                 "ticker": "BTC", 
                 "type": "good", 
-                "title": "🐋 CRYPTO SUPREME PUMP: BITCOIN TO THE MOON! 🪙",
+                "title": "🐋 CRYPTO SUPREME PUMP: BITCOIN TO THE MOON! 💠",
                 "text": "🚀 BULL RUN CONFIRMED: US Government ne Bitcoin ko officially safe reserve asset ledger me whitelist kiya! Absolute green candle launch!"
             },
             {
@@ -114,7 +114,7 @@ class StocksNews(commands.Cog):
         # Composite single output frame blueprint
         embed = discord.Embed(
             title=news_title, 
-            description=f"### {alert_text}\n\n📊 **Market Rate Adjustment:**\n🔹 **{comp_name}** (`{ticker}`): `{current_price}` ➡️ **`{new_price} Coins`** (`{change_str}`)", 
+            description=f"### {alert_text}\n\n📊 **Market Rate Adjustment:**\n🔹 **{comp_name}** (`{ticker}`): `{current_price}` ➡️ **`{new_price} Specie`** (`{change_str}`)", 
             color=color
         )
         embed.set_footer(text="Baki saare stocks stable hain. !!stocks check karein!")

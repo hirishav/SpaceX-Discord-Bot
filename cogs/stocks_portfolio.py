@@ -78,9 +78,9 @@ class StocksPortfolio(commands.Cog):
         for ticker, shares, price, name in rows:
             val = shares * price
             total_value += val
-            text += f"🔹 **{name}** (`{ticker}`): `{shares}` Shares — Worth **{val} Coins**\n"
+            text += f"🔹 **{name}** (`{ticker}`): `{shares}` Shares — Worth **{val} Specie**\n"
 
-        embed.description = f"### 📊 Net Asset Holdings: **{total_value} Coins**\n\n{text}"
+        embed.description = f"### 📊 Net Asset Holdings: **{total_value} Specie**\n\n{text}"
         await ctx.send(embed=embed)
 
 async def setup(bot):

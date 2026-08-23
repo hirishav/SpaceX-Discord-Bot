@@ -27,7 +27,7 @@ class EcoCoinflip(commands.Cog):
         wallet = self.get_wallet(str(ctx.author.id))
 
         if wallet <= 0:
-            return await ctx.send("❌ Aapke paas jua khelne ke liye ek coin bhi nahi hai!")
+            return await ctx.send("❌ Aapke paas jua khelne ke liye ek Specie bhi nahi hai!")
 
         if amount_str.lower() == "all": amount = wallet
         elif amount_str.lower() == "half": amount = wallet // 2
@@ -35,8 +35,11 @@ class EcoCoinflip(commands.Cog):
             try: amount = int(amount_str)
             except ValueError: return await ctx.send("❌ Amount thik se likho!")
 
+        if amount > 250000:
+            amount = 250000
+
         if amount <= 0 or amount > wallet:
-            return await ctx.send("❌ Galat amount! Check kijiye aapke pass kitne coins hain.")
+            return await ctx.send("❌ Galat amount! Check kijiye aapke pass kitne Specie hain.")
 
         bot_flip = random.choice(["heads", "tails"])
         
@@ -45,10 +48,10 @@ class EcoCoinflip(commands.Cog):
 
         if user_choice == bot_flip:
             cursor.execute("UPDATE economy SET wallet = wallet + ? WHERE user_id = ?", (amount, str(ctx.author.id)))
-            embed = discord.Embed(title="🪙 Coinflip - JEET GAYE!", description=f"Coin par **{bot_flip.upper()}** aaya!\nAapne lagaaye the `🪙 {amount}` aur aap **`🪙 {amount}`** coins jeet gaye! ✅", color=discord.Color.green())
+            embed = discord.Embed(title="💠 Coinflip - JEET GAYE!", description=f"Specie par **{bot_flip.upper()}** aaya!\nAapne lagaaye the `💠 {amount}` aur aap **`💠 {amount}`** Specie jeet gaye! ✅", color=discord.Color.green())
         else:
             cursor.execute("UPDATE economy SET wallet = wallet - ? WHERE user_id = ?", (amount, str(ctx.author.id)))
-            embed = discord.Embed(title="🪙 Coinflip - HAR GAYE!", description=f"Coin par **{bot_flip.upper()}** aaya!\nAapne kismat me `🪙 {amount}` coins gawa diye! 💀", color=discord.Color.red())
+            embed = discord.Embed(title="💠 Coinflip - HAR GAYE!", description=f"Specie par **{bot_flip.upper()}** aaya!\nAapne kismat me `💠 {amount}` Specie gawa diye! 💀", color=discord.Color.red())
 
         conn.commit()
         conn.close()

@@ -69,7 +69,7 @@ class BlackjackView(discord.ui.View):
                 inline=True
             )
             
-        embed.add_field(name="💰 Bet Amount", value=f"**🪙 {self.amount} Coins**", inline=False)
+        embed.add_field(name="💰 Bet Amount", value=f"**💠 {self.amount} Specie**", inline=False)
         return embed
 
     async def end_game(self, interaction, result_text, color, final_change):
@@ -97,7 +97,7 @@ class BlackjackView(discord.ui.View):
         p_score = self.calculate_score(self.player_hand)
 
         if p_score > 21: # BUSTED!
-            await self.end_game(interaction, f"💥 **Aap Busted ho gaye (Score: {p_score})!** Dealer jeet gaya. Aapne `🪙 {self.amount}` kho diye.", discord.Color.red(), -self.amount)
+            await self.end_game(interaction, f"💥 **Aap Busted ho gaye (Score: {p_score})!** Dealer jeet gaya. Aapne `💠 {self.amount}` kho diye.", discord.Color.red(), -self.amount)
         else:
             await interaction.response.edit_message(embed=await self.get_embed(), view=self)
 
@@ -115,11 +115,11 @@ class BlackjackView(discord.ui.View):
             d_score = self.calculate_score(self.dealer_hand)
 
         if d_score > 21:
-            await self.end_game(interaction, f"✅ **Dealer Busted (Score: {d_score})!** Aap jeet gaye! **`🪙 {self.amount}`** aapke wallet me add ho gaye.", discord.Color.green(), self.amount)
+            await self.end_game(interaction, f"✅ **Dealer Busted (Score: {d_score})!** Aap jeet gaye! **`💠 {self.amount}`** aapke wallet me add ho gaye.", discord.Color.green(), self.amount)
         elif p_score > d_score:
-            await self.end_game(interaction, f"🏆 **Aapka score uncha raha!** Aap jeet gaye **`🪙 {self.amount}`** coins!", discord.Color.green(), self.amount)
+            await self.end_game(interaction, f"🏆 **Aapka score uncha raha!** Aap jeet gaye **`💠 {self.amount}`** Specie!", discord.Color.green(), self.amount)
         elif p_score < d_score:
-            await self.end_game(interaction, f"💀 **Dealer ka score behtar tha.** Aap **`🪙 {self.amount}`** gawa baithe.", discord.Color.red(), -self.amount)
+            await self.end_game(interaction, f"💀 **Dealer ka score behtar tha.** Aap **`💠 {self.amount}`** gawa baithe.", discord.Color.red(), -self.amount)
         else:
             await self.end_game(interaction, "👔 **TIE (Push)!** Dono ka score barabar raha. Aapka paisa safe hai.", discord.Color.orange(), 0)
 
@@ -160,7 +160,10 @@ class EcoBlackjack(commands.Cog):
             try: amount = int(amount_str)
             except ValueError: return await ctx.send("❌ Valid amount likhein!")
 
-        if amount <= 0 or amount > wallet: return await ctx.send("❌ Coins check kijiye pehle.")
+        if amount > 250000:
+            amount = 250000
+
+        if amount <= 0 or amount > wallet: return await ctx.send("❌ Specie check kijiye pehle.")
 
         view = BlackjackView(ctx, amount, self, wallet)
         embed = await view.get_embed()

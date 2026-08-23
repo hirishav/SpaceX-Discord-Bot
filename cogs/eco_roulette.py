@@ -34,7 +34,10 @@ class EcoRoulette(commands.Cog):
             try: amount = int(amount_str)
             except ValueError: return await ctx.send("❌ Amount invalid hai!")
 
-        if amount <= 0 or amount > wallet: return await ctx.send("❌ Coins check kijiye apne!")
+        if amount > 250000:
+            amount = 250000
+
+        if amount <= 0 or amount > wallet: return await ctx.send("❌ Specie check kijiye apne!")
 
         # Roulette Spinning System (0-36)
         # 0 is Green. 1-18 Red, 19-36 Black
@@ -48,10 +51,10 @@ class EcoRoulette(commands.Cog):
             multiplier = 14 if winning_color == "green" else 2
             winnings = amount * (multiplier - 1)
             cursor.execute("UPDATE economy SET wallet = wallet + ? WHERE user_id = ?", (winnings, str(ctx.author.id)))
-            embed = discord.Embed(title="🎡 Roulette Wheel - WIN!", description=f"Wheel ruka number `{spin}` (**{winning_color.upper()}**) par!\nAapka andaza sahi tha! Aap **`🪙 {amount * multiplier}`** coins jeet gaye! 💰", color=discord.Color.green())
+            embed = discord.Embed(title="🎡 Roulette Wheel - WIN!", description=f"Wheel ruka number `{spin}` (**{winning_color.upper()}**) par!\nAapka andaza sahi tha! Aap **`💠 {amount * multiplier}`** Specie jeet gaye! 💰", color=discord.Color.green())
         else:
             cursor.execute("UPDATE economy SET wallet = wallet - ? WHERE user_id = ?", (amount, str(ctx.author.id)))
-            embed = discord.Embed(title="🎡 Roulette Wheel - LOST!", description=f"Wheel ruka number `{spin}` (**{winning_color.upper()}**) par!\nWrong bet! Aapne **`🪙 {amount}`** coins gawa diye. 💸", color=discord.Color.red())
+            embed = discord.Embed(title="🎡 Roulette Wheel - LOST!", description=f"Wheel ruka number `{spin}` (**{winning_color.upper()}**) par!\nWrong bet! Aapne **`💠 {amount}`** Specie gawa diye. 💸", color=discord.Color.red())
 
         conn.commit()
         conn.close()

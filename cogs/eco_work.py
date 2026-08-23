@@ -44,7 +44,7 @@ class EcoWork(commands.Cog):
 
     @commands.hybrid_command(name="work")
     async def work(self, ctx):
-        """Mehnat ka kaam karke safe coins kamane ke liye."""
+        """Mehnat ka kaam karke safe Specie kamane ke liye."""
         if not await self.handle_cooldown(ctx):
             return
 
@@ -62,7 +62,7 @@ class EcoWork(commands.Cog):
 
         embed = discord.Embed(
             title="💼 Work Completed!",
-            description=f"{ctx.author.mention}, aapne **{job}** aur badle me aapko **🪙 {earnings}** coins mile!",
+            description=f"{ctx.author.mention}, aapne **{job}** aur badle me aapko **💠 {earnings}** Specie mile!",
             color=discord.Color.green()
         )
         await ctx.send(embed=embed)

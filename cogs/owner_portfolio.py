@@ -33,9 +33,9 @@ class OwnerPortfolio(commands.Cog):
         for ticker, shares, price, name in rows:
             val = shares * price
             total_value += val
-            text += f"🔹 **{name}** (`{ticker}`): `{shares}` Shares — Worth **{val} Coins**\n"
+            text += f"🔹 **{name}** (`{ticker}`): `{shares}` Shares — Worth **{val} Specie**\n"
 
-        embed.description = f"### 📊 Target Account Total Holdings: **{total_value} Coins**\n\n{text if text else 'Khali Portfolio Data'}"
+        embed.description = f"### 📊 Target Account Total Holdings: **{total_value} Specie**\n\n{text if text else 'Khali Portfolio Data'}"
         await ctx.send(embed=embed)
 
     @commands.hybrid_command(name="addstock")
@@ -48,7 +48,7 @@ class OwnerPortfolio(commands.Cog):
         cursor.execute("INSERT INTO stocks (ticker, company_name, current_price, available_shares) VALUES (?, ?, ?, 10000)", (ticker, name, price))
         conn.commit()
         conn.close()
-        await ctx.send(f"👑 **Success:** Asset `{name}` (`{ticker}`) registered into core database arrays with 10k pools at initial cost **{price} Coins**!")
+        await ctx.send(f"👑 **Success:** Asset `{name}` (`{ticker}`) registered into core database arrays with 10k pools at initial cost **{price} Specie**!")
 
     @commands.hybrid_command(name="setshares")
     @commands.is_owner()

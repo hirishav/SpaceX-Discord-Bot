@@ -48,12 +48,12 @@ class EcoSlut(commands.Cog):
         if success:
             earnings = random.randint(200, 800)
             cursor.execute("UPDATE economy SET wallet = wallet + ? WHERE user_id = ?", (earnings, str(ctx.author.id)))
-            await ctx.send(f"💋 {ctx.author.mention}, aapne raste par ameer logon ko thoda entertain kiya aur **🪙 {earnings}** jhatak liye!")
+            await ctx.send(f"💋 {ctx.author.mention}, aapne raste par ameer logon ko thoda entertain kiya aur **💠 {earnings}** jhatak liye!")
         else:
             fine = random.randint(150, 400)
             if fine > wallet: fine = wallet
             cursor.execute("UPDATE economy SET wallet = wallet - ? WHERE user_id = ?", (fine, str(ctx.author.id)))
-            await ctx.send(f"📸 {ctx.author.mention}, aap saste kamo me pakde gaye! Police ne aap par **🪙 {fine}** ka fine thok diya! 💀")
+            await ctx.send(f"📸 {ctx.author.mention}, aap saste kamo me pakde gaye! Police ne aap par **💠 {fine}** ka fine thok diya! 💀")
 
         conn.commit()
         conn.close()

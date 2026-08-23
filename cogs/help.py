@@ -371,7 +371,7 @@ class Help(commands.Cog):
             examples = f"`{prefix}setstatus dnd watching anime`"
 
         elif cmd.name == "addmoney":
-            description = "👑 Sirf Rishav bhai ke liye - Globally kisi ke wallet ya bank me coins add karne ke liye."
+            description = "👑 Sirf Rishav bhai ke liye - Globally kisi ke wallet ya bank me Specie add karne ke liye."
             usage = f"`{prefix}addmoney @user/ID <wallet/bank> <amount>`"
             examples = f"`{prefix}addmoney @User bank 3e3`"
 
@@ -527,7 +527,7 @@ class Help(commands.Cog):
             examples = f"`{prefix}bal`"
 
         elif cmd.name == "work":
-            description = "Mehnat ka kaam karke safe coins kamane ke liye (30s Cooldown)."
+            description = "Mehnat ka kaam karke safe Specie kamane ke liye (30s Cooldown)."
             usage = f"`{prefix}work`"
             examples = f"`{prefix}work`"
 
@@ -547,7 +547,7 @@ class Help(commands.Cog):
             examples = f"`{prefix}rob @User`"
 
         elif cmd.name == "give":
-            description = "Apne wallet se kisi doosre user ko coins transfer karne ke liye."
+            description = "Apne wallet se kisi doosre user ko Specie transfer karne ke liye."
             usage = f"`{prefix}give @user <amount>`"
             examples = f"`{prefix}give @User 5000`"
 
@@ -666,7 +666,7 @@ class Help(commands.Cog):
             examples = f"`{prefix}stocks 2`"
 
         elif cmd.name == "buystock":
-            description = "🛒 Wallet coins ko use karke limited share inventory pool se real assets instantly purchase karne ke liye."
+            description = "🛒 Wallet Specie ko use karke limited share inventory pool se real assets instantly purchase karne ke liye."
             usage = f"`{prefix}buystock <TICKER> <quantity>`"
             examples = f"`{prefix}buystock NIFTY 5`"
 

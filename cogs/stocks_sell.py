@@ -45,7 +45,7 @@ class StocksSell(commands.Cog):
         conn.close()
 
         embed = discord.Embed(title="💵 Liquidation Complete!", color=discord.Color.gold())
-        embed.description = f"🚀 Tumne **{amount}** shares bech diye hain **{ticker}** ke!\n💰 Wallet Credited: **{total_payout} Coins**."
+        embed.description = f"🚀 Tumne **{amount}** shares bech diye hain **{ticker}** ke!\n💰 Wallet Credited: **{total_payout} Specie**."
         await ctx.send(embed=embed)
 
 async def setup(bot):

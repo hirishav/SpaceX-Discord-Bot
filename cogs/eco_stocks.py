@@ -63,7 +63,7 @@ class StockPaginationView(discord.ui.View):
             emoji = "🔺" if "+" in change else "🔻"
             embed.add_field(
                 name=f"🏢 {name} (`{ticker}`)",
-                value=f"👉 Current Price: **{price} Coins**\n📊 Change Vector: `{change}` {emoji}\n📦 Available Supply: `{available}/10000` Shares Left",
+                value=f"👉 Current Price: **{price} Specie**\n📊 Change Vector: `{change}` {emoji}\n📦 Available Supply: `{available}/10000` Shares Left",
                 inline=False
             )
         embed.set_footer(text=f"Use {self.ctx.prefix}buystock to invest! | Active User: {self.ctx.author.name}")
@@ -134,6 +134,9 @@ class EcoStocks(commands.Cog):
             
             factor = 1 + (change / 100)
             new_price = max(10, int(price * factor)) 
+            
+            if new_price > 300000:
+                new_price = 300000
             
             sign = "+" if change > 0 else ""
             change_str = f"{sign}{change}%"

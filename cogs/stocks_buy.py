@@ -40,7 +40,7 @@ class StocksBuy(commands.Cog):
 
         if wallet < total_cost:
             conn.close()
-            return await ctx.send(f"❌ **Insufficient Funds:** Total Cost: **{total_cost} Coins**, Wallet: **{wallet} Coins**.")
+            return await ctx.send(f"❌ **Insufficient Funds:** Total Cost: **{total_cost} Specie**, Wallet: **{wallet} Specie**.")
 
         # Atomic transaction loops blocks
         cursor.execute("UPDATE economy SET wallet = ? WHERE user_id = ?", (wallet - total_cost, user_id))
@@ -56,7 +56,7 @@ class StocksBuy(commands.Cog):
         conn.close()
 
         embed = discord.Embed(title="✅ Shares Purchased!", color=discord.Color.green())
-        embed.description = f"🥳 Tumne **{amount}** shares khareed liye hain **{ticker}** ke!\n💰 Total Deducted: **{total_cost} Coins**."
+        embed.description = f"🥳 Tumne **{amount}** shares khareed liye hain **{ticker}** ke!\n💰 Total Deducted: **{total_cost} Specie**."
         await ctx.send(embed=embed)
 
 async def setup(bot):
