@@ -77,8 +77,9 @@ class CashOutButton(discord.ui.Button):
         await view.game_over(interaction, won=True)
 
 class EcoMineView(discord.ui.View):
-    def __init__(self, user: discord.Member, bet_amount: int, mines_count: int, db_path: str):
+    def __init__(self, bot, user: discord.Member, bet_amount: int, mines_count: int, db_path: str):
         super().__init__(timeout=120)
+        self.bot = bot
         self.user = user
         self.bet_amount = bet_amount
         self.mines_count = mines_count
@@ -104,6 +105,8 @@ class EcoMineView(discord.ui.View):
     async def on_timeout(self):
         if not self.game_over_flag and self.message:
             self.game_over_flag = True
+            if hasattr(self.bot, 'active_mine_games'):
+                self.bot.active_mine_games.pop(self.message.id, None)
             for btn in self.mine_buttons:
                 btn.disabled = True
             self.cash_out_btn.disabled = True
@@ -161,6 +164,9 @@ class EcoMineView(discord.ui.View):
 
     async def game_over(self, interaction: discord.Interaction, won: bool):
         self.game_over_flag = True
+        if hasattr(self.bot, 'active_mine_games') and self.message:
+            self.bot.active_mine_games.pop(self.message.id, None)
+            
         for btn in self.mine_buttons:
             btn.disabled = True
             if btn.is_mine and not btn.is_revealed:
@@ -231,11 +237,15 @@ class EcoMine(commands.Cog):
         conn.commit()
         conn.close()
 
-        view = EcoMineView(user=ctx.author, bet_amount=amount, mines_count=mines_count, db_path=self.db_path)
+        view = EcoMineView(bot=self.bot, user=ctx.author, bet_amount=amount, mines_count=mines_count, db_path=self.db_path)
         embed = view.build_embed()
         
         message = await ctx.send(embed=embed, view=view)
         view.message = message
+        
+        if not hasattr(self.bot, 'active_mine_games'):
+            self.bot.active_mine_games = {}
+        self.bot.active_mine_games[message.id] = view
 
     @mine.error
     async def mine_error(self, ctx, error):
