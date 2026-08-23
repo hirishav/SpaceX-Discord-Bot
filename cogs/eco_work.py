@@ -37,7 +37,9 @@ class EcoWork(commands.Cog):
         if isinstance(error, commands.CommandOnCooldown):
             await ctx.send(f"⏳ {ctx.author.mention}, chill karo! Try again after **{int(error.retry_after)} seconds**.")
         else:
-            raise error
+            await ctx.send(f"⚠️ Debug Work Error: {error}")
+            import traceback
+            traceback.print_exc()
 
 async def setup(bot):
-    await bot.add_cog(EcoWork(bot))
+    await bot.add_cog(EcoWork(bot))
