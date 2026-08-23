@@ -40,7 +40,7 @@ class MineButton(discord.ui.Button):
             if interaction.user.id != view.user.id:
                 return await interaction.response.send_message("❌ Yeh game aapka nahi hai!", ephemeral=True)
                 
-            if self.is_revealed or view.is_finished:
+            if self.is_revealed or view.game_over_flag:
                 return await interaction.response.defer()
 
             self.is_revealed = True
@@ -71,7 +71,7 @@ class CashOutButton(discord.ui.Button):
         if interaction.user.id != view.user.id:
             return await interaction.response.send_message("❌ Yeh game aapka nahi hai!", ephemeral=True)
             
-        if view.is_finished:
+        if view.game_over_flag:
             return await interaction.response.defer()
             
         await view.game_over(interaction, won=True)
@@ -86,7 +86,7 @@ class EcoMineView(discord.ui.View):
         self.revealed_count = 0
         self.total_tiles = 9
         self.multiplier = 1.0
-        self.is_finished = False
+        self.game_over_flag = False
         self.message = None
         
         # Setup board
@@ -102,8 +102,8 @@ class EcoMineView(discord.ui.View):
         self.add_item(self.cash_out_btn)
 
     async def on_timeout(self):
-        if not self.is_finished and self.message:
-            self.is_finished = True
+        if not self.game_over_flag and self.message:
+            self.game_over_flag = True
             for btn in self.mine_buttons:
                 btn.disabled = True
             self.cash_out_btn.disabled = True
@@ -160,7 +160,7 @@ class EcoMineView(discord.ui.View):
         await interaction.response.edit_message(embed=embed, view=self)
 
     async def game_over(self, interaction: discord.Interaction, won: bool):
-        self.is_finished = True
+        self.game_over_flag = True
         for btn in self.mine_buttons:
             btn.disabled = True
             if btn.is_mine and not btn.is_revealed:
