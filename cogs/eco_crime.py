@@ -34,13 +34,25 @@ class EcoCrime(commands.Cog):
             fine = random.randint(400, 1000)
 
         if success:
-            earnings = random.randint(800, 2000)
+            earnings = random.randint(300, 800)
             cursor.execute("UPDATE economy SET wallet = wallet + ? WHERE user_id = ?", (earnings, str(ctx.author.id)))
-            await ctx.send(f"🥷 {ctx.author.mention}, aapne bank loot liya aur chupke se **💠 {earnings:,}** uda le gye! Pura master-mind lagaya!")
+            
+            embed = discord.Embed(
+                title="🥷 Crime Successful!",
+                description=f"{ctx.author.mention}, aapne bank loot liya aur chupke se **💠 {earnings:,}** uda le gye! Pura master-mind lagaya!",
+                color=discord.Color.green()
+            )
+            await ctx.send(embed=embed)
         else:
             if fine > wallet: fine = wallet
             cursor.execute("UPDATE economy SET wallet = wallet - ? WHERE user_id = ?", (fine, str(ctx.author.id)))
-            await ctx.send(f"🚨 {ctx.author.mention}, ATM ukhadte waqt alarm baj gya! Aapko bhaari fine bharna pada: **💠 {fine:,}**! 💀")
+            
+            embed = discord.Embed(
+                title="🚨 Busted!",
+                description=f"{ctx.author.mention}, ATM ukhadte waqt alarm baj gya! Aapko bhaari fine bharna pada: **💠 {fine:,}**! 💀",
+                color=discord.Color.red()
+            )
+            await ctx.send(embed=embed)
 
         conn.commit()
         conn.close()

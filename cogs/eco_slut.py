@@ -24,14 +24,26 @@ class EcoSlut(commands.Cog):
         success = random.choice([True, True, False]) # 66% chance success
         
         if success:
-            earnings = random.randint(200, 800)
+            earnings = random.randint(100, 350)
             cursor.execute("UPDATE economy SET wallet = wallet + ? WHERE user_id = ?", (earnings, str(ctx.author.id)))
-            await ctx.send(f"💋 {ctx.author.mention}, aapne raste par ameer logon ko thoda entertain kiya aur **💠 {earnings}** jhatak liye!")
+            
+            embed = discord.Embed(
+                title="💋 Entertainment Completed!",
+                description=f"{ctx.author.mention}, aapne raste par ameer logon ko thoda entertain kiya aur **💠 {earnings}** jhatak liye!",
+                color=discord.Color.green()
+            )
+            await ctx.send(embed=embed)
         else:
-            fine = random.randint(150, 400)
+            fine = random.randint(50, 150)
             if fine > wallet: fine = wallet
             cursor.execute("UPDATE economy SET wallet = wallet - ? WHERE user_id = ?", (fine, str(ctx.author.id)))
-            await ctx.send(f"📸 {ctx.author.mention}, aap saste kamo me pakde gaye! Police ne aap par **💠 {fine}** ka fine thok diya! 💀")
+            
+            embed = discord.Embed(
+                title="🚨 Caught in the Act!",
+                description=f"📸 {ctx.author.mention}, aap saste kamo me pakde gaye! Police ne aap par **💠 {fine}** ka fine thok diya! 💀",
+                color=discord.Color.red()
+            )
+            await ctx.send(embed=embed)
 
         conn.commit()
         conn.close()
