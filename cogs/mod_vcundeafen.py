@@ -7,7 +7,7 @@ class ModVcundeafen(commands.Cog):
         self.bot = bot
 
     @commands.hybrid_command(name="vcundeafen")
-    @commands.has_permissions(deafen_members=True)
+    @commands.has_guild_permissions(deafen_members=True)
     async def vcundeafen(self, ctx, member: discord.Member, *, reason: str = "Koi reason nahi diya gaya"):
         """Kisi member ka voice channel deafen hatane ke liye."""
         if not member.voice or not member.voice.channel:

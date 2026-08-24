@@ -7,7 +7,7 @@ class ModVcunmute(commands.Cog):
         self.bot = bot
 
     @commands.hybrid_command(name="vcunmute")
-    @commands.has_permissions(mute_members=True)
+    @commands.has_guild_permissions(mute_members=True)
     async def vcunmute(self, ctx, member: discord.Member, *, reason: str = "Koi reason nahi diya gaya"):
         """Kisi member ka voice channel mute hatane ke liye."""
         if not member.voice or not member.voice.channel:

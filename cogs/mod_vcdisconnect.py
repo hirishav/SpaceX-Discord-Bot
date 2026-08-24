@@ -7,7 +7,7 @@ class ModVcdisconnect(commands.Cog):
         self.bot = bot
 
     @commands.hybrid_command(name="vcdisconnect", aliases=["vckick"])
-    @commands.has_permissions(move_members=True)
+    @commands.has_guild_permissions(move_members=True)
     async def vcdisconnect(self, ctx, member: discord.Member, *, reason: str = "Koi reason nahi diya gaya"):
         """Kisi member ko voice channel se bahar nikalne (disconnect) ke liye."""
         if not member.voice or not member.voice.channel:

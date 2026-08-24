@@ -7,7 +7,7 @@ class ModVcmove(commands.Cog):
         self.bot = bot
 
     @commands.hybrid_command(name="vcmove")
-    @commands.has_permissions(move_members=True)
+    @commands.has_guild_permissions(move_members=True)
     async def vcmove(self, ctx, member: discord.Member, channel: discord.VoiceChannel, *, reason: str = "Koi reason nahi diya gaya"):
         """Kisi member ko ek voice channel se doosre me move karne ke liye."""
         if not member.voice or not member.voice.channel:
