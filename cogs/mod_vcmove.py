@@ -1,7 +1,18 @@
 # cogs/mod_vcmove.py
 import discord
 from discord.ext import commands
-import typing
+
+class VCMoveTarget(commands.Converter):
+    async def convert(self, ctx, argument):
+        try:
+            return await commands.MemberConverter().convert(ctx, argument)
+        except commands.MemberNotFound:
+            pass
+            
+        try:
+            return await commands.VoiceChannelConverter().convert(ctx, argument)
+        except commands.ChannelNotFound:
+            raise commands.BadArgument("❌ Pehla argument ya toh member hona chahiye ya voice channel! ID check karein.")
 
 class ModVcmove(commands.Cog):
     def __init__(self, bot):
@@ -9,7 +20,7 @@ class ModVcmove(commands.Cog):
 
     @commands.hybrid_command(name="vcmove")
     @commands.has_guild_permissions(move_members=True)
-    async def vcmove(self, ctx, target: typing.Union[discord.Member, discord.VoiceChannel], channel: discord.VoiceChannel, *, reason: str = "Koi reason nahi diya gaya"):
+    async def vcmove(self, ctx, target: VCMoveTarget, channel: discord.VoiceChannel, *, reason: str = "Koi reason nahi diya gaya"):
         """Kisi member ya pure VC ko doosre voice channel me move karne ke liye."""
         
         if isinstance(target, discord.Member):
@@ -71,14 +82,12 @@ class ModVcmove(commands.Cog):
     async def vcmove_error(self, ctx, error):
         if isinstance(error, commands.MissingPermissions):
             await ctx.send("❌ Aapke paas is command ko use karne ki permission nahi hai!")
-        elif isinstance(error, commands.MemberNotFound):
-            await ctx.send("❌ Member nahi mila! Sahi tag ya ID use karein.")
         elif isinstance(error, commands.ChannelNotFound):
             await ctx.send("❌ Channel nahi mila! Sahi channel ID use karein.")
         elif isinstance(error, commands.MissingRequiredArgument):
             await ctx.send(f"❌ Sahi tarika: `{ctx.prefix}vcmove @user/channel_id <channel_id> [reason]`")
-        elif isinstance(error, commands.BadUnionArgument):
-            await ctx.send("❌ Pehla argument ya toh member hona chahiye ya voice channel! ID check karein.")
+        elif isinstance(error, commands.BadArgument):
+            await ctx.send(str(error))
         else:
             await ctx.send(f"❌ Kuch gadbad hui: {error}")
 
