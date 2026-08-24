@@ -10,7 +10,7 @@ class EcoCrime(commands.Cog):
         self.db_path = "warnings.db"
 
     @commands.hybrid_command(name="crime")
-    @commands.cooldown(1, 15, commands.BucketType.user)
+    @commands.cooldown(1, 3600, commands.BucketType.user)
     async def crime(self, ctx):
         """High-risk, High-reward illegal kaam!"""
         conn = sqlite3.connect(self.db_path)
@@ -48,7 +48,13 @@ class EcoCrime(commands.Cog):
     @crime.error
     async def crime_error(self, ctx, error):
         if isinstance(error, commands.CommandOnCooldown):
-            await ctx.send(f"⏳ {ctx.author.mention}, police dhoond rhi hai! Try again after **{int(error.retry_after)} seconds**.")
+            hours, remainder = divmod(int(error.retry_after), 3600)
+            minutes, seconds = divmod(remainder, 60)
+            time_left = ""
+            if hours > 0: time_left += f"{hours}h "
+            if minutes > 0: time_left += f"{minutes}m "
+            time_left += f"{seconds}s".strip()
+            await ctx.send(f"⏳ {ctx.author.mention}, police dhoond rhi hai! Try again after **{time_left}**.")
         else:
             raise error
 

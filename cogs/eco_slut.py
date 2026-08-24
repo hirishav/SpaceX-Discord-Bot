@@ -10,7 +10,7 @@ class EcoSlut(commands.Cog):
         self.db_path = "warnings.db"
 
     @commands.hybrid_command(name="slut")
-    @commands.cooldown(1, 15, commands.BucketType.user)
+    @commands.cooldown(1, 300, commands.BucketType.user)
     async def slut(self, ctx):
         """Risky tareeqon se paise kamane ke liye."""
         conn = sqlite3.connect(self.db_path)
@@ -39,7 +39,11 @@ class EcoSlut(commands.Cog):
     @slut.error
     async def slut_error(self, ctx, error):
         if isinstance(error, commands.CommandOnCooldown):
-            await ctx.send(f"⏳ {ctx.author.mention}, sabr rkho! Try again after **{int(error.retry_after)} seconds**.")
+            minutes, seconds = divmod(int(error.retry_after), 60)
+            time_left = ""
+            if minutes > 0: time_left += f"{minutes}m "
+            time_left += f"{seconds}s".strip()
+            await ctx.send(f"⏳ {ctx.author.mention}, sabr rkho! Try again after **{time_left}**.")
         else:
             raise error
 

@@ -25,14 +25,20 @@ def _cfg(name: str, default: str = "") -> str:
 # isliye naya cog add karne par bas iski file "Mod_/Eco_/Fun_/Gen_/Owner_"
 # naming convention follow kare toh help menu apne aap update ho jaata hai.
 # ─────────────────────────────────────────────────────────────
-CATEGORY_ORDER = ["moderation", "economy", "fun", "utility", "general", "owner"]
+CATEGORY_ORDER = ["chat", "voice", "economy", "fun", "utility", "general", "owner"]
 
 CATEGORY_META = {
-    "moderation": {
-        "emoji": "🛠️",
-        "label": "Moderation",
-        "aliases": ["mod", "mods", "moderation", "modding"],
-        "blurb": "Server ko control aur safe rakhne ke liye saare moderation tools.",
+    "chat": {
+        "emoji": "💬",
+        "label": "Chat Moderation",
+        "aliases": ["chat", "mod", "mods", "moderation", "modding"],
+        "blurb": "Server chat ko control aur safe rakhne ke liye saare moderation tools.",
+    },
+    "voice": {
+        "emoji": "🎙️",
+        "label": "Voice Moderation",
+        "aliases": ["voice", "vc", "vcm", "voicemod"],
+        "blurb": "Voice channels ko control karne aur members manage karne ke tools.",
     },
     "economy": {
         "emoji": "💰",
@@ -80,8 +86,10 @@ def resolve_category(cmd: commands.Command) -> str:
     # chahe unka cog file kisi bhi naam se shuru hota ho (e.g. mod_blacklist.py).
     if cmd.hidden or cog_name.startswith("Owner") or cmd.name in {"blacklist"}:
         return "owner"
+    if cog_name.startswith("ModVc") or cog_name.startswith("ModVoice"):
+        return "voice"
     if cog_name.startswith("Mod"):
-        return "moderation"
+        return "chat"
     if cog_name.startswith("Eco") or cog_name.startswith("Stocks"):
         return "economy"
     if cog_name.startswith("Fun"):
@@ -823,7 +831,52 @@ class Help(commands.Cog):
         elif cmd.name == "help":
             description = "📖 Bot ke saare commands ki premium, category-wise list dikhata hai."
             usage = f"`{prefix}help`\n`{prefix}help <category>`\n`{prefix}help <command>`"
-            examples = f"`{prefix}help moderation`\n`{prefix}help ban`"
+            examples = f"`{prefix}help chat`\n`{prefix}help ban`"
+
+        elif cmd.name == "mine":
+            description = "⛏️ Mine me jaakar mining karo aur special ores dhundo (1m Cooldown)."
+            usage = f"`{prefix}mine`"
+            examples = f"`{prefix}mine`"
+
+        elif cmd.name == "daily":
+            description = "📅 Apna free daily Specie reward claim karne ke liye (24h Cooldown)."
+            usage = f"`{prefix}daily`"
+            examples = f"`{prefix}daily`"
+
+        elif cmd.name == "weekly":
+            description = "📅 Apna lamba bada weekly Specie reward claim karne ke liye (7d Cooldown)."
+            usage = f"`{prefix}weekly`"
+            examples = f"`{prefix}weekly`"
+
+        elif cmd.name == "vcmute":
+            description = "🎙️ Kisi member ko voice channel me server mute karne ke liye."
+            usage = f"`{prefix}vcmute @user [reason]`"
+            examples = f"`{prefix}vcmute @User Mic spam`"
+
+        elif cmd.name == "vcunmute":
+            description = "🎙️ Kisi member ka voice channel mute hatane ke liye."
+            usage = f"`{prefix}vcunmute @user [reason]`"
+            examples = f"`{prefix}vcunmute @User`"
+
+        elif cmd.name == "vcdeafen":
+            description = "🎧 Kisi member ko voice channel me deafen (aawaz sunne se rokna) karne ke liye."
+            usage = f"`{prefix}vcdeafen @user [reason]`"
+            examples = f"`{prefix}vcdeafen @User`"
+
+        elif cmd.name == "vcundeafen":
+            description = "🎧 Kisi member ka voice channel deafen hatane ke liye."
+            usage = f"`{prefix}vcundeafen @user [reason]`"
+            examples = f"`{prefix}vcundeafen @User`"
+
+        elif cmd.name == "vcdisconnect":
+            description = "🚪 Kisi member ko voice channel se bahar nikalne (disconnect) ke liye."
+            usage = f"`{prefix}vcdisconnect @user [reason]`"
+            examples = f"`{prefix}vcdisconnect @User`"
+
+        elif cmd.name == "vcmove":
+            description = "✈️ Kisi member ko ek voice channel se doosre channel me bhejne ke liye."
+            usage = f"`{prefix}vcmove @user #channel_name/ID [reason]`"
+            examples = f"`{prefix}vcmove @User 1234567890`"
 
         cmd_embed = discord.Embed(
             title=f"✦ Command: {cmd.name.capitalize()} ✦",

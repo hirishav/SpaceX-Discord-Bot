@@ -46,11 +46,19 @@ class StocksBuy(commands.Cog):
         cursor.execute("UPDATE economy SET wallet = ? WHERE user_id = ?", (wallet - total_cost, user_id))
         cursor.execute("UPDATE stocks SET available_shares = ? WHERE ticker = ?", (available - amount, ticker))
         
-        cursor.execute("INSERT OR IGNORE INTO portfolios (user_id, ticker, shares) VALUES (?, ?, 0)", (user_id, ticker))
-        cursor.execute("SELECT shares FROM portfolios WHERE user_id = ? AND ticker = ?", (user_id, ticker))
-        owned = cursor.fetchone()[0]
+        cursor.execute("INSERT OR IGNORE INTO portfolios (user_id, ticker, shares, avg_buy_price) VALUES (?, ?, 0, 0)", (user_id, ticker))
+        cursor.execute("SELECT shares, avg_buy_price FROM portfolios WHERE user_id = ? AND ticker = ?", (user_id, ticker))
+        row = cursor.fetchone()
+        owned = row[0]
+        avg_buy = row[1] if row[1] is not None else 0
         
-        cursor.execute("UPDATE portfolios SET shares = ? WHERE user_id = ? AND ticker = ?", (owned + amount, user_id, ticker))
+        if owned > 0 and avg_buy == 0:
+            avg_buy = price # fallback if it was a legacy purchase before the update
+            
+        new_shares_total = owned + amount
+        new_avg_buy = ((owned * avg_buy) + (amount * price)) / new_shares_total if new_shares_total > 0 else 0
+        
+        cursor.execute("UPDATE portfolios SET shares = ?, avg_buy_price = ? WHERE user_id = ? AND ticker = ?", (new_shares_total, new_avg_buy, user_id, ticker))
         
         conn.commit()
         conn.close()

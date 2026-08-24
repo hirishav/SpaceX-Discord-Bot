@@ -58,7 +58,7 @@ class StocksPortfolio(commands.Cog):
             return await ctx.send("🔒 **Access Denied:** Is user ka investment portfolio securely private lock par set hai!")
 
         cursor.execute("""
-            SELECT p.ticker, p.shares, s.current_price, s.company_name 
+            SELECT p.ticker, p.shares, s.current_price, s.company_name, p.avg_buy_price 
             FROM portfolios p 
             JOIN stocks s ON p.ticker = s.ticker 
             WHERE p.user_id = ? AND p.shares > 0
@@ -74,13 +74,37 @@ class StocksPortfolio(commands.Cog):
             return await ctx.send(embed=embed)
 
         total_value = 0
+        total_profit_loss = 0
         text = ""
-        for ticker, shares, price, name in rows:
+        for row in rows:
+            ticker, shares, price, name = row[0], row[1], row[2], row[3]
+            avg_buy = row[4] if (len(row) > 4 and row[4] is not None) else 0
+            
             val = shares * price
             total_value += val
-            text += f"🔹 **{name}** (`{ticker}`): `{shares}` Shares — Worth **{val} Specie**\n"
+            
+            if avg_buy > 0:
+                profit_loss = val - (shares * avg_buy)
+                total_profit_loss += profit_loss
+                pl_percent = (profit_loss / (shares * avg_buy)) * 100
+                
+                if profit_loss >= 0:
+                    pl_str = f"| 📈 **+{profit_loss:,.0f} Specie (+{pl_percent:.2f}%)**"
+                else:
+                    pl_str = f"| 📉 **{profit_loss:,.0f} Specie ({pl_percent:.2f}%)**"
+            else:
+                pl_str = "*(Legacy Buy)*"
 
-        embed.description = f"### 📊 Net Asset Holdings: **{total_value} Specie**\n\n{text}"
+            text += f"🔹 **{name}** (`{ticker}`)\n└ `{shares}` Shares | Value: **{val:,.0f} Specie** {pl_str}\n\n"
+
+        if total_profit_loss > 0:
+            overall_pl = f"📈 Overall Profit: **+{total_profit_loss:,.0f} Specie**"
+        elif total_profit_loss < 0:
+            overall_pl = f"📉 Overall Loss: **{total_profit_loss:,.0f} Specie**"
+        else:
+            overall_pl = "⚖️ Overall PnL: **0 Specie**"
+            
+        embed.description = f"### 📊 Net Asset Holdings: **{total_value:,.0f} Specie**\n{overall_pl}\n\n{text}"
         await ctx.send(embed=embed)
 
 async def setup(bot):

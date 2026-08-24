@@ -44,9 +44,16 @@ def init_stocks_db():
         ticker TEXT,
         shares INTEGER DEFAULT 0,
         profile_privacy TEXT DEFAULT 'public',
+        avg_buy_price REAL DEFAULT 0,
         PRIMARY KEY (user_id, ticker)
     )
     """)
+    
+    # Add avg_buy_price if missing
+    try:
+        cursor.execute("ALTER TABLE portfolios ADD COLUMN avg_buy_price REAL DEFAULT 0")
+    except Exception:
+        pass
     
     # Core Database initialization sync loop
     for ticker, name, price in TOP_200_STOCKS:

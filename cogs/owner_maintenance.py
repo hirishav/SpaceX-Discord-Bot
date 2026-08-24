@@ -124,7 +124,7 @@ class OwnerMaintenance(commands.Cog):
                         description=f"<@{user_id}> Abhi aap aaram se bot ko bina kisi dikkat ke istemaal kar sakte hain.\n\n*Sorry for the inconvenience caused! Thank you for waiting.* ✨",
                         color=discord.Color.green()
                     )
-                    await channel.send(content=f"<@{user_id}>", embed=embed)
+                    await channel.send(content=f"<@{user_id}>", embed=embed, silent=True)
                     await asyncio.sleep(0.5) # Anti spam rate limits check protection filter
             except Exception:
                 continue
