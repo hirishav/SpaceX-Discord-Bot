@@ -16,7 +16,7 @@ class EcoDaily(commands.Cog):
         cursor = conn.cursor()
         cursor.execute("INSERT OR IGNORE INTO economy (user_id, wallet, bank) VALUES (?, 0, 0)", (str(ctx.author.id),))
 
-        reward = 1000
+        reward = 500
 
         cursor.execute("UPDATE economy SET wallet = wallet + ? WHERE user_id = ?", (reward, str(ctx.author.id)))
         conn.commit()

@@ -16,7 +16,7 @@ class EcoWeekly(commands.Cog):
         cursor = conn.cursor()
         cursor.execute("INSERT OR IGNORE INTO economy (user_id, wallet, bank) VALUES (?, 0, 0)", (str(ctx.author.id),))
 
-        earnings = random.randint(10000, 25000)
+        earnings = random.randint(5000, 10000)
         cursor.execute("UPDATE economy SET wallet = wallet + ? WHERE user_id = ?", (earnings, str(ctx.author.id)))
         
         # Get new total

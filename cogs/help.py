@@ -599,6 +599,21 @@ class Help(commands.Cog):
             usage = f"`{prefix}botinfo`"
             examples = f"`{prefix}botinfo`"
 
+        elif cmd.name == "disable":
+            description = "Server mein commands ko disable karne ke liye."
+            usage = f"`{prefix}disable <command_name>`"
+            examples = f"`{prefix}disable daily`\n`{prefix}disable cf`"
+
+        elif cmd.name == "enable":
+            description = "Server mein disabled commands ko waapas enable karne ke liye."
+            usage = f"`{prefix}enable <command_name>`"
+            examples = f"`{prefix}enable daily`\n`{prefix}enable cf`"
+
+        elif cmd.name in ["marketnews", "news"]:
+            description = "Manual news alert ko trigger karne ke liye."
+            usage = f"`{prefix}marketnews`"
+            examples = f"`{prefix}marketnews`"
+
         elif cmd.name == "afk":
             description = "Aapko AFK status par dalne ke liye taaki ping karne par bot notify kare."
             usage = f"`{prefix}afk [reason]`"

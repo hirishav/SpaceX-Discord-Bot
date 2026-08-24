@@ -7,7 +7,7 @@ class OwnerStatus(commands.Cog):
         self.bot = bot
 
     # setstatus command aur uska alias 'ss'
-    @commands.hybrid_command(name="setstatus", aliases=["ss"], hidden=True)
+    @commands.command(name="setstatus", aliases=["ss"], hidden=True)
     @commands.is_owner()
     async def setstatus(self, ctx, status_type: str, activity_type: str = "playing", *, activity_name: str = None):
         """Bot ka status aur activity badalye."""
