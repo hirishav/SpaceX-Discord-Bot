@@ -51,11 +51,9 @@ class EcoSlut(commands.Cog):
     @slut.error
     async def slut_error(self, ctx, error):
         if isinstance(error, commands.CommandOnCooldown):
-            minutes, seconds = divmod(int(error.retry_after), 60)
-            time_left = ""
-            if minutes > 0: time_left += f"{minutes}m "
-            time_left += f"{seconds}s".strip()
-            await ctx.send(f"⏳ {ctx.author.mention}, sabr rkho! Try again after **{time_left}**.")
+            import time
+            future_time = int(time.time() + error.retry_after)
+            await ctx.send(f"⏳ {ctx.author.mention}, sabr rkho! Try again **<t:{future_time}:R>**.")
         else:
             raise error
 

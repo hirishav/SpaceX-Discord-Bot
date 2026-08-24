@@ -35,7 +35,9 @@ class EcoWork(commands.Cog):
     @work.error
     async def work_error(self, ctx, error):
         if isinstance(error, commands.CommandOnCooldown):
-            await ctx.send(f"⏳ {ctx.author.mention}, chill karo! Try again after **{int(error.retry_after)} seconds**.")
+            import time
+            future_time = int(time.time() + error.retry_after)
+            await ctx.send(f"⏳ {ctx.author.mention}, chill karo! Try again **<t:{future_time}:R>**.")
         else:
             await ctx.send(f"⚠️ Debug Work Error: {error}")
             import traceback

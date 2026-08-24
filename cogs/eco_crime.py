@@ -60,13 +60,9 @@ class EcoCrime(commands.Cog):
     @crime.error
     async def crime_error(self, ctx, error):
         if isinstance(error, commands.CommandOnCooldown):
-            hours, remainder = divmod(int(error.retry_after), 3600)
-            minutes, seconds = divmod(remainder, 60)
-            time_left = ""
-            if hours > 0: time_left += f"{hours}h "
-            if minutes > 0: time_left += f"{minutes}m "
-            time_left += f"{seconds}s".strip()
-            await ctx.send(f"⏳ {ctx.author.mention}, police dhoond rhi hai! Try again after **{time_left}**.")
+            import time
+            future_time = int(time.time() + error.retry_after)
+            await ctx.send(f"⏳ {ctx.author.mention}, police dhoond rhi hai! Try again **<t:{future_time}:R>**.")
         else:
             raise error
 

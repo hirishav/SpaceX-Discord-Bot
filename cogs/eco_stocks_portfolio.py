@@ -9,13 +9,31 @@ class StocksPortfolio(commands.Cog):
         self.bot = bot
 
     @commands.hybrid_command(name="portfolio", aliases=["pf", "mystocks"])
-    async def view_portfolio(self, ctx, option_or_user: str = None):
+    async def view_portfolio(self, ctx, *, option_or_user: str = None):
         """Portfolio dekhne ya privacy set karne ke liye. Usage: !!pf / !!pf set private / !!pf @user"""
         user_id = str(ctx.author.id)
         
         # Action handler for dynamic privacy settings initialization loops
-        if option_or_user and option_or_user.lower() == "set":
-            return await ctx.send(f"❌ Sahi tarika: `{ctx.prefix}portfolio set private` ya `{ctx.prefix}portfolio set public`")
+        if option_or_user:
+            opt = option_or_user.lower().strip()
+            if opt == "set":
+                return await ctx.send(f"❌ Sahi tarika: `{ctx.prefix}portfolio set private` ya `{ctx.prefix}portfolio set public`")
+            elif opt == "set private":
+                conn = get_db()
+                cursor = conn.cursor()
+                cursor.execute("INSERT OR IGNORE INTO portfolios (user_id, ticker, shares, profile_privacy) VALUES (?, 'NIFTY', 0, 'private')", (user_id,))
+                cursor.execute("UPDATE portfolios SET profile_privacy = 'private' WHERE user_id = ?", (user_id,))
+                conn.commit()
+                conn.close()
+                return await ctx.send("🔒 **Privacy Set:** Aapka asset investment layout portfolio ab private ho gaya hai!")
+            elif opt == "set public":
+                conn = get_db()
+                cursor = conn.cursor()
+                cursor.execute("INSERT OR IGNORE INTO portfolios (user_id, ticker, shares, profile_privacy) VALUES (?, 'NIFTY', 0, 'public')", (user_id,))
+                cursor.execute("UPDATE portfolios SET profile_privacy = 'public' WHERE user_id = ?", (user_id,))
+                conn.commit()
+                conn.close()
+                return await ctx.send("🔓 **Privacy Set:** Aapka portfolio ab public ho gaya hai, ise koi bhi dekh sakta hai!")
 
         if ctx.message.mentions:
             target_user = ctx.message.mentions[0]
@@ -23,25 +41,6 @@ class StocksPortfolio(commands.Cog):
             target_user = self.bot.get_user(int(option_or_user)) or ctx.author
         else:
             target_user = ctx.author
-
-        # Check sub-command array filters string mappings
-        if option_or_user and option_or_user.lower() == "private" and ctx.message.content.split()[1].lower() == "set":
-            conn = get_db()
-            cursor = conn.cursor()
-            cursor.execute("INSERT OR IGNORE INTO portfolios (user_id, ticker, shares, profile_privacy) VALUES (?, 'NIFTY', 0, 'private')", (user_id,))
-            cursor.execute("UPDATE portfolios SET profile_privacy = 'private' WHERE user_id = ?", (user_id,))
-            conn.commit()
-            conn.close()
-            return await ctx.send("🔒 **Privacy Set:** Aapka asset investment layout portfolio ab private ho gaya hai!")
-
-        if option_or_user and option_or_user.lower() == "public" and ctx.message.content.split()[1].lower() == "set":
-            conn = get_db()
-            cursor = conn.cursor()
-            cursor.execute("INSERT OR IGNORE INTO portfolios (user_id, ticker, shares, profile_privacy) VALUES (?, 'NIFTY', 0, 'public')", (user_id,))
-            cursor.execute("UPDATE portfolios SET profile_privacy = 'public' WHERE user_id = ?", (user_id,))
-            conn.commit()
-            conn.close()
-            return await ctx.send("🔓 **Privacy Set:** Aapka portfolio ab public ho gaya hai, ise koi bhi dekh sakta hai!")
 
         # Processing target user records array read
         target_id = str(target_user.id)
