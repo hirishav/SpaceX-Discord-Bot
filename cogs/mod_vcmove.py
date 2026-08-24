@@ -24,6 +24,10 @@ class ModVcmove(commands.Cog):
                 color=discord.Color.blue()
             )
             await ctx.send(embed=embed)
+            try:
+                await ctx.message.delete()
+            except Exception:
+                pass
         except discord.Forbidden:
             await ctx.send("❌ Mere paas is member ko move karne ki permission nahi hai! (Higher role chahiye)")
         except Exception as e:

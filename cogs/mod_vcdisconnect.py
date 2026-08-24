@@ -21,6 +21,10 @@ class ModVcdisconnect(commands.Cog):
                 color=discord.Color.orange()
             )
             await ctx.send(embed=embed)
+            try:
+                await ctx.message.delete()
+            except Exception:
+                pass
         except discord.Forbidden:
             await ctx.send("❌ Mere paas is member ko disconnect karne ki permission nahi hai! (Higher role chahiye)")
         except Exception as e:
