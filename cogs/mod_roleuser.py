@@ -11,6 +11,10 @@ class ModRoleUser(commands.Cog):
     async def roleuser(self, ctx, *, role: discord.Role):
         """Kisi specific role ke members ki list dekhne ke liye."""
         
+        # Ensure guild members are fully cached
+        if not ctx.guild.chunked:
+            await ctx.guild.chunk()
+            
         members = role.members
         if not members:
             embed = discord.Embed(

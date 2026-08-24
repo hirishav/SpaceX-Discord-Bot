@@ -17,6 +17,10 @@ class ModPunishments(commands.Cog):
 
         active_punishments = []
 
+        # Ensure guild members are fully cached
+        if not ctx.guild.chunked:
+            await ctx.guild.chunk()
+
         # 1. Active Timeouts (Mutes)
         muted_members = [m for m in ctx.guild.members if m.is_timed_out()]
         
