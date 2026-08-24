@@ -727,6 +727,11 @@ class Help(commands.Cog):
             usage = f"`{prefix}roleuser @role/ID`"
             examples = f"`{prefix}roleuser @VIP`"
 
+        elif cmd.name == "punishments":
+            description = "🛡️ Server me chal rahe active timed punishments (Mutes aur Temproles) ki list dekhne ke liye."
+            usage = f"`{prefix}punishments`"
+            examples = f"`{prefix}punishments`"
+
         elif cmd.name == "temprole":
             description = "⏱️ Kisi user ko limited time ke liye role assign karein."
             usage = f"`{prefix}temprole [user] [time] [role], [reason]`"
