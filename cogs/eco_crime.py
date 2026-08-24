@@ -34,7 +34,7 @@ class EcoCrime(commands.Cog):
             fine = random.randint(400, 1000)
 
         if success:
-            earnings = random.randint(300, 800)
+            earnings = random.randint(500, 2000)
             cursor.execute("UPDATE economy SET wallet = wallet + ? WHERE user_id = ?", (earnings, str(ctx.author.id)))
             
             embed = discord.Embed(

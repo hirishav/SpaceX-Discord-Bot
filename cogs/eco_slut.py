@@ -24,7 +24,7 @@ class EcoSlut(commands.Cog):
         success = random.choice([True, True, False]) # 66% chance success
         
         if success:
-            earnings = random.randint(100, 350)
+            earnings = random.randint(100, 1000)
             cursor.execute("UPDATE economy SET wallet = wallet + ? WHERE user_id = ?", (earnings, str(ctx.author.id)))
             
             embed = discord.Embed(

@@ -17,7 +17,7 @@ class EcoWork(commands.Cog):
         cursor = conn.cursor()
         cursor.execute("INSERT OR IGNORE INTO economy (user_id, wallet, bank) VALUES (?, 0, 0)", (str(ctx.author.id),))
 
-        earnings = random.randint(50, 200)
+        earnings = random.randint(50, 500)
         jobs = ["McDonalds me burger banaya", "Rishav bhai ke bot ki coding ki", "Discord server manage kiya", "YouTube video edit ki"]
         job = random.choice(jobs)
 
