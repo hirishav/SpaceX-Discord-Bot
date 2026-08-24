@@ -1,6 +1,7 @@
 # cogs/mod_vcmove.py
 import discord
 from discord.ext import commands
+import typing
 
 class ModVcmove(commands.Cog):
     def __init__(self, bot):
@@ -8,30 +9,63 @@ class ModVcmove(commands.Cog):
 
     @commands.hybrid_command(name="vcmove")
     @commands.has_guild_permissions(move_members=True)
-    async def vcmove(self, ctx, member: discord.Member, channel: discord.VoiceChannel, *, reason: str = "Koi reason nahi diya gaya"):
-        """Kisi member ko ek voice channel se doosre me move karne ke liye."""
-        if not member.voice or not member.voice.channel:
-            return await ctx.send("❌ Ye member abhi kisi voice channel me nahi hai!")
-            
-        if member.voice.channel.id == channel.id:
-            return await ctx.send("⚠️ Member pehle se hi ussi voice channel me hai!")
+    async def vcmove(self, ctx, target: typing.Union[discord.Member, discord.VoiceChannel], channel: discord.VoiceChannel, *, reason: str = "Koi reason nahi diya gaya"):
+        """Kisi member ya pure VC ko doosre voice channel me move karne ke liye."""
+        
+        if isinstance(target, discord.Member):
+            member = target
+            if not member.voice or not member.voice.channel:
+                return await ctx.send("❌ Ye member abhi kisi voice channel me nahi hai!")
+                
+            if member.voice.channel.id == channel.id:
+                return await ctx.send("⚠️ Member pehle se hi ussi voice channel me hai!")
 
-        try:
-            await member.move_to(channel, reason=f"VCMove by {ctx.author}: {reason}")
-            embed = discord.Embed(
-                title="✈️ Voice Moved",
-                description=f"✅ {member.mention} ko {channel.mention} me move kar diya gaya hai.\n**Reason:** {reason}",
-                color=discord.Color.blue()
-            )
-            await ctx.send(embed=embed)
+            try:
+                await member.move_to(channel, reason=f"VCMove by {ctx.author}: {reason}")
+                embed = discord.Embed(
+                    title="✈️ Voice Moved",
+                    description=f"✅ {member.mention} ko {channel.mention} me move kar diya gaya hai.\n**Reason:** {reason}",
+                    color=discord.Color.blue()
+                )
+                await ctx.send(embed=embed)
+                try:
+                    await ctx.message.delete()
+                except Exception:
+                    pass
+            except discord.Forbidden:
+                await ctx.send("❌ Mere paas is member ko move karne ki permission nahi hai! (Higher role chahiye)")
+            except Exception as e:
+                await ctx.send(f"❌ Kuch gadbad ho gayi: {e}")
+
+        elif isinstance(target, discord.VoiceChannel):
+            from_channel = target
+            if len(from_channel.members) == 0:
+                return await ctx.send("❌ Pehle wale voice channel me koi nahi hai!")
+                
+            if from_channel.id == channel.id:
+                return await ctx.send("⚠️ Dono voice channels same hain!")
+
+            moved_count = 0
             try:
                 await ctx.message.delete()
             except Exception:
                 pass
-        except discord.Forbidden:
-            await ctx.send("❌ Mere paas is member ko move karne ki permission nahi hai! (Higher role chahiye)")
-        except Exception as e:
-            await ctx.send(f"❌ Kuch gadbad ho gayi: {e}")
+            
+            msg = await ctx.send(f"⏳ Moving members from {from_channel.mention} to {channel.mention}...")
+            
+            for member in from_channel.members:
+                try:
+                    await member.move_to(channel, reason=f"Mass VCMove by {ctx.author}: {reason}")
+                    moved_count += 1
+                except Exception:
+                    pass
+
+            embed = discord.Embed(
+                title="✈️ Mass Voice Moved",
+                description=f"✅ {moved_count} members ko {from_channel.mention} se {channel.mention} me move kar diya gaya hai.\n**Reason:** {reason}",
+                color=discord.Color.blue()
+            )
+            await msg.edit(content=None, embed=embed)
 
     @vcmove.error
     async def vcmove_error(self, ctx, error):
@@ -42,7 +76,9 @@ class ModVcmove(commands.Cog):
         elif isinstance(error, commands.ChannelNotFound):
             await ctx.send("❌ Channel nahi mila! Sahi channel ID use karein.")
         elif isinstance(error, commands.MissingRequiredArgument):
-            await ctx.send(f"❌ Sahi tarika: `{ctx.prefix}vcmove @user <channel_id> [reason]`")
+            await ctx.send(f"❌ Sahi tarika: `{ctx.prefix}vcmove @user/channel_id <channel_id> [reason]`")
+        elif isinstance(error, commands.BadUnionArgument):
+            await ctx.send("❌ Pehla argument ya toh member hona chahiye ya voice channel! ID check karein.")
         else:
             await ctx.send(f"❌ Kuch gadbad hui: {error}")
 
