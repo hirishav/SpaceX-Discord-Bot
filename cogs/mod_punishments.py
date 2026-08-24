@@ -31,7 +31,7 @@ class ModPunishments(commands.Cog):
         if muted_members or self.bot.db:
             try:
                 async for entry in ctx.guild.audit_logs(limit=200):
-                    if entry.action == discord.AuditLogAction.member_update and hasattr(entry.after, 'communication_disabled_until'):
+                    if entry.action == discord.AuditLogAction.member_update and getattr(entry.after, 'timed_out_until', None) is not None:
                         if entry.target.id not in timeout_logs:
                             timeout_logs[entry.target.id] = entry.user
                     elif entry.action == discord.AuditLogAction.member_role_update:
@@ -76,10 +76,7 @@ class ModPunishments(commands.Cog):
                 role_str = role.mention if role else f"Deleted Role"
                 
                 key = f"{user_id}_{role_id}"
-                mod = role_logs.get(int(user_id)) # We might not match exactly, but let's try
-                mod_mention = "Unknown (Logs)"
-                if key in role_logs:
-                    mod_mention = role_logs[key].mention
+                mod_mention = role_logs[key].mention if key in role_logs else "Unknown (Logs)"
 
                 time_str = f"<t:{int(expires_at)}:R>"
 
