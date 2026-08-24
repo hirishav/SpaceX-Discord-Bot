@@ -43,7 +43,7 @@ class EcoGive(commands.Cog):
             amount = author_wallet // 2
         else:
             try:
-                amount = int(amount_str)
+                amount = int(float(amount_str))
             except ValueError:
                 return await ctx.send("❌ Valid amount likho bhai (Number, all, ya half)!")
 

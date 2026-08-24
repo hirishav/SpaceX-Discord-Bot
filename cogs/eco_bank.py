@@ -37,14 +37,14 @@ class EcoBank(commands.Cog):
             amount = wallet // 2
         else:
             try:
-                amount = int(amount_str)
+                amount = int(float(amount_str))
             except ValueError:
                 return await ctx.send("❌ Valid amount likho (Number, all, ya half)!")
 
         if amount <= 0:
             return await ctx.send("❌ Amount 0 se bada hona chahiye bhai!")
         if amount > wallet:
-            return await ctx.send(f"❌ Aapke wallet me itne paise nahi hain! Current Wallet: 💠 `{wallet}`")
+            return await ctx.send(f"❌ Aapke wallet me itne paise nahi hain! Current Wallet: 💠 `{wallet:,}`")
 
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
@@ -52,7 +52,11 @@ class EcoBank(commands.Cog):
         conn.commit()
         conn.close()
 
-        await ctx.send(f"🏦 {ctx.author.mention} ne **💠 {amount:,}** Specie apne bank me safe deposit kar diye!")
+        embed = discord.Embed(
+            description=f"✅ {ctx.author.mention}, aapne **💠 {amount:,} Specie** apne bank me safe deposit kar diye!",
+            color=discord.Color.green()
+        )
+        await ctx.send(embed=embed)
 
     @commands.hybrid_command(name="withdraw", aliases=["with"])
     async def withdraw(self, ctx, amount_str: str = None):
@@ -71,14 +75,14 @@ class EcoBank(commands.Cog):
             amount = bank // 2
         else:
             try:
-                amount = int(amount_str)
+                amount = int(float(amount_str))
             except ValueError:
                 return await ctx.send("❌ Valid amount likho (Number, all, ya half)!")
 
         if amount <= 0:
             return await ctx.send("❌ Amount 0 se bada hona chahiye bhai!")
         if amount > bank:
-            return await ctx.send(f"❌ Bank me itne Specie nahi hain! Current Bank: 💠 `{bank}`")
+            return await ctx.send(f"❌ Bank me itne Specie nahi hain! Current Bank: 💠 `{bank:,}`")
 
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
@@ -86,7 +90,11 @@ class EcoBank(commands.Cog):
         conn.commit()
         conn.close()
 
-        await ctx.send(f"💰 {ctx.author.mention} ne **💠 {amount:,}** Specie bank se nikal kar wallet me daal liye!")
+        embed = discord.Embed(
+            description=f"✅ {ctx.author.mention}, aapne **💠 {amount:,} Specie** bank se nikal kar wallet me daal liye!",
+            color=discord.Color.green()
+        )
+        await ctx.send(embed=embed)
 
 async def setup(bot):
     await bot.add_cog(EcoBank(bot))

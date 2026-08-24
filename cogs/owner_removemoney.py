@@ -36,7 +36,7 @@ class OwnerRemoveMoney(commands.Cog):
                 return None, None
                 
         if amount_str.isdigit():
-            return "fixed", int(amount_str)
+            return "fixed", int(float(amount_str))
             
         return None, None
 

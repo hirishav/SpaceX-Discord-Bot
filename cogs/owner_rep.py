@@ -28,7 +28,7 @@ class OwnerRep(commands.Cog):
         if not amount_str.isdigit():
             return await ctx.send("❌ Amount must be a valid number!")
             
-        amount = int(amount_str)
+        amount = int(float(amount_str))
         if amount <= 0:
             return await ctx.send("❌ Amount must be greater than 0!")
 
@@ -67,7 +67,7 @@ class OwnerRep(commands.Cog):
                 conn.close()
                 return await ctx.send("❌ Amount must be a valid number or 'all'!")
             
-            amount = int(amount_str)
+            amount = int(float(amount_str))
             if amount <= 0:
                 conn.close()
                 return await ctx.send("❌ Amount must be greater than 0!")

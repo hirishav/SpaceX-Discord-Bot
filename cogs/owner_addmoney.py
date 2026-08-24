@@ -26,7 +26,7 @@ class OwnerAddMoney(commands.Cog):
             except ValueError:
                 return None
         if amount_str.isdigit():
-            return int(amount_str)
+            return int(float(amount_str))
         return None
 
     @commands.hybrid_command(name="addmoney", aliases=["am"], hidden=True)

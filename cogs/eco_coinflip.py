@@ -32,7 +32,7 @@ class EcoCoinflip(commands.Cog):
         if amount_str.lower() == "all": amount = wallet
         elif amount_str.lower() == "half": amount = wallet // 2
         else:
-            try: amount = int(amount_str)
+            try: amount = int(float(amount_str))
             except ValueError: return await ctx.send("❌ Amount thik se likho!")
 
         if amount > 250000:
