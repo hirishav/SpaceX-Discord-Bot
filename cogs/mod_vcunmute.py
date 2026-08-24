@@ -29,5 +29,16 @@ class ModVcunmute(commands.Cog):
         except Exception as e:
             await ctx.send(f"❌ Kuch gadbad ho gayi: {e}")
 
+    @vcunmute.error
+    async def vcunmute_error(self, ctx, error):
+        if isinstance(error, commands.MissingPermissions):
+            await ctx.send("❌ Aapke paas is command ko use karne ki permission nahi hai!")
+        elif isinstance(error, commands.MemberNotFound):
+            await ctx.send("❌ Member nahi mila! Sahi tag ya ID use karein.")
+        elif isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send(f"❌ Sahi tarika: `{ctx.prefix}vcunmute @user [reason]`")
+        else:
+            await ctx.send(f"❌ Kuch gadbad hui: {error}")
+
 async def setup(bot):
     await bot.add_cog(ModVcunmute(bot))
