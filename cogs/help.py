@@ -722,6 +722,11 @@ class Help(commands.Cog):
             usage = f"`{prefix}roleaudit`"
             examples = f"`{prefix}roleaudit`"
 
+        elif cmd.name == "temprole":
+            description = "⏱️ Kisi user ko limited time ke liye role assign karein."
+            usage = f"`{prefix}temprole [user] [time] [role], [reason]`"
+            examples = f"`{prefix}temprole @User 10m @VIP, Good behaviour`"
+
         elif cmd.name == "lookup":
             description = "🕵️ User Profile Forensics Matrix. Kisi bhi member ka deep timeline creation aur safety check permissions report dekhne ke liye."
             usage = f"`{prefix}lookup` ya `{prefix}lookup @user`"

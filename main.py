@@ -508,6 +508,17 @@ class SpaceXBot(commands.Bot):
             PRIMARY KEY (channel_id, module_name)
         )
         """)
+
+        # TEMPORARY ROLES TABLE
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS temproles (
+            guild_id TEXT,
+            user_id TEXT,
+            role_id TEXT,
+            expires_at INTEGER,
+            PRIMARY KEY (guild_id, user_id, role_id)
+        )
+        """)
         
         self.db.commit()
         
