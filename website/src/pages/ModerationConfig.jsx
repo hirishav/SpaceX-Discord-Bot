@@ -23,12 +23,18 @@ export function ModerationConfig() {
     ticket: true
   });
 
+  // Disabled commands state
+  const [allCommands, setAllCommands] = useState([]);
+  const [disabledCommands, setDisabledCommands] = useState([]);
+  const [commandSearch, setCommandSearch] = useState('');
+
   useEffect(() => {
     Promise.all([
       fetch(`/api/guilds/${id}/moderation`).then(res => res.json()),
-      fetch(`/api/guilds/${id}/config`).then(res => res.json())
+      fetch(`/api/guilds/${id}/config`).then(res => res.json()),
+      fetch(`/api/commands`).then(res => res.json())
     ])
-    .then(([modData, configData]) => {
+    .then(([modData, configData, cmdData]) => {
       if (modData.error) throw new Error(modData.error);
       
       const disabled = modData.disabled_modules || [];
@@ -39,6 +45,11 @@ export function ModerationConfig() {
         utility: !disabled.includes('utility'),
         ticket: !disabled.includes('ticket')
       });
+      
+      setDisabledCommands(modData.disabled_commands || []);
+      if (cmdData && cmdData.commands) {
+        setAllCommands(cmdData.commands);
+      }
 
       setServerName(configData.name);
       setServerIcon(configData.icon);
@@ -70,7 +81,10 @@ export function ModerationConfig() {
       const res = await fetch(`/api/guilds/${id}/moderation`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ disabled_modules: disabledList })
+        body: JSON.stringify({ 
+          disabled_modules: disabledList,
+          disabled_commands: disabledCommands
+        })
       });
       
       if (!res.ok) throw new Error('Failed to save configuration');
@@ -172,7 +186,41 @@ export function ModerationConfig() {
             </label>
           </div>
 
-          <div className="form-actions">
+          <div className="form-group" style={{ marginTop: '30px' }}>
+            <label>Disable Specific Commands</label>
+            <p className="help-text">Select individual commands to disable them across your server.</p>
+            <input 
+              type="text" 
+              placeholder="Search commands..." 
+              value={commandSearch}
+              onChange={(e) => setCommandSearch(e.target.value)}
+              style={{ marginBottom: '10px' }}
+            />
+            <div style={{ maxHeight: '250px', overflowY: 'auto', background: 'rgba(0,0,0,0.2)', padding: '15px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
+              {allCommands.filter(cmd => cmd.toLowerCase().includes(commandSearch.toLowerCase())).map(cmd => (
+                <label key={cmd} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px', cursor: 'pointer' }}>
+                  <input 
+                    type="checkbox" 
+                    checked={disabledCommands.includes(cmd)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setDisabledCommands([...disabledCommands, cmd]);
+                      } else {
+                        setDisabledCommands(disabledCommands.filter(c => c !== cmd));
+                      }
+                    }}
+                    style={{ width: '18px', height: '18px', accentColor: '#8b5cf6' }}
+                  />
+                  <span style={{ fontSize: '15px', color: disabledCommands.includes(cmd) ? '#f87171' : '#fff' }}>/{cmd}</span>
+                </label>
+              ))}
+              {allCommands.filter(cmd => cmd.toLowerCase().includes(commandSearch.toLowerCase())).length === 0 && (
+                <p style={{ color: '#aaa', fontStyle: 'italic' }}>No commands found.</p>
+              )}
+            </div>
+          </div>
+
+          <div className="form-actions" style={{ marginTop: '30px' }}>
             <button type="submit" className="btn-primary save-btn" disabled={saving}>
               <Save size={18} /> {saving ? 'Saving...' : 'Save Changes'}
             </button>

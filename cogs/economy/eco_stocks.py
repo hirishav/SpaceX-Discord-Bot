@@ -3,7 +3,7 @@ import discord
 from discord.ext import commands, tasks
 import random
 import database as sqlite3
-from cogs.eco_stocks_core import get_db, init_stocks_db, get_stock_cap
+from cogs.economy.eco_stocks_core import get_db, init_stocks_db, get_stock_cap
 
 # --- 🔢 MODAL POPUP FOR "GO TO PAGE" BUTTON ---
 class GoToPageModal(discord.ui.Modal, title="Jump to Stock Page"):

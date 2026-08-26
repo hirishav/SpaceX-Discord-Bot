@@ -8,10 +8,14 @@ import discord
 import database as sqlite3
 
 app = Quart(__name__)
-# Enable CORS for the frontend development server
-app = cors(app, allow_origin=["http://localhost:5173", "http://127.0.0.1:5173"], allow_credentials=True)
+app.config['JSON_SORT_KEYS'] = False
+app.secret_key = os.getenv('FLASK_SECRET_KEY', 'spacex-super-secret-key-123')
 
-app.secret_key = os.urandom(24)
+# Define FRONTEND_URL dynamically (use localhost for testing, Netlify for prod)
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:5173')
+
+# Enable CORS for the frontend server
+app = cors(app, allow_origin=[FRONTEND_URL, "http://localhost:5173", "http://127.0.0.1:5173"], allow_credentials=True)
 
 # Discord OAuth2 configuration
 CLIENT_ID = os.getenv("OAUTH_CLIENT_ID", "")
@@ -124,7 +128,7 @@ async def callback():
             session['refresh_token'] = token_response['refresh_token']
             
     # Redirect back to frontend dashboard
-    return redirect("http://localhost:5173/dashboard")
+    return redirect(f"{FRONTEND_URL}/dashboard")
 
 @app.route('/api/auth/logout')
 async def logout():
@@ -136,6 +140,16 @@ async def logout():
 @app.route('/api/client_id')
 async def get_client_id():
     return jsonify({'client_id': CLIENT_ID})
+
+@app.route('/api/commands')
+async def get_commands():
+    # Fetch all commands that are not hidden and not owner-only
+    commands = []
+    for cmd in bot_instance.commands:
+        if not getattr(cmd, 'hidden', False) and not cmd.cog_name == "Owner":
+            commands.append(cmd.name)
+    commands.sort()
+    return jsonify({'commands': commands})
 
 @app.route('/api/users/@me')
 async def get_user():
@@ -176,13 +190,11 @@ async def get_user_guilds():
                     
             return jsonify(manageable_guilds)
 
-@app.route('/api/guilds/<guild_id>/config', methods=['GET', 'POST'])
-async def guild_config(guild_id):
+async def check_auth_and_permissions(guild_id):
     token = session.get('access_token')
     if not token:
         return jsonify({"error": "Unauthorized"}), 401
         
-    # Check if user is in this guild and has permissions
     headers = {"Authorization": f"Bearer {token}"}
     async with aiohttp.ClientSession() as aio_session:
         async with aio_session.get(f"{DISCORD_API_ENDPOINT}/users/@me/guilds", headers=headers) as resp:
@@ -201,10 +213,18 @@ async def guild_config(guild_id):
             if not has_perm:
                 return jsonify({"error": "Forbidden"}), 403
 
-    # Ensure bot is in guild
     guild = bot_instance.get_guild(int(guild_id))
     if not guild:
         return jsonify({"error": "Bot is not in this guild"}), 404
+        
+    return guild
+
+@app.route('/api/guilds/<guild_id>/config', methods=['GET', 'POST'])
+async def guild_config(guild_id):
+    auth_result = await check_auth_and_permissions(guild_id)
+    if isinstance(auth_result, tuple):
+        return auth_result
+    guild = auth_result
 
     if request.method == 'GET':
         prefix = bot_instance.prefix_cache.get(int(guild_id), '!!')
@@ -238,17 +258,19 @@ async def guild_config(guild_id):
 
 @app.route('/api/guilds/<guild_id>/channels')
 async def get_guild_channels(guild_id):
-    if 'oauth2_token' not in session: return jsonify({'error': 'Unauthorized'}), 401
-    guild = bot_instance.get_guild(int(guild_id))
-    if not guild: return jsonify({'error': 'Bot not in guild'}), 404
+    auth_result = await check_auth_and_permissions(guild_id)
+    if isinstance(auth_result, tuple):
+        return auth_result
+    guild = auth_result
     channels = [{'id': str(c.id), 'name': c.name} for c in guild.text_channels]
     return jsonify({'channels': channels})
 
 @app.route('/api/guilds/<guild_id>/welcome', methods=['GET', 'POST'])
 async def manage_welcome(guild_id):
-    if 'oauth2_token' not in session: return jsonify({'error': 'Unauthorized'}), 401
-    guild = bot_instance.get_guild(int(guild_id))
-    if not guild: return jsonify({'error': 'Bot not in guild'}), 404
+    auth_result = await check_auth_and_permissions(guild_id)
+    if isinstance(auth_result, tuple):
+        return auth_result
+    guild = auth_result
     
     if request.method == 'GET':
         cursor = bot_instance.db.cursor()
@@ -269,26 +291,70 @@ async def manage_welcome(guild_id):
         bot_instance.db.commit()
         return jsonify({'success': True})
 
+@app.route('/api/guilds/<guild_id>/welcome/test', methods=['POST'])
+async def test_welcome(guild_id):
+    auth_result = await check_auth_and_permissions(guild_id)
+    if isinstance(auth_result, tuple):
+        return auth_result
+    guild = auth_result
+    
+    data = await request.json
+    channel_id = data.get('channel_id')
+    message_content = data.get('message', 'Welcome {user} to {server}!')
+    mention = data.get('mention', 1)
+    
+    if not channel_id:
+        return jsonify({'error': 'No channel selected'}), 400
+        
+    channel = guild.get_channel(int(channel_id))
+    if not channel:
+        return jsonify({'error': 'Channel not found'}), 404
+        
+    # Replace placeholders for test
+    formatted_message = message_content.replace('{user}', guild.me.mention if mention else guild.me.display_name)\
+                                       .replace('{server}', guild.name)\
+                                       .replace('{membercount}', str(guild.member_count))
+                                       
+    try:
+        await channel.send(f"**[TEST WELCOME MESSAGE]**\n{formatted_message}")
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/api/guilds/<guild_id>/moderation', methods=['GET', 'POST'])
 async def manage_moderation(guild_id):
-    if 'oauth2_token' not in session: return jsonify({'error': 'Unauthorized'}), 401
-    guild = bot_instance.get_guild(int(guild_id))
-    if not guild: return jsonify({'error': 'Bot not in guild'}), 404
+    auth_result = await check_auth_and_permissions(guild_id)
+    if isinstance(auth_result, tuple):
+        return auth_result
+    guild = auth_result
     
     if request.method == 'GET':
-        disabled = list(bot_instance.disabled_modules_server_cache.get(int(guild_id), set()))
-        return jsonify({'disabled_modules': disabled})
+        disabled_modules = list(bot_instance.disabled_modules_server_cache.get(int(guild_id), set()))
+        disabled_commands = list(bot_instance.disabled_commands_cache.get(int(guild_id), set()))
+        return jsonify({
+            'disabled_modules': disabled_modules,
+            'disabled_commands': disabled_commands
+        })
     else:
         data = await request.json
         disabled_modules = data.get('disabled_modules', [])
+        disabled_commands = data.get('disabled_commands', [])
         
         cursor = bot_instance.db.cursor()
+        
+        # Modules
         cursor.execute('DELETE FROM disabled_modules_server WHERE server_id = ?', (str(guild_id),))
         bot_instance.disabled_modules_server_cache[int(guild_id)] = set()
-        
         for mod in disabled_modules:
             cursor.execute('INSERT INTO disabled_modules_server (server_id, module_name) VALUES (?, ?)', (str(guild_id), mod))
             bot_instance.disabled_modules_server_cache[int(guild_id)].add(mod)
+            
+        # Commands
+        cursor.execute('DELETE FROM disabled_commands WHERE server_id = ?', (str(guild_id),))
+        bot_instance.disabled_commands_cache[int(guild_id)] = set()
+        for cmd in disabled_commands:
+            cursor.execute('INSERT INTO disabled_commands (server_id, command_name) VALUES (?, ?)', (str(guild_id), cmd))
+            bot_instance.disabled_commands_cache[int(guild_id)].add(cmd)
             
         bot_instance.db.commit()
         return jsonify({'success': True})

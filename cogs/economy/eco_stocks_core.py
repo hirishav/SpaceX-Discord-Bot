@@ -1,6 +1,6 @@
 # cogs/stocks_core.py
 import database as sqlite3
-from cogs.eco_stocks_list import TOP_200_STOCKS
+from cogs.economy.eco_stocks_list import TOP_200_STOCKS
 
 def get_db():
     return sqlite3.connect("warnings.db")

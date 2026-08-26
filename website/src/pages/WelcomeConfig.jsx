@@ -12,8 +12,10 @@ export function WelcomeConfig() {
   
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [testing, setTesting] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
+  const [testSuccess, setTestSuccess] = useState(false);
 
   // Form State
   const [enabled, setEnabled] = useState(false);
@@ -79,6 +81,35 @@ export function WelcomeConfig() {
     }
   };
 
+  const handleTest = async (e) => {
+    e.preventDefault();
+    setTesting(true);
+    setTestSuccess(false);
+    setError(null);
+
+    try {
+      const res = await fetch(`/api/guilds/${id}/welcome/test`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          channel_id: channelId,
+          message: message,
+          mention: mention ? 1 : 0
+        })
+      });
+      
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to send test message');
+      
+      setTestSuccess(true);
+      setTimeout(() => setTestSuccess(false), 3000);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setTesting(false);
+    }
+  };
+
   if (loading) return <div className="dashboard-loading"><div className="spinner"></div></div>;
   
   if (error && !serverName) {
@@ -108,6 +139,7 @@ export function WelcomeConfig() {
 
         {error && <div className="alert-error">{error}</div>}
         {success && <div className="alert-success">Settings saved successfully!</div>}
+        {testSuccess && <div className="alert-success">Test message sent successfully! Check your channel.</div>}
 
         <form onSubmit={handleSave} className="config-form">
           <div className="form-group toggle-group">
@@ -160,9 +192,12 @@ export function WelcomeConfig() {
             </label>
           </div>
 
-          <div className="form-actions">
+          <div className="form-actions" style={{ display: 'flex', gap: '10px' }}>
             <button type="submit" className="btn-primary save-btn" disabled={saving || (!enabled && false)}>
               <Save size={18} /> {saving ? 'Saving...' : 'Save Changes'}
+            </button>
+            <button type="button" className="btn-secondary" onClick={handleTest} disabled={testing || !enabled || !channelId}>
+              {testing ? 'Sending Test...' : 'Test Message'}
             </button>
           </div>
         </form>

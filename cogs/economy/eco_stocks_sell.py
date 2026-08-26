@@ -2,7 +2,7 @@
 import discord
 from discord.ext import commands
 import database as sqlite3
-from cogs.eco_stocks_core import get_db
+from cogs.economy.eco_stocks_core import get_db
 
 class StocksSell(commands.Cog):
     def __init__(self, bot):

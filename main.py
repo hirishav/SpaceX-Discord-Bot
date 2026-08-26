@@ -5,6 +5,7 @@ import os
 import database as sqlite3
 import time
 import asyncio
+from pathlib import Path
 
 try:
     import uvloop
@@ -551,17 +552,20 @@ class SpaceXBot(commands.Bot):
 
         print('Modules load ho rahe hain...')
         if os.path.exists('./cogs'):
-            for filename in os.listdir('./cogs'):
-                if filename.endswith('.py'):
-                    if filename in ['eco_stocks_core.py', 'eco_stocks_list.py']:
-                        print(f'-> Skipped Non-Cog Utility File: {filename}')
-                        continue
-                        
-                    try:
-                        await self.load_extension(f'cogs.{filename[:-3]}')
-                        print(f'-> Successfully Loaded: {filename}')
-                    except Exception as e:
-                        print(f'-> Failed to Load Extension {filename}: {e}')
+            for path in Path('./cogs').rglob('*.py'):
+                filename = path.name
+                if filename in ['eco_stocks_core.py', 'eco_stocks_list.py']:
+                    print(f'-> Skipped Non-Cog Utility File: {filename}')
+                    continue
+                    
+                # Extract parts without '.py'
+                module_path = '.'.join(path.parts)[:-3]
+                
+                try:
+                    await self.load_extension(module_path)
+                    print(f'-> Successfully Loaded: {module_path}')
+                except Exception as e:
+                    print(f'-> Failed to Load Extension {module_path}: {e}')
 
         print('Syncing slash commands...')
         try:

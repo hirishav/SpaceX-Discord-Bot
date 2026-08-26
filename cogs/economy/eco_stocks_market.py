@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands, tasks
 import database as sqlite3
 import random
-from cogs.eco_stocks_core import get_stock_cap
+from cogs.economy.eco_stocks_core import get_stock_cap
 
 class EcoStocksMarket(commands.Cog):
     def __init__(self, bot):
