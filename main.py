@@ -63,15 +63,7 @@ def get_prefix(bot, message):
         tokens = message.content.split()
         if tokens:
             first_word = tokens[0].lower()
-            if not hasattr(bot, 'all_commands_cache'):
-                all_cmds = set()
-                for cmd in bot.commands:
-                    all_cmds.add(cmd.name)
-                    for alias in cmd.aliases:
-                        all_cmds.add(alias)
-                bot.all_commands_cache = all_cmds
-            
-            if first_word in bot.all_commands_cache:
+            if first_word in bot.all_commands:
                 return (base_prefix, "")
                 
     return base_prefix
