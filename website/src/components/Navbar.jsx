@@ -1,12 +1,23 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { config } from '../config';
 import logoUrl from '../assets/logo.jpg';
 
 export function Navbar() {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    fetch('/api/users/@me')
+      .then(res => {
+        if (res.ok) return res.json();
+        throw new Error('Not logged in');
+      })
+      .then(data => setUser(data))
+      .catch(() => setUser(null));
+  }, []);
 
   return (
     <nav className="navbar">
@@ -41,9 +52,15 @@ export function Navbar() {
             <a href={config.TOPGG_URL} target="_blank" rel="noopener noreferrer" className="btn btn-vote nav-invite" style={{ fontWeight: 'bold' }}>
               Vote
             </a>
-            <a href={config.INVITE_URL} target="_blank" rel="noopener noreferrer" className="btn btn-primary nav-invite">
-              Add to Discord
-            </a>
+            {user ? (
+              <Link to="/dashboard" className="btn btn-primary nav-invite">
+                Dashboard
+              </Link>
+            ) : (
+              <a href="/api/auth/login" className="btn btn-primary nav-invite">
+                Login
+              </a>
+            )}
           </div>
         </div>
 

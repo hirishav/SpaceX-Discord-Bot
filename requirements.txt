@@ -1,5 +1,6 @@
 discord.py>=2.4,<3
-Flask
+Quart
+quart-cors
 aiohttp>=3.9,<4
 python-dotenv>=1.0,<2
 topggpy>=1,<2

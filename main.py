@@ -14,15 +14,16 @@ except ImportError:
 
 import aiohttp
 import topgg
-from flask import Flask, request, jsonify
-from threading import Thread
 import shutil
-
 try:
     from dotenv import load_dotenv
     load_dotenv()
 except ImportError:
     pass
+
+from web_server import app, setup_web_server
+import hypercorn.asyncio
+from hypercorn.config import Config as HyperConfig
 
 # Environment Variable aur Config setup
 try:
@@ -37,71 +38,7 @@ except (ImportError, AttributeError):
     TOPGG_TOKEN = os.getenv("TOPGG_TOKEN")
     BACKUP_CHANNEL_ID = os.getenv("BACKUP_CHANNEL_ID")
 
-# Web Server ke liye setup (For Render 24/7)
-app = Flask('')
-
-@app.route('/')
-def home():
-    return "SpaceX Bot Is Alive & Running 24/7! 🚀"
-
-@app.route('/topgg_webhook', methods=['POST'])
-def topgg_webhook():
-    data = request.json
-    if data and 'user' in data:
-        user_id = str(data['user'])
-        
-        # Connect to database
-        db = sqlite3.connect("warnings.db", check_same_thread=False, isolation_level=None)
-        cursor = db.cursor()
-        cursor.execute("INSERT OR IGNORE INTO reps (user_id, rep_points) VALUES (?, 0)", (user_id,))
-        cursor.execute("INSERT OR IGNORE INTO economy (user_id, wallet, bank) VALUES (?, 0, 0)", (user_id,))
-        
-        # Determine rep points: e.g., 1 point for normal and weekend votes
-        rep_amount = 1
-        specie_reward = 5000
-        
-        cursor.execute("UPDATE reps SET rep_points = rep_points + ? WHERE user_id = ?", (rep_amount, user_id))
-        cursor.execute("UPDATE economy SET wallet = wallet + ? WHERE user_id = ?", (specie_reward, user_id))
-        
-        cursor.execute("SELECT rep_points FROM reps WHERE user_id = ?", (user_id,))
-        total_rep = cursor.fetchone()[0]
-        db.commit()
-        db.close()
-        
-        # Send DM asynchronously
-        try:
-            user_id_int = int(user_id)
-            async def send_dm():
-                try:
-                    user = bot.get_user(user_id_int) or await bot.fetch_user(user_id_int)
-                    if user:
-                        embed = discord.Embed(
-                            title="✅ Vote ke liye Sukriya! ✅",
-                            description=f"Aapke vote ke liye bahut bahut dhanyawad! ❤️\n\nIske inaam mein aapko mila hai **{rep_amount} Rep Point** aur **💠 {specie_reward:,} Specie**! ✨\n**Total Rep Points:** `{total_rep}`\n\nAise hi support karte rahiye aur aur bhi inaam kamate rahiye! 🚀",
-                            color=discord.Color.brand_green()
-                        )
-                        embed.set_footer(text="SpaceX Bot Team")
-                        embed.set_thumbnail(url=bot.user.display_avatar.url)
-                        await user.send(embed=embed)
-                except Exception as e:
-                    print(f"Failed to send DM for vote: {e}")
-
-            if bot.loop and bot.is_ready():
-                asyncio.run_coroutine_threadsafe(send_dm(), bot.loop)
-        except Exception as e:
-            print(f"Error preparing DM for vote: {e}")
-        
-        return jsonify({"status": "success", "user": user_id, "reps_added": rep_amount}), 200
-        
-    return jsonify({"status": "error", "message": "Invalid payload"}), 400
-
-def run_server():
-    app.run(host='0.0.0.0', port=8080)
-
-def keep_alive():
-    t = Thread(target=run_server)
-    t.daemon = True
-    t.start()
+# Web Server is now handled by web_server.py
 
 # ⚙️ DYNAMIC CUSTOM PREFIX FETCH ENGINE (OPTIMIZED)
 def get_prefix(bot, message):
@@ -347,6 +284,13 @@ class SpaceXBot(commands.Bot):
             print(f"⚠️ Error downloading DB backup: {e}")
 
     async def setup_hook(self):
+        # 🚀 START WEB SERVER
+        setup_web_server(self)
+        config = HyperConfig()
+        config.bind = ["0.0.0.0:8080"]
+        self.loop.create_task(hypercorn.asyncio.serve(app, config))
+        print("-> Background Web Server Started via Hypercorn!")
+
         # ⚡ RESTORE CLOUD DATABASE FIRST
         await self.download_db_backup()
 
@@ -766,8 +710,6 @@ async def on_message(message):
     await bot.process_commands(message)
 
 if __name__ == '__main__':
-    keep_alive()
-    print("-> Background Web Server Started!")
     if BOT_TOKEN:
         bot.run(BOT_TOKEN)
     else:
