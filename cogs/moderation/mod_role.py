@@ -93,7 +93,7 @@ class ModRole(commands.Cog):
         )
         embed.add_field(name="Action", value=action.capitalize(), inline=True)
         embed.add_field(name="Role", value=target_role.mention, inline=True)
-        embed.add_field(name="Target", value=target_description, inline=True)
+        embed.add_field(name="Target", value=f"{target_description} ({len(members_to_modify)} checked)", inline=True)
         embed.add_field(name="Success", value=f"{success_count} members", inline=True)
         if failed_count > 0:
             embed.add_field(name="Failed", value=f"{failed_count} members (Check permissions)", inline=True)
