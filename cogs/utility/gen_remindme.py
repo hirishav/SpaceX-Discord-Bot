@@ -46,12 +46,12 @@ class GenRemindme(commands.Cog):
         if not time_str or not task:
             embed_err = discord.Embed(
                 title="❌ Galat Format!",
-                description=f"Sahi tarika: `{ctx.prefix or '/'}remindme <time><s/m/h> <work>`\n\n💡 **Examples:**\n👉 `{ctx.prefix or '/'}remindme 20m Padhne jana hai`\n👉 `{ctx.prefix or '/'}rm 1h Video edit karni hai`",
+                description=f"Sahi tarika: `{ctx.prefix or '/'}remindme <time><s/m/h/d> <work>`\n\n💡 **Examples:**\n👉 `{ctx.prefix or '/'}remindme 20m Padhne jana hai`\n👉 `{ctx.prefix or '/'}rm 1h Video edit karni hai`",
                 color=discord.Color.red()
             )
             return await ctx.send(embed=embed_err)
 
-        time_multipliers = {'s': 1, 'm': 60, 'h': 3600}
+        time_multipliers = {'s': 1, 'm': 60, 'h': 3600, 'd': 86400}
         unit = ""
         digits = ""
         
@@ -62,13 +62,13 @@ class GenRemindme(commands.Cog):
                 unit += char
 
         if not digits:
-            return await ctx.send("❌ Bhai, time sahi se specify karo! (Example: `10s`, `20m`, `2h`) ⏰")
+            return await ctx.send("❌ Bhai, time sahi se specify karo! (Example: `10s`, `20m`, `2h`, `1d`) ⏰")
 
         amount = int(digits)
         unit = unit.lower() if unit else 'm'
 
         if unit not in time_multipliers:
-            return await ctx.send("❌ Galat time unit! Sirf `s`, `m`, aur `h` allowed hain.")
+            return await ctx.send("❌ Galat time unit! Sirf `s`, `m`, `h`, aur `d` allowed hain.")
 
         calculated_seconds = amount * time_multipliers[unit]
 

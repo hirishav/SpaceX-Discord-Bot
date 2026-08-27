@@ -616,7 +616,7 @@ class Help(commands.Cog):
 
         elif cmd.name == "remindme":
             description = "⏰ Specific time ke baad kisi kaam ke liye ping karke yaad dilane ke liye."
-            usage = f"`{prefix}remindme <time><s/m/h> <work>`"
+            usage = f"`{prefix}remindme <time><s/m/h/d> <work>`"
             examples = f"`{prefix}remindme 10m Exams Ki Taiyari`"
 
         elif cmd.name == "servers":
