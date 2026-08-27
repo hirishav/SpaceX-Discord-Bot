@@ -35,9 +35,13 @@ async def home():
     return "SpaceX Bot API Is Alive & Running 24/7! 🚀"
 
 # ----------------- TOP.GG WEBHOOK -----------------
-@app.route('/topgg_webhook', methods=['POST'])
+@app.route('/topgg_webhook', methods=['POST'], strict_slashes=False)
 async def topgg_webhook():
-    data = await request.json
+    try:
+        data = await request.get_json(silent=True, force=True)
+    except Exception:
+        data = None
+        
     if data and 'user' in data:
         user_id = str(data['user'])
         
