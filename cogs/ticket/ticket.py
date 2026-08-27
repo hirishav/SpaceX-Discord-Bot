@@ -181,7 +181,7 @@ class Ticket(commands.Cog):
             return None
         return {
             "category_id": int(row[0]) if row[0] else None,
-            "support_role_id": int(row[1]) if row[1] else None,
+            "support_role_ids": [int(x) for x in str(row[1]).split(",")] if row[1] else [],
             "log_channel_id": int(row[2]) if row[2] else None,
             "panel_channel_id": int(row[3]) if row[3] else None,
             "panel_message_id": int(row[4]) if row[4] else None,
@@ -195,7 +195,7 @@ class Ticket(commands.Cog):
         if not current:
             cursor.execute("INSERT INTO ticket_config (guild_id) VALUES (?)", (str(guild_id),))
             current = {
-                "category_id": None, "support_role_id": None, "log_channel_id": None,
+                "category_id": None, "support_role_ids": [], "log_channel_id": None,
                 "panel_channel_id": None, "panel_message_id": None, "ticket_counter": 0
             }
 
@@ -208,7 +208,7 @@ class Ticket(commands.Cog):
             WHERE guild_id = ?
         """, (
             str(current["category_id"]) if current["category_id"] else None,
-            str(current["support_role_id"]) if current["support_role_id"] else None,
+            ",".join(str(x) for x in current["support_role_ids"]) if current.get("support_role_ids") else None,
             str(current["log_channel_id"]) if current["log_channel_id"] else None,
             str(current["panel_channel_id"]) if current["panel_channel_id"] else None,
             str(current["panel_message_id"]) if current["panel_message_id"] else None,
@@ -248,10 +248,11 @@ class Ticket(commands.Cog):
     def is_staff(self, member: discord.Member, cfg: dict) -> bool:
         if member.guild_permissions.administrator or member.guild_permissions.manage_guild or member.guild_permissions.manage_messages:
             return True
-        if cfg and cfg.get("support_role_id"):
-            role = member.guild.get_role(cfg["support_role_id"])
-            if role and role in member.roles:
-                return True
+        if cfg and cfg.get("support_role_ids"):
+            for role_id in cfg["support_role_ids"]:
+                role = member.guild.get_role(role_id)
+                if role and role in member.roles:
+                    return True
         return False
 
     # ─────────────────────────────────────────────────────────────
@@ -304,9 +305,9 @@ class Ticket(commands.Cog):
             guild.me: discord.PermissionOverwrite(view_channel=True, read_messages=True, send_messages=True, manage_channels=True, manage_messages=True, attach_files=True)
         }
 
-        support_role = guild.get_role(cfg["support_role_id"]) if cfg.get("support_role_id") else None
-        if support_role:
-            overwrites[support_role] = discord.PermissionOverwrite(view_channel=True, read_messages=True, send_messages=True, attach_files=True, read_message_history=True)
+        support_roles = [guild.get_role(r_id) for r_id in cfg.get("support_role_ids", []) if guild.get_role(r_id)]
+        for role in support_roles:
+            overwrites[role] = discord.PermissionOverwrite(view_channel=True, read_messages=True, send_messages=True, attach_files=True, read_message_history=True)
 
         try:
             ticket_chan = await guild.create_text_channel(
@@ -339,8 +340,8 @@ class Ticket(commands.Cog):
         embed.set_footer(text=f"SpaceX Ticket System • User ID: {user.id}")
 
         mention_str = user.mention
-        if support_role:
-            mention_str += f" | {support_role.mention}"
+        if support_roles:
+            mention_str += " | " + " ".join([r.mention for r in support_roles])
 
         await ticket_chan.send(content=mention_str, embed=embed, view=TicketControlView(self.bot))
         await self.log_action(guild, ticket_chan.id, user.id, "Ticket Created", f"Ticket #{counter} open kiya gaya.")
@@ -626,7 +627,7 @@ class Ticket(commands.Cog):
             self.update_config(
                 ctx.guild.id,
                 category_id=category.id,
-                support_role_id=role.id,
+                support_role_ids=[role.id],
                 log_channel_id=log_channel.id
             )
             
@@ -645,12 +646,15 @@ class Ticket(commands.Cog):
 
     @ticket.command(name="setup")
     @commands.has_permissions(manage_guild=True)
-    async def setup(self, ctx, category: discord.CategoryChannel, support_role: discord.Role, log_channel: discord.TextChannel = None):
-        """Ticket system manually configure karne ke liye (Category, Support Role, Log Channel)."""
+    async def setup(self, ctx, category: discord.CategoryChannel, support_roles: commands.Greedy[discord.Role], log_channel: discord.TextChannel = None):
+        """Ticket system manually configure karne ke liye (Category, Support Roles, Log Channel)."""
+        if not support_roles:
+            return await ctx.send("❌ Bhai, kam se kam ek support role mention karna zaroori hai!")
+        
         self.update_config(
             ctx.guild.id,
             category_id=category.id,
-            support_role_id=support_role.id,
+            support_role_ids=[r.id for r in support_roles],
             log_channel_id=log_channel.id if log_channel else None
         )
         embed = discord.Embed(
@@ -659,7 +663,9 @@ class Ticket(commands.Cog):
             color=discord.Color.green()
         )
         embed.add_field(name="📁 Category", value=category.name, inline=True)
-        embed.add_field(name="🛡️ Support Role", value=support_role.mention, inline=True)
+        
+        roles_mention = " ".join([r.mention for r in support_roles])
+        embed.add_field(name="🛡️ Support Roles", value=roles_mention, inline=True)
         embed.add_field(name="📋 Log Channel", value=log_channel.mention if log_channel else "Not Configured", inline=True)
         embed.set_footer(text="Ab aap `!!ticket panel` command use karke ticket button bhej sakte hain!")
         await ctx.send(embed=embed)
@@ -725,9 +731,9 @@ class Ticket(commands.Cog):
             ctx.guild.me: discord.PermissionOverwrite(view_channel=True, read_messages=True, send_messages=True, manage_channels=True, manage_messages=True, attach_files=True)
         }
 
-        support_role = ctx.guild.get_role(cfg["support_role_id"]) if cfg.get("support_role_id") else None
-        if support_role:
-            overwrites[support_role] = discord.PermissionOverwrite(view_channel=True, read_messages=True, send_messages=True, attach_files=True, read_message_history=True)
+        support_roles = [ctx.guild.get_role(r_id) for r_id in cfg.get("support_role_ids", []) if ctx.guild.get_role(r_id)]
+        for role in support_roles:
+            overwrites[role] = discord.PermissionOverwrite(view_channel=True, read_messages=True, send_messages=True, attach_files=True, read_message_history=True)
 
         try:
             ticket_chan = await ctx.guild.create_text_channel(
@@ -758,8 +764,8 @@ class Ticket(commands.Cog):
         embed.set_footer(text=f"SpaceX Ticket System • User ID: {ctx.author.id}")
 
         mention_str = ctx.author.mention
-        if support_role:
-            mention_str += f" | {support_role.mention}"
+        if support_roles:
+            mention_str += " | " + " ".join([r.mention for r in support_roles])
 
         await ticket_chan.send(content=mention_str, embed=embed, view=TicketControlView(self.bot))
         await self.log_action(ctx.guild, ticket_chan.id, ctx.author.id, "Ticket Created", f"Ticket #{counter} open kiya gaya.")

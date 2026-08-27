@@ -35,29 +35,38 @@ async def home():
     return "SpaceX Bot API Is Alive & Running 24/7! 🚀"
 
 # ----------------- TOP.GG WEBHOOK -----------------
-@app.route('/topgg_webhook', methods=['POST'])
+@app.route('/topgg_webhook', methods=['POST'], strict_slashes=False)
 async def topgg_webhook():
-    data = await request.json
+    try:
+        data = await request.get_json(silent=True, force=True)
+    except Exception:
+        data = None
+
     if data and 'user' in data:
         user_id = str(data['user'])
         
-        # Connect to database
-        db = sqlite3.connect("warnings.db", check_same_thread=False, isolation_level=None)
-        cursor = db.cursor()
-        cursor.execute("INSERT OR IGNORE INTO reps (user_id, rep_points) VALUES (?, 0)", (user_id,))
-        cursor.execute("INSERT OR IGNORE INTO economy (user_id, wallet, bank) VALUES (?, 0, 0)", (user_id,))
-        
-        # Determine rep points: e.g., 1 point for normal and weekend votes
-        rep_amount = 1
-        specie_reward = 5000
-        
-        cursor.execute("UPDATE reps SET rep_points = rep_points + ? WHERE user_id = ?", (rep_amount, user_id))
-        cursor.execute("UPDATE economy SET wallet = wallet + ? WHERE user_id = ?", (specie_reward, user_id))
-        
-        cursor.execute("SELECT rep_points FROM reps WHERE user_id = ?", (user_id,))
-        total_rep = cursor.fetchone()[0]
-        db.commit()
-        db.close()
+        try:
+            # Connect to database
+            db = sqlite3.connect("warnings.db", check_same_thread=False, isolation_level=None)
+            cursor = db.cursor()
+            cursor.execute("INSERT OR IGNORE INTO reps (user_id, rep_points) VALUES (?, 0)", (user_id,))
+            cursor.execute("INSERT OR IGNORE INTO economy (user_id, wallet, bank) VALUES (?, 0, 0)", (user_id,))
+            
+            # Determine rep points: e.g., 1 point for normal and weekend votes
+            rep_amount = 1
+            specie_reward = 5000
+            
+            cursor.execute("UPDATE reps SET rep_points = rep_points + ? WHERE user_id = ?", (rep_amount, user_id))
+            cursor.execute("UPDATE economy SET wallet = wallet + ? WHERE user_id = ?", (specie_reward, user_id))
+            
+            cursor.execute("SELECT rep_points FROM reps WHERE user_id = ?", (user_id,))
+            row = cursor.fetchone()
+            total_rep = row[0] if row else rep_amount
+            db.commit()
+            db.close()
+        except Exception as e:
+            print(f"Error updating DB for vote: {e}")
+            return jsonify({"status": "error", "message": "Database error"}), 500
         
         # Send DM asynchronously
         try:
@@ -78,8 +87,8 @@ async def topgg_webhook():
                 except Exception as e:
                     print(f"Failed to send DM for vote: {e}")
 
-            if bot_instance and bot_instance.loop and bot_instance.is_ready():
-                bot_instance.loop.create_task(send_dm())
+            if bot_instance and bot_instance.is_ready():
+                asyncio.create_task(send_dm())
         except Exception as e:
             print(f"Error preparing DM for vote: {e}")
         

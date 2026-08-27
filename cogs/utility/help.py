@@ -728,9 +728,9 @@ class Help(commands.Cog):
             examples = f"`{prefix}staffstats`\n`{prefix}staffstats @Rishav`"
 
         elif cmd.name == "role":
-            description = "🛡️ Kisi user ko server me role assign ya unse role remove karne ke liye."
-            usage = f"`{prefix}role @user <role>`"
-            examples = f"`{prefix}role @User @Mod`"
+            description = "🛡️ Kisi ko ya sabko ek role assign ya remove karein. Tum role ka aadha naam (e.g. 'Private') bhi likh sakte ho."
+            usage = f"`{prefix}role <add/remove> <everyone/@user/@targetRole> <RoleToAdd>`"
+            examples = f"`{prefix}role add everyone Active Member`\n`{prefix}role remove @user Private`\n`{prefix}role add Private Access`"
 
         elif cmd.name == "roleaudit":
             description = "🛡️ Server security matrix audit. Dangerous administrative permissions (Administrator, Manage Roles) wale logo ki tracking dashboard screen par lane ke liye."
@@ -748,9 +748,14 @@ class Help(commands.Cog):
             examples = f"`{prefix}punishments`"
 
         elif cmd.name == "temprole":
-            description = "⏱️ Kisi user ko limited time ke liye role assign karein."
+            description = "⏱️ Kisi user ko limited time ke liye role assign karein. Tum role ka aadha naam bhi likh sakte ho."
             usage = f"`{prefix}temprole [user] [time] [role], [reason]`"
-            examples = f"`{prefix}temprole @User 10m @VIP, Good behaviour`"
+            examples = f"`{prefix}temprole @User 10m VIP, Good behaviour`"
+
+        elif cmd.name in ["am", "automod", "automode"]:
+            description = "🛡️ Server ko links, invites, nsfw aadi se protect karne ke liye advanced AutoMod system."
+            usage = f"`{prefix}am <enable/disable>`\n`{prefix}am <category>`\n`{prefix}am set punishment <category> <punishment>`\n`{prefix}am bypass @user <category>`"
+            examples = f"`{prefix}am enable`\n`{prefix}am links`\n`{prefix}am set punishment links mute 1h`\n`{prefix}am bypass @user links`"
 
         elif cmd.name == "lookup":
             description = "🕵️ User Profile Forensics Matrix. Kisi bhi member ka deep timeline creation aur safety check permissions report dekhne ke liye."

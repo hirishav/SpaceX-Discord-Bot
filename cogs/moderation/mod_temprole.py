@@ -6,14 +6,7 @@ import re
 import asyncio
 import time
 from discord.ext.commands import Converter, BadArgument
-
-class RoleOrString(Converter):
-    async def convert(self, ctx, argument):
-        try:
-            role = await commands.RoleConverter().convert(ctx, argument)
-            return role
-        except BadArgument:
-            return argument
+from utils import SmartRoleConverter
 
 class ModTemprole(commands.Cog):
     def __init__(self, bot):
@@ -56,11 +49,11 @@ class ModTemprole(commands.Cog):
             role_arg = role_and_reason.strip()
             reason = "No reason provided"
 
-        # Try to convert the first part to a Role
+        # Try to convert the first part to a Role using SmartRoleConverter
         try:
-            role = await commands.RoleConverter().convert(ctx, role_arg)
-        except commands.BadArgument:
-            return await ctx.send(f"❌ Role `{role_arg}` nahi mila! Kripya sahi role mention ya ID dein.")
+            role = await SmartRoleConverter().convert(ctx, role_arg)
+        except commands.BadArgument as e:
+            return await ctx.send(str(e))
 
         if role >= ctx.author.top_role and ctx.author.id != ctx.guild.owner_id:
             return await ctx.send("❌ Aap apne se baray ya barabar ke role ko kisi ko de nahi sakte!")
