@@ -1,3 +1,4 @@
+import re
 import discord
 from discord.ext import commands
 
@@ -5,18 +6,20 @@ class SmartRoleConverter(commands.Converter):
     async def convert(self, ctx: commands.Context, argument: str) -> discord.Role:
         """
         Custom Role Converter that:
-        1. Tries to find an exact match (ID, mention, exact name).
+        1. Tries to find an exact match by ID or mention.
         2. Performs a partial/fuzzy match on role names.
         3. If multiple roles match, prompts the user via a UI View to select the intended one.
         """
-        # 1. Try exact match (RoleConverter handles ID, mention, and exact case-sensitive name)
-        try:
-            role = await commands.RoleConverter().convert(ctx, argument)
-            return role
-        except commands.RoleNotFound:
-            pass
+        # 1. Try exact match for ID or Mention
+        is_id_or_mention = re.match(r'^<@&?\d+>$|^\d+$', argument.strip())
+        if is_id_or_mention:
+            try:
+                role = await commands.RoleConverter().convert(ctx, argument)
+                return role
+            except commands.RoleNotFound:
+                pass
 
-        # 2. Try partial/fuzzy match
+        # 2. Try partial/fuzzy match for names
         argument_lower = argument.lower()
         matched_roles = [r for r in ctx.guild.roles if argument_lower in r.name.lower()]
 
