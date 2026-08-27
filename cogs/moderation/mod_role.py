@@ -42,7 +42,7 @@ class ModRole(commands.Cog):
 
         # Step 2: Resolve the target (who gets the role)
         if target.lower() == "everyone" or target.lower() == "@everyone":
-            members_to_modify = [m for m in ctx.guild.members if not m.bot]
+            members_to_modify = [m async for m in ctx.guild.fetch_members(limit=None) if not m.bot]
             target_description = "Everyone"
         else:
             # Try to resolve as Member
@@ -54,7 +54,8 @@ class ModRole(commands.Cog):
                 # Try to resolve as Role
                 try:
                     source_role = await SmartRoleConverter().convert(ctx, target)
-                    members_to_modify = source_role.members
+                    # Fetch all members (including offline) to find who has this role
+                    members_to_modify = [m async for m in ctx.guild.fetch_members(limit=None) if not m.bot and source_role in m.roles]
                     target_description = f"Users with {source_role.name} role"
                 except commands.BadArgument:
                     return await ctx.send(f"❌ Target `{target}` na toh koi user hai, na role, aur na hi 'everyone'.")
