@@ -414,14 +414,9 @@ class Help(commands.Cog):
             examples = f"`{prefix}cleanspace 10`"
 
         elif cmd.name == "blacklistserver":
-            description = "🚫 Kisi toxic/raid server ko blacklist karna taaki bot waha se leave ho jaye aur future me join na kare (Owner Only)."
-            usage = f"`{prefix}blacklistserver <server_id>`"
-            examples = f"`{prefix}blacklistserver 1234567890`"
-
-        elif cmd.name == "whitelistserver":
-            description = "✅ Kisi server ko blacklist se hatane ke liye (Owner Only)."
-            usage = f"`{prefix}whitelistserver <server_id>`"
-            examples = f"`{prefix}whitelistserver 1234567890`"
+            description = "🚫 Kisi toxic/raid server ko blacklist karna ya remove karna (Owner Only)."
+            usage = f"`{prefix}blacklistserver <add/remove> <server_id>`"
+            examples = f"`{prefix}blacklistserver add 1234567890`\n`{prefix}blacklistserver remove 1234567890`"
 
         elif cmd.name == "sudo":
             description = "👨‍💻 Kisi aur user ke naam se (as them) koi command run karne ke liye (Owner Only)."
