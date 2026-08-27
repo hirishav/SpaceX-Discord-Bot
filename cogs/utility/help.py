@@ -753,7 +753,16 @@ class Help(commands.Cog):
             examples = f"`{prefix}temprole @User 10m VIP, Good behaviour`"
 
         elif cmd.name in ["am", "automod", "automode"]:
-            description = "🛡️ Server ko links, invites, nsfw aadi se protect karne ke liye advanced AutoMod system."
+            description = (
+                "🛡️ Server ko links, invites, nsfw aadi se protect karne ke liye advanced AutoMod system.\n\n"
+                "**📌 Available Categories:**\n"
+                "• `links` (Block all web links)\n"
+                "• `invites` (Block Discord invites)\n"
+                "• `nsfw` (Block NSFW content & links)\n"
+                "• `spoilers` (Block spoiler tags `||text||`)\n"
+                "• `spam` (Block repetitive messages/spam)\n"
+                "• `mentions` (Block mass mentions > 5)"
+            )
             usage = f"`{prefix}am <enable/disable>`\n`{prefix}am <category>`\n`{prefix}am set punishment <category> <punishment>`\n`{prefix}am bypass @user <category>`"
             examples = f"`{prefix}am enable`\n`{prefix}am links`\n`{prefix}am set punishment links mute 1h`\n`{prefix}am bypass @user links`"
 
