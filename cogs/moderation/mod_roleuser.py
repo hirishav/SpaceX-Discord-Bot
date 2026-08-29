@@ -127,11 +127,16 @@ class ModRoleUser(commands.Cog):
 
     @commands.hybrid_command(name="roleuser", aliases=["roleusers", "inrole"])
     @commands.has_guild_permissions(manage_roles=True)
-    async def roleuser(self, ctx, *, role: typing.Union[discord.Role, str]):
+    async def roleuser(self, ctx, *, role_query: str):
         """Kisi specific role ke members ki list dekhne ke liye."""
         
-        if isinstance(role, str):
-            roles = [r for r in ctx.guild.roles if role.lower() in r.name.lower()]
+        try:
+            target_role = await commands.RoleConverter().convert(ctx, role_query)
+        except commands.RoleNotFound:
+            target_role = None
+
+        if not target_role:
+            roles = [r for r in ctx.guild.roles if role_query.lower() in r.name.lower()]
             if len(roles) == 0:
                 await ctx.send("❌ Role nahi mila! Kripya sahi role mention karein ya ID daalein.", ephemeral=True)
                 return
@@ -141,8 +146,6 @@ class ModRoleUser(commands.Cog):
                 view = RoleSelectView(roles, self, ctx)
                 view.message = await ctx.send("🔍 Multiple roles found. Please select one:", view=view, ephemeral=True)
                 return
-        else:
-            target_role = role
             
         await self.send_role_members(ctx, target_role)
 
