@@ -6,6 +6,8 @@ import database as sqlite3
 import time
 import asyncio
 from pathlib import Path
+import sys
+import traceback
 
 try:
     import uvloop
@@ -620,8 +622,49 @@ def get_remaining_time_str(expires_at):
         time_str += f"{hours}h "
     if minutes > 0:
         time_str += f"{minutes}m "
-    time_str += f"{seconds}s"
+    if seconds > 0 or not time_str:
+        time_str += f"{seconds}s"
+        
     return time_str.strip()
+
+@bot.event
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.CommandNotFound):
+        # Ignore CommandNotFound to prevent spam
+        return
+        
+    if isinstance(error, commands.MissingPermissions):
+        perms = ", ".join(error.missing_permissions)
+        try:
+            await ctx.send(f"❌ Is command ko run karne ke liye aapko ye permissions chahiye: `{perms}`")
+        except discord.Forbidden:
+            pass
+        return
+        
+    if isinstance(error, commands.MissingRequiredArgument):
+        try:
+            await ctx.send(f"❌ Kuch zaroori info miss ho gayi: `{error.param.name}`\nSahi tarika dekhne ke liye: `{ctx.prefix}help {ctx.command.name}`")
+        except discord.Forbidden:
+            pass
+        return
+        
+    if isinstance(error, commands.BadArgument):
+        try:
+            await ctx.send(f"❌ Aapne galat argument diya hai. Sahi tarika dekhne ke liye: `{ctx.prefix}help {ctx.command.name}`")
+        except discord.Forbidden:
+            pass
+        return
+        
+    if isinstance(error, commands.CommandOnCooldown):
+        try:
+            await ctx.send(f"⏳ Ye command cooldown pe hai. Kripya {error.retry_after:.1f} seconds rukiye.", delete_after=5)
+        except discord.Forbidden:
+            pass
+        return
+        
+    # Log unhandled errors to console
+    print(f"Ignoring exception in command {ctx.command}:", file=sys.stderr)
+    traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
 
 @bot.event
 async def on_message(message):

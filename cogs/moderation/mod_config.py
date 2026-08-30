@@ -4,18 +4,28 @@ from discord.ext import commands
 
 VALID_MODULES = {"moderation", "economy", "fun", "utility", "general"}
 
+def is_admin_or_owner():
+    async def predicate(ctx):
+        if await ctx.bot.is_owner(ctx.author):
+            return True
+        if getattr(ctx.author.guild_permissions, 'manage_guild', False):
+            return True
+        raise commands.MissingPermissions(["manage_guild"])
+    return commands.check(predicate)
+
+
 class ModConfig(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
     @commands.hybrid_group(name="disable", invoke_without_command=True)
-    @commands.has_permissions(manage_guild=True)
+    @is_admin_or_owner()
     async def disable(self, ctx):
         """Disable a module or command in this server or channel."""
         await ctx.send(f"❌ Sahi usage: `{ctx.prefix}disable module <name> [#channel]` ya `{ctx.prefix}disable command <name> [#channel]`")
 
     @disable.command(name="module")
-    @commands.has_permissions(manage_guild=True)
+    @is_admin_or_owner()
     async def disable_module(self, ctx, module_name: str, channel: discord.TextChannel = None):
         """Disable an entire module (category) globally or for a specific channel."""
         module_name = module_name.lower()
@@ -66,7 +76,7 @@ class ModConfig(commands.Cog):
             await ctx.send(f"🚫 `{module_name.capitalize()}` module is now disabled globally in this server (Channel overrides removed).")
 
     @disable.command(name="command")
-    @commands.has_permissions(manage_guild=True)
+    @is_admin_or_owner()
     async def disable_command(self, ctx, command_name: str, channel: discord.TextChannel = None):
         """Disable a specific command globally or for a specific channel."""
         command_name = command_name.lower()
@@ -122,13 +132,13 @@ class ModConfig(commands.Cog):
             await ctx.send(f"🚫 Command `{command_name}` is now disabled globally in this server (Channel overrides removed).")
 
     @commands.hybrid_group(name="enable", invoke_without_command=True)
-    @commands.has_permissions(manage_guild=True)
+    @is_admin_or_owner()
     async def enable(self, ctx):
         """Enable a module or command in this server or channel."""
         await ctx.send(f"❌ Sahi usage: `{ctx.prefix}enable module <name> [#channel]` ya `{ctx.prefix}enable command <name> [#channel]`")
 
     @enable.command(name="module")
-    @commands.has_permissions(manage_guild=True)
+    @is_admin_or_owner()
     async def enable_module(self, ctx, module_name: str, channel: discord.TextChannel = None):
         """Enable an entire module globally or for a specific channel."""
         module_name = module_name.lower()
@@ -172,7 +182,7 @@ class ModConfig(commands.Cog):
             cursor.close()
 
     @enable.command(name="command")
-    @commands.has_permissions(manage_guild=True)
+    @is_admin_or_owner()
     async def enable_command(self, ctx, command_name: str, channel: discord.TextChannel = None):
         """Enable a specific command globally or for a specific channel."""
         command_name = command_name.lower()
