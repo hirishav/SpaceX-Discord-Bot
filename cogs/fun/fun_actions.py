@@ -9,8 +9,20 @@ class FunActions(commands.Cog):
         self.api_base = "https://nekos.life/api/v2/img/"
 
     async def fetch_gif(self, endpoint: str) -> str:
-        # Define API configurations
-        otaku_map = {"handholding": "handhold", "greet": "wave", "animal_dog": "dog", "animal_cat": "cat"}
+        # Comprehensive mapping to ensure otakugifs.xyz returns a valid GIF for every command
+        otaku_map = {
+            "handholding": "handhold", "greet": "wave", "animal_dog": "pat", "animal_cat": "pat",
+            "highfive": "thumbsup", "lewd": "blush", "capybara": "pat", "quokka": "smile",
+            "sleepy": "cry", "teehee": "smile", "bang": "punch", "jojo": "smug",
+            "kemonomimi": "smile", "nani": "stare", "triggered": "cry", "insult": "slap",
+            "owo": "stare", "wasted": "cry", "clagwimoth": "stare", "poi": "smile",
+            "awoo": "cry", "spank": "slap", "sumfuk": "smug", "delet_this": "punch",
+            "trap": "blush", "nsfw": "smug", "deredere": "blush", "waifu_insult": "slap",
+            "baka": "slap", "dab": "dance", "wag": "dance", "wombat": "pat",
+            "megumin": "smile", "initial_d": "roll", "rem": "smile", "gaming": "stare",
+            "facedesk": "cry", "otter": "hug", "neko": "smile", "discord_memes": "smug",
+            "banghead": "cry", "thinking": "stare"
+        }
         otaku_endpoint = otaku_map.get(endpoint, endpoint)
         
         # Hardcoded fallbacks for endpoints that don't exist in APIs or often fail
