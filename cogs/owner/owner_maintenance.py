@@ -106,28 +106,10 @@ class OwnerMaintenance(commands.Cog):
             await self.notify_users()
 
     async def notify_users(self):
-        if not self.bot.interrupted_users:
-            return
-
-        # Local cache clone tracking target fields
-        targets = dict(self.bot.interrupted_users)
-        self.bot.interrupted_users = {}
-
-        print(f"-> Sending dynamic recovery notifications to {len(targets)} active profiles...")
-        
-        for user_id, channel_id in targets.items():
-            try:
-                channel = self.bot.get_channel(channel_id)
-                if channel:
-                    embed = discord.Embed(
-                        title="🚀 We Are Back Online!",
-                        description=f"<@{user_id}> Abhi aap aaram se bot ko bina kisi dikkat ke istemaal kar sakte hain.\n\n*Sorry for the inconvenience caused! Thank you for waiting.* ✨",
-                        color=discord.Color.green()
-                    )
-                    await channel.send(content=f"<@{user_id}>", embed=embed, silent=True)
-                    await asyncio.sleep(0.5) # Anti spam rate limits check protection filter
-            except Exception:
-                continue
+        # User requested to remove the pinging behavior as it is annoying (mass pings when maintenance ends).
+        # We just clear the cache to free memory.
+        if hasattr(self.bot, 'interrupted_users'):
+            self.bot.interrupted_users = {}
 
     @commands.command(name="restorebackup", aliases=["loadbackup"])
     @commands.is_owner()
