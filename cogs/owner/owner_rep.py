@@ -18,7 +18,7 @@ class OwnerRep(commands.Cog):
             except Exception:
                 return None, None
 
-    @commands.hybrid_command(name="addrep", hidden=True)
+    @commands.command(name="addrep", hidden=True)
     @commands.is_owner()
     async def add_rep(self, ctx, user_str: str = None, amount_str: str = None):
         """Add rep points to a user. Usage: !!addrep @user 10"""
@@ -45,7 +45,7 @@ class OwnerRep(commands.Cog):
 
         await ctx.send(f"👑 **Owner Action:** Added `{amount}` rep points to **{username}**!")
 
-    @commands.hybrid_command(name="removerep", hidden=True)
+    @commands.command(name="removerep", hidden=True)
     @commands.is_owner()
     async def remove_rep(self, ctx, user_str: str = None, amount_str: str = None):
         """Remove rep points from a user. Usage: !!removerep @user all/10"""

@@ -5,7 +5,7 @@ class OwnerInfo(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.hybrid_command(name="ownerinfo", aliases=["owner"], help="Displays information about the bot creator Rishav.")
+    @commands.command(name="ownerinfo", aliases=["owner"], help="Displays information about the bot creator Rishav.")
     async def owner_details(self, ctx): # Cogs me 'self' zaroori hai
         # Apni explicit public details yahan set karo
         owner_username = "phrenic_rishav" 

@@ -44,7 +44,7 @@ class OwnerStatus(commands.Cog):
 
 
 
-    @commands.hybrid_command(name="updatetopgg", aliases=["topggupdate", "poststats"], hidden=True)
+    @commands.command(name="updatetopgg", aliases=["topggupdate", "poststats"], hidden=True)
     @commands.is_owner()
     async def updatetopgg(self, ctx):
         """Top.gg website par live server count direct update karein."""

@@ -5,7 +5,7 @@ class OwnerBadge(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.hybrid_command(name="badge")
+    @commands.command(name="badge")
     @commands.is_owner()
     async def add_badge(self, ctx, user: discord.User, *, badge: str):
         """Add a custom badge to a user's profile."""
@@ -17,7 +17,7 @@ class OwnerBadge(commands.Cog):
         except Exception as e:
             await ctx.send(f"❌ Error adding badge (maybe they already have it?): {e}")
 
-    @commands.hybrid_command(name="removebadge")
+    @commands.command(name="removebadge")
     @commands.is_owner()
     async def remove_badge(self, ctx, user: discord.User, *, badge: str):
         """Remove a custom badge from a user's profile."""

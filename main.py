@@ -664,6 +664,16 @@ async def on_command_error(ctx, error):
             pass
         return
         
+    if isinstance(error, commands.CheckFailure):
+        try:
+            if "The check functions for command" in str(error):
+                await ctx.send("🚫 Ye command is server ya channel me disabled hai.")
+            else:
+                await ctx.send(f"❌ {str(error)}")
+        except discord.Forbidden:
+            pass
+        return
+        
     # Log unhandled errors to console
     print(f"Ignoring exception in command {ctx.command}:", file=sys.stderr)
     traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)

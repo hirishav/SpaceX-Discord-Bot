@@ -5,7 +5,7 @@ class OwnerBlacklist(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.hybrid_command(name="blacklistserver")
+    @commands.command(name="blacklistserver")
     @commands.is_owner()
     async def blacklistserver(self, ctx, action: str, server_id: str):
         """Blacklist or unblacklist a server."""

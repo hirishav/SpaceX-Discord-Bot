@@ -129,7 +129,7 @@ class OwnerMaintenance(commands.Cog):
             except Exception:
                 continue
 
-    @commands.hybrid_command(name="restorebackup", aliases=["loadbackup"])
+    @commands.command(name="restorebackup", aliases=["loadbackup"])
     @commands.is_owner()
     async def restore_backup(self, ctx):
         """Force load the latest database backup from the cloud channel."""

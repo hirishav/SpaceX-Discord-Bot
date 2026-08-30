@@ -8,7 +8,7 @@ class OwnerPortfolio(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.hybrid_command(name="ownerportfolio", aliases=["opf"])
+    @commands.command(name="ownerportfolio", aliases=["opf"])
     @commands.is_owner()
     async def admin_view_portfolio(self, ctx, member: discord.Member = None):
         """👑 SECURE OWNER LOCK: Kisi ka bhi portfolio bypass karke dekhne ke liye."""
@@ -38,7 +38,7 @@ class OwnerPortfolio(commands.Cog):
         embed.description = f"### 📊 Target Account Total Holdings: **{total_value} Specie**\n\n{text if text else 'Khali Portfolio Data'}"
         await ctx.send(embed=embed)
 
-    @commands.hybrid_command(name="addstock")
+    @commands.command(name="addstock")
     @commands.is_owner()
     async def add_custom_stock(self, ctx, ticker: str, name: str, price: int):
         """👑 Admin command se pool me instant naya stock insert register karne ke liye."""
@@ -50,7 +50,7 @@ class OwnerPortfolio(commands.Cog):
         conn.close()
         await ctx.send(f"👑 **Success:** Asset `{name}` (`{ticker}`) registered into core database arrays with 10k pools at initial cost **{price} Specie**!")
 
-    @commands.hybrid_command(name="setshares")
+    @commands.command(name="setshares")
     @commands.is_owner()
     async def modify_stock_shares(self, ctx, ticker: str, qty: int):
         """👑 Pool supply limits quantities ko manually drop ya force increase karne ke liye."""

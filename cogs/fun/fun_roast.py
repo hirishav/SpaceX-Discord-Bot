@@ -147,7 +147,7 @@ class FunRoast(commands.Cog):
             "Bhai tu aisi kadi hai chain ki jo kisi se nahi judti, bas beech me latki rehti hai."
         ]
 
-    @commands.hybrid_command(name="roast")
+    @commands.command(name="roast")
     async def roast(self, ctx, member: discord.Member = None):
         """Kisi ki dosto ke beech witty Hinglish roasts ke sath taang kheenchte hain."""
         member = member or ctx.author

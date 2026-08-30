@@ -5,7 +5,7 @@ class OwnerCleanspace(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.hybrid_command(name="cleanspace")
+    @commands.command(name="cleanspace")
     @commands.is_owner()
     async def cleanspace(self, ctx, min_members: int = 10):
         """Leave servers with fewer than specified members."""
