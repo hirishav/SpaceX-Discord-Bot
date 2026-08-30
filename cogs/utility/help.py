@@ -319,6 +319,24 @@ class Help(commands.Cog):
 
         target = query.lower().strip()
 
+        if target in ["action", "actions"]:
+            embed = discord.Embed(
+                title="🎭 Action & Image Commands",
+                description=(
+                    f"Ye rahe saare anime actions aur image commands!\n"
+                    f"💡 *Tip: Use `{prefix}help <command>` for details.*\n"
+                    f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+                ),
+                color=EMBED_COLOR
+            )
+            targeted = "`bang`, `bite`, `cuddle`, `greet`, `handholding`, `highfive`, `hug`, `insult`, `kiss`, `lick`, `nom`, `pat`, `poke`, `punch`, `slap`, `spank`, `stare`, `tickle`, `waifu_insult`, `baka`, `delet_this`"
+            self_cmds = "`animal_cat`, `animal_dog`, `awoo`, `banghead`, `blush`, `capybara`, `clagwimoth`, `cry`, `dab`, `dance`, `deredere`, `discord_memes`, `facedesk`, `gaming`, `initial_d`, `jojo`, `kemonomimi`, `lewd`, `megumin`, `nani`, `neko`, `otter`, `owo`, `poi`, `pout`, `quokka`, `rem`, `roll`, `shrug`, `sleepy`, `smile`, `smug`, `sumfuk`, `teehee`, `thinking`, `thumbsup`, `trap`, `triggered`, `wag`, `wasted`, `wombat`, `nsfw`"
+            
+            embed.add_field(name="🎯 Targeted Actions (Requires @user)", value=targeted, inline=False)
+            embed.add_field(name="🖼️ Self Actions & Images", value=self_cmds, inline=False)
+            embed.set_footer(text=f"Requested by {ctx.author.display_name}", icon_url=ctx.author.display_avatar.url)
+            return await ctx.send(embed=embed)
+
         # ---- CASE 2: !!help <category> ----
         matched_key = None
         for key, meta in CATEGORY_META.items():
@@ -836,11 +854,17 @@ class Help(commands.Cog):
             usage = f"`{prefix}welcome setchannel #channel`\n`{prefix}welcome setmessage <msg>`\n`{prefix}welcome mention <on/off>`\n`{prefix}welcome test`"
             examples = f"`{prefix}welcome setchannel #welcome`\n`{prefix}welcome setmessage Welcome {{user}} to {{server}}! ✅`"
 
-        elif cmd.name in ["kiss", "hug", "slap", "spank", "tickle"]:
+        elif cmd.name in ["bang", "bite", "cuddle", "greet", "handholding", "highfive", "hug", "insult", "kiss", "lick", "nom", "pat", "poke", "punch", "slap", "spank", "stare", "tickle", "waifu_insult", "baka", "delet_this"]:
             action = cmd.name
             description = f"🎭 Kisi member ko {action} karne ke liye ek anime reaction GIF ke saath!"
             usage = f"`{prefix}{action} @user`"
             examples = f"`{prefix}{action} @User`"
+
+        elif cmd.name in ["animal_cat", "animal_dog", "awoo", "banghead", "blush", "capybara", "clagwimoth", "cry", "dab", "dance", "deredere", "discord_memes", "facedesk", "gaming", "initial_d", "jojo", "kemonomimi", "lewd", "megumin", "nani", "neko", "otter", "owo", "poi", "pout", "quokka", "rem", "roll", "shrug", "sleepy", "smile", "smug", "sumfuk", "teehee", "thinking", "thumbsup", "trap", "triggered", "wag", "wasted", "wombat", "nsfw"]:
+            action = cmd.name
+            description = f"🎭 Apne actions express karne ke liye ({action}) ek anime reaction GIF ke saath!"
+            usage = f"`{prefix}{action}`"
+            examples = f"`{prefix}{action}`"
 
         elif cmd.name == "rep":
             description = "⭐ Apna ya kisi doosre user ka rep points check karne aur leaderboard dekhne ke liye."
