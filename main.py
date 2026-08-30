@@ -665,13 +665,7 @@ async def on_command_error(ctx, error):
         return
         
     if isinstance(error, commands.CheckFailure):
-        try:
-            if "The check functions for command" in str(error):
-                await ctx.send("🚫 Ye command is server ya channel me disabled hai.")
-            else:
-                await ctx.send(f"❌ {str(error)}")
-        except discord.Forbidden:
-            pass
+        # Ignore CheckFailure silently so disabled commands don't spam the chat.
         return
         
     # Log unhandled errors to console
