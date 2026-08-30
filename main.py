@@ -125,9 +125,9 @@ class SpaceXBot(commands.Bot):
         if not interaction.guild or not interaction.command:
             return True
             
-        command_name = interaction.command.name
+        command_name = interaction.command.qualified_name.split()[0]
         
-        if command_name in {"disable", "enable"}: 
+        if command_name in {"disable", "enable", "help"}: 
             return True
             
         guild_id = interaction.guild.id
@@ -162,12 +162,14 @@ class SpaceXBot(commands.Bot):
             return True
         if not ctx.guild or not ctx.command:
             return True
-        if ctx.command.name in {"disable", "enable"}:
+            
+        command_name = ctx.command.qualified_name.split()[0]
+            
+        if command_name in {"disable", "enable", "help"}:
             return True
             
         guild_id = ctx.guild.id
         channel_id = ctx.channel.id
-        command_name = ctx.command.name
         module_name = self._resolve_module(ctx.command)
         
         disabled_reason = None

@@ -13,6 +13,17 @@ class FunActions(commands.Cog):
         otaku_map = {"handholding": "handhold", "greet": "wave", "animal_dog": "dog", "animal_cat": "cat"}
         otaku_endpoint = otaku_map.get(endpoint, endpoint)
         
+        # Hardcoded fallbacks for endpoints that don't exist in APIs or often fail
+        fallbacks = {
+            "owo": "https://media1.tenor.com/m/3b2R9x3aD7YAAAAd/uwu-owo.gif",
+            "bang": "https://media.tenor.com/O6p6W8Lid2QAAAAM/anime-shoot.gif",
+            "highfive": "https://media.tenor.com/n14aT3L-kUIAAAAM/anime-high-five.gif",
+            "insult": "https://media.tenor.com/Z4O8V0YV6kYAAAAM/anime-insult.gif",
+            "waifu_insult": "https://media.tenor.com/8QxM8eC7FSwAAAAM/anime-slap.gif",
+            "delet_this": "https://media.tenor.com/4g_NfE_o1CMAAAAM/delete-this-gun.gif",
+            "baka": "https://media.tenor.com/c6fU3c9Fq4MAAAAM/baka-anime.gif"
+        }
+        
         apis = [
             f"https://nekos.life/api/v2/img/{endpoint}",
             f"https://api.otakugifs.xyz/gif?reaction={otaku_endpoint}",
@@ -33,8 +44,8 @@ class FunActions(commands.Cog):
                     print(f"Failed fetching {endpoint} from {api_url}: {e}")
                     continue
             
-        print(f"Error: All APIs failed to fetch GIF for {endpoint}")
-        return None
+        print(f"Warning: All APIs failed to fetch GIF for {endpoint}, checking fallbacks")
+        return fallbacks.get(endpoint, None)
 
     async def action_command(self, ctx, member: discord.Member, action_name: str, past_tense: str, emoji: str, is_targeted: bool = True):
         if is_targeted:
@@ -56,8 +67,6 @@ class FunActions(commands.Cog):
         )
         if gif_url:
             embed.set_image(url=gif_url)
-        else:
-            embed.set_footer(text="Failed to load GIF.")
             
         await ctx.send(embed=embed)
 
