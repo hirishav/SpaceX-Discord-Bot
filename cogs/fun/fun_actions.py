@@ -9,14 +9,31 @@ class FunActions(commands.Cog):
         self.api_base = "https://nekos.life/api/v2/img/"
 
     async def fetch_gif(self, endpoint: str) -> str:
+        # Define API configurations
+        otaku_map = {"handholding": "handhold", "greet": "wave", "animal_dog": "dog", "animal_cat": "cat"}
+        otaku_endpoint = otaku_map.get(endpoint, endpoint)
+        
+        apis = [
+            f"https://nekos.life/api/v2/img/{endpoint}",
+            f"https://api.otakugifs.xyz/gif?reaction={otaku_endpoint}",
+            f"https://nekos.best/api/v2/{endpoint}"
+        ]
+
         async with aiohttp.ClientSession() as session:
-            try:
-                async with session.get(self.api_base + endpoint) as response:
-                    if response.status == 200:
-                        data = await response.json()
-                        return data.get("url")
-            except Exception as e:
-                print(f"Error fetching GIF from {endpoint}: {e}")
+            for api_url in apis:
+                try:
+                    async with session.get(api_url, timeout=5) as response:
+                        if response.status == 200:
+                            data = await response.json()
+                            if "url" in data:
+                                return data["url"]
+                            elif "results" in data and len(data["results"]) > 0:
+                                return data["results"][0].get("url")
+                except Exception as e:
+                    print(f"Failed fetching {endpoint} from {api_url}: {e}")
+                    continue
+            
+        print(f"Error: All APIs failed to fetch GIF for {endpoint}")
         return None
 
     async def action_command(self, ctx, member: discord.Member, action_name: str, past_tense: str, emoji: str, is_targeted: bool = True):
@@ -386,6 +403,8 @@ class FunActions(commands.Cog):
             await ctx.send(f"❌ Kisko {ctx.command.name} karna hai bhai? `@user` mention karo!\n**Sahi tarika:** `{ctx.prefix}{ctx.command.name} @user`")
         elif isinstance(error, commands.MemberNotFound):
             await ctx.send("❌ Ye member mujhe server me nahi mila!")
+        else:
+            raise error
 
 async def setup(bot):
     await bot.add_cog(FunActions(bot))
