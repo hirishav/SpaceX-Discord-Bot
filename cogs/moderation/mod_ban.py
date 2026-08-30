@@ -56,6 +56,8 @@ class ModBan(commands.Cog):
     async def ban_error(self, ctx, error):
         if isinstance(error, commands.MissingPermissions):
             pass
+        elif isinstance(error, commands.MemberNotFound):
+            await ctx.send("❌ Ye member mujhe server me nahi mila! Sahi ID ya mention provide karein.")
         elif isinstance(error, commands.MissingRequiredArgument):
             await ctx.send(f"❌ Sahi tarika: `{ctx.prefix}ban @user <reason>`")
 

@@ -137,13 +137,17 @@ class SpaceXBot(commands.Bot):
         is_cmd_enabled_channel = channel_id in self.enabled_commands_channel_cache and command_name in self.enabled_commands_channel_cache[channel_id]
         is_mod_enabled_channel = channel_id in self.enabled_modules_channel_cache and module_name in self.enabled_modules_channel_cache[channel_id]
         
-        if channel_id in self.disabled_commands_channel_cache and command_name in self.disabled_commands_channel_cache[channel_id]:
+        if is_cmd_enabled_channel:
+            pass
+        elif channel_id in self.disabled_commands_channel_cache and command_name in self.disabled_commands_channel_cache[channel_id]:
             disabled_reason = True
-        elif not is_cmd_enabled_channel and guild_id in self.disabled_commands_cache and command_name in self.disabled_commands_cache[guild_id]:
+        elif guild_id in self.disabled_commands_cache and command_name in self.disabled_commands_cache[guild_id]:
             disabled_reason = True
+        elif is_mod_enabled_channel:
+            pass
         elif channel_id in self.disabled_modules_channel_cache and module_name in self.disabled_modules_channel_cache[channel_id]:
             disabled_reason = True
-        elif not is_mod_enabled_channel and not is_cmd_enabled_channel and guild_id in self.disabled_modules_server_cache and module_name in self.disabled_modules_server_cache[guild_id]:
+        elif guild_id in self.disabled_modules_server_cache and module_name in self.disabled_modules_server_cache[guild_id]:
             disabled_reason = True
             
         if disabled_reason:
@@ -169,13 +173,17 @@ class SpaceXBot(commands.Bot):
         is_cmd_enabled_channel = channel_id in self.enabled_commands_channel_cache and command_name in self.enabled_commands_channel_cache[channel_id]
         is_mod_enabled_channel = channel_id in self.enabled_modules_channel_cache and module_name in self.enabled_modules_channel_cache[channel_id]
         
-        if channel_id in self.disabled_commands_channel_cache and command_name in self.disabled_commands_channel_cache[channel_id]:
+        if is_cmd_enabled_channel:
+            pass
+        elif channel_id in self.disabled_commands_channel_cache and command_name in self.disabled_commands_channel_cache[channel_id]:
             disabled_reason = True
-        elif not is_cmd_enabled_channel and guild_id in self.disabled_commands_cache and command_name in self.disabled_commands_cache[guild_id]:
+        elif guild_id in self.disabled_commands_cache and command_name in self.disabled_commands_cache[guild_id]:
             disabled_reason = True
+        elif is_mod_enabled_channel:
+            pass
         elif channel_id in self.disabled_modules_channel_cache and module_name in self.disabled_modules_channel_cache[channel_id]:
             disabled_reason = True
-        elif not is_mod_enabled_channel and not is_cmd_enabled_channel and guild_id in self.disabled_modules_server_cache and module_name in self.disabled_modules_server_cache[guild_id]:
+        elif guild_id in self.disabled_modules_server_cache and module_name in self.disabled_modules_server_cache[guild_id]:
             disabled_reason = True
             
         if disabled_reason:

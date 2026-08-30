@@ -47,14 +47,23 @@ class ModConfig(commands.Cog):
                 self.bot.disabled_modules_server_cache[guild_id] = set()
             self.bot.disabled_modules_server_cache[guild_id].add(module_name)
             
+            channel_ids = [str(c.id) for c in ctx.guild.channels]
+            for c_id in channel_ids:
+                c_id_int = int(c_id)
+                if c_id_int in getattr(self.bot, 'enabled_modules_channel_cache', {}) and module_name in self.bot.enabled_modules_channel_cache[c_id_int]:
+                    self.bot.enabled_modules_channel_cache[c_id_int].remove(module_name)
+            
             cursor = self.bot.db.cursor()
             try:
                 cursor.execute("INSERT OR REPLACE INTO disabled_modules_server (server_id, module_name) VALUES (?, ?)", (str(guild_id), module_name))
+                if channel_ids:
+                    placeholders = ','.join('?' for _ in channel_ids)
+                    cursor.execute(f"DELETE FROM enabled_modules_channel WHERE module_name = ? AND channel_id IN ({placeholders})", [module_name] + channel_ids)
                 self.bot.db.commit()
             finally:
                 cursor.close()
                 
-            await ctx.send(f"🚫 `{module_name.capitalize()}` module is now disabled globally in this server.")
+            await ctx.send(f"🚫 `{module_name.capitalize()}` module is now disabled globally in this server (Channel overrides removed).")
 
     @disable.command(name="command")
     @commands.has_permissions(manage_guild=True)
@@ -94,14 +103,23 @@ class ModConfig(commands.Cog):
                 self.bot.disabled_commands_cache[guild_id] = set()
             self.bot.disabled_commands_cache[guild_id].add(command_name)
             
+            channel_ids = [str(c.id) for c in ctx.guild.channels]
+            for c_id in channel_ids:
+                c_id_int = int(c_id)
+                if c_id_int in getattr(self.bot, 'enabled_commands_channel_cache', {}) and command_name in self.bot.enabled_commands_channel_cache[c_id_int]:
+                    self.bot.enabled_commands_channel_cache[c_id_int].remove(command_name)
+            
             cursor = self.bot.db.cursor()
             try:
                 cursor.execute("INSERT OR REPLACE INTO disabled_commands (server_id, command_name) VALUES (?, ?)", (str(guild_id), command_name))
+                if channel_ids:
+                    placeholders = ','.join('?' for _ in channel_ids)
+                    cursor.execute(f"DELETE FROM enabled_commands_channel WHERE command_name = ? AND channel_id IN ({placeholders})", [command_name] + channel_ids)
                 self.bot.db.commit()
             finally:
                 cursor.close()
                 
-            await ctx.send(f"🚫 Command `{command_name}` is now disabled globally in this server.")
+            await ctx.send(f"🚫 Command `{command_name}` is now disabled globally in this server (Channel overrides removed).")
 
     @commands.hybrid_group(name="enable", invoke_without_command=True)
     @commands.has_permissions(manage_guild=True)
@@ -137,9 +155,19 @@ class ModConfig(commands.Cog):
             else:
                 if guild_id in self.bot.disabled_modules_server_cache and module_name in self.bot.disabled_modules_server_cache[guild_id]:
                     self.bot.disabled_modules_server_cache[guild_id].remove(module_name)
+                
+                channel_ids = [str(c.id) for c in ctx.guild.channels]
+                for c_id in channel_ids:
+                    c_id_int = int(c_id)
+                    if c_id_int in getattr(self.bot, 'disabled_modules_channel_cache', {}) and module_name in self.bot.disabled_modules_channel_cache[c_id_int]:
+                        self.bot.disabled_modules_channel_cache[c_id_int].remove(module_name)
+                        
                 cursor.execute("DELETE FROM disabled_modules_server WHERE server_id = ? AND module_name = ?", (str(guild_id), module_name))
+                if channel_ids:
+                    placeholders = ','.join('?' for _ in channel_ids)
+                    cursor.execute(f"DELETE FROM disabled_modules_channel WHERE module_name = ? AND channel_id IN ({placeholders})", [module_name] + channel_ids)
                 self.bot.db.commit()
-                await ctx.send(f"✅ `{module_name.capitalize()}` module enabled globally.")
+                await ctx.send(f"✅ `{module_name.capitalize()}` module enabled globally (Channel overrides removed).")
         finally:
             cursor.close()
 
@@ -174,9 +202,19 @@ class ModConfig(commands.Cog):
             else:
                 if guild_id in self.bot.disabled_commands_cache and command_name in self.bot.disabled_commands_cache[guild_id]:
                     self.bot.disabled_commands_cache[guild_id].remove(command_name)
+                
+                channel_ids = [str(c.id) for c in ctx.guild.channels]
+                for c_id in channel_ids:
+                    c_id_int = int(c_id)
+                    if c_id_int in getattr(self.bot, 'disabled_commands_channel_cache', {}) and command_name in self.bot.disabled_commands_channel_cache[c_id_int]:
+                        self.bot.disabled_commands_channel_cache[c_id_int].remove(command_name)
+                        
                 cursor.execute("DELETE FROM disabled_commands WHERE server_id = ? AND command_name = ?", (str(guild_id), command_name))
+                if channel_ids:
+                    placeholders = ','.join('?' for _ in channel_ids)
+                    cursor.execute(f"DELETE FROM disabled_commands_channel WHERE command_name = ? AND channel_id IN ({placeholders})", [command_name] + channel_ids)
                 self.bot.db.commit()
-                await ctx.send(f"✅ Command `{command_name}` enabled globally.")
+                await ctx.send(f"✅ Command `{command_name}` enabled globally (Channel overrides removed).")
         finally:
             cursor.close()
 
