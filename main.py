@@ -665,7 +665,18 @@ async def on_command_error(ctx, error):
         return
         
     if isinstance(error, commands.CheckFailure):
-        # Ignore CheckFailure silently so disabled commands don't spam the chat.
+        msg = str(error)
+        if "The check functions for command" in msg:
+            # Ignore CheckFailure silently so disabled commands don't spam the chat.
+            return
+            
+        if isinstance(error, commands.NotOwner):
+            return
+            
+        try:
+            await ctx.send(f"❌ {msg}")
+        except discord.Forbidden:
+            pass
         return
         
     # Log unhandled errors to console
