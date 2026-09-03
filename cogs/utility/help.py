@@ -807,6 +807,21 @@ class Help(commands.Cog):
             usage = f"`{prefix}listprefixless`"
             examples = f"`{prefix}listprefixless`"
 
+        elif cmd.name == "addcmd":
+            description = "🔧 Server me naye custom commands banane ke liye. Action: 'add', 'remove', or 'text'."
+            usage = f"`{prefix}addcmd <action> <command_name> <message/roles>`"
+            examples = f"`{prefix}addcmd text rules Please read the rules!`\n`{prefix}addcmd add staff @StaffRole Welcome {{user}}!`"
+
+        elif cmd.name == "delcmd":
+            description = "🗑️ Server se kisi custom command ko delete karne ke liye."
+            usage = f"`{prefix}delcmd <command_name>`"
+            examples = f"`{prefix}delcmd rules`"
+
+        elif cmd.name in ["listcmds", "cc", "custom", "commands"]:
+            description = "📋 Server me bane hue saare custom commands ki list dekhne ke liye."
+            usage = f"`{prefix}listcmds`"
+            examples = f"`{prefix}listcmds`"
+
         elif cmd.name in ["addpremium", "apremium"]:
             description = "👑 Owner-Only: Kisi server/user ko premium perks grant karne ke liye."
             usage = f"`{prefix}addpremium <ID>`"

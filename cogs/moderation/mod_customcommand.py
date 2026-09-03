@@ -93,7 +93,7 @@ class ModCustomCommand(commands.Cog):
         del self.custom_cmds_cache[s_id][command_name]
         await ctx.send(f"✅ Custom command `{command_name}` has been deleted.")
 
-    @commands.hybrid_command(name="listcmds")
+    @commands.hybrid_command(name="listcmds", aliases=["cc", "custom", "commands"])
     @commands.has_permissions(manage_roles=True)
     async def listcmds(self, ctx):
         """Lists all custom commands in this server."""
