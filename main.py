@@ -530,6 +530,18 @@ class SpaceXBot(commands.Bot):
         )
         """)
         
+        # CUSTOM COMMANDS TABLE
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS custom_commands (
+            server_id TEXT,
+            command_name TEXT,
+            action TEXT,
+            role_ids TEXT,
+            response_message TEXT,
+            PRIMARY KEY (server_id, command_name)
+        )
+        """)
+        
         self.db.commit()
         
         # 🧠 WARM UP CACHE ENGINE: Memory hydration on startup
