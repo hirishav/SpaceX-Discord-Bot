@@ -354,6 +354,9 @@ class Help(commands.Cog):
             return
 
         # ---- CASE 3: !!help <command> ----
+        if target in ["truth", "dare"]:
+            target = "tnd"
+
         cmd = self.bot.get_command(target)
 
         if not cmd:
@@ -940,6 +943,21 @@ class Help(commands.Cog):
             description = "✈️ Kisi member ko ek voice channel se doosre channel me bhejne ke liye."
             usage = f"`{prefix}vcmove @user #channel_name/ID [reason]`"
             examples = f"`{prefix}vcmove @User 1234567890`"
+
+        elif cmd.name == "tnd":
+            description = "💬 Channel mein Truth and Dare game chalu (on) ya band (off) karne ke liye."
+            usage = f"`{prefix}tnd on [#channel]`\n`{prefix}tnd off [#channel]`"
+            examples = f"`{prefix}tnd on #fun-chat`"
+
+        elif cmd.name == "counting":
+            description = "🔢 Server mein Counting game setup karne ke liye, bina mistakes ginti badhao!"
+            usage = f"`{prefix}counting [#channel]`"
+            examples = f"`{prefix}counting #counting-channel`"
+
+        elif cmd.name == "joinrole":
+            description = "🎯 Naye members ke liye auto-join role set karein. (Bonus: Isme **Sticky Roles** feature by default enabled hai! Jo member server chhodte hain aur waapis aate hain, unhe unke purane roles automatic wapas mil jayenge!)"
+            usage = f"`{prefix}joinrole @role`\n`{prefix}joinrole on/off`"
+            examples = f"`{prefix}joinrole @Member`"
 
         cmd_embed = discord.Embed(
             title=f"✦ Command: {cmd.name.capitalize()} ✦",

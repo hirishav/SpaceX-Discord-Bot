@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 import random
 import database
+from .tnd_data import MORE_TRUTHS, MORE_DARES
 
 TRUTHS = [
     "What's a secret you've never told anyone?",
@@ -21,6 +22,8 @@ TRUTHS = [
     "What is your weirdest flex?"
 ]
 
+TRUTHS.extend(MORE_TRUTHS)
+
 DARES = [
     "Send a voice message of you singing the chorus of your favorite song.",
     "Type a message using only your nose.",
@@ -38,6 +41,8 @@ DARES = [
     "Send your most recently used emoji 10 times.",
     "Change your profile picture to a meme for the rest of the day."
 ]
+
+DARES.extend(MORE_DARES)
 
 class TNDView(discord.ui.View):
     def __init__(self):
