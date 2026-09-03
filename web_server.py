@@ -58,10 +58,20 @@ async def topgg_webhook():
         cursor.execute("UPDATE reps SET rep_points = rep_points + ? WHERE user_id = ?", (rep_amount, user_id))
         cursor.execute("UPDATE economy SET wallet = wallet + ? WHERE user_id = ?", (specie_reward, user_id))
         
+        expires_at = int(time.time()) + (12 * 3600)
+        cursor.execute("""
+        INSERT INTO temp_prefixless_users (user_id, expires_at)
+        VALUES (?, ?)
+        ON CONFLICT(user_id) DO UPDATE SET expires_at=excluded.expires_at
+        """, (user_id, expires_at))
+        
         cursor.execute("SELECT rep_points FROM reps WHERE user_id = ?", (user_id,))
         total_rep = cursor.fetchone()[0]
         db.commit()
         db.close()
+        
+        if bot_instance and hasattr(bot_instance, 'temp_prefixless_users_cache'):
+            bot_instance.temp_prefixless_users_cache[int(user_id)] = expires_at
         
         # Send DM asynchronously
         try:
@@ -72,7 +82,7 @@ async def topgg_webhook():
                     if user:
                         embed = discord.Embed(
                             title="✅ Vote ke liye Sukriya! ✅",
-                            description=f"Aapke vote ke liye bahut bahut dhanyawad! ❤️\n\nIske inaam mein aapko mila hai **{rep_amount} Rep Point** aur **💠 {specie_reward:,} Specie**! ✨\n**Total Rep Points:** `{total_rep}`\n\nAise hi support karte rahiye aur aur bhi inaam kamate rahiye! 🚀",
+                            description=f"Aapke vote ke liye bahut bahut dhanyawad! ❤️\n\nIske inaam mein aapko mila hai **{rep_amount} Rep Point**, **💠 {specie_reward:,} Specie**, aur **12 ghante ke liye Prefixless Perms**! ✨\n**Total Rep Points:** `{total_rep}`\n\nAise hi support karte rahiye aur aur bhi inaam kamate rahiye! 🚀",
                             color=discord.Color.brand_green()
                         )
                         embed.set_footer(text="SpaceX Bot Team")

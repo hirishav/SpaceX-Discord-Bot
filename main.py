@@ -56,6 +56,10 @@ def get_prefix(bot, message):
     is_whitelisted = False
     if message.author.id in bot.owner_ids or (hasattr(bot, 'prefixless_cache') and message.author.id in bot.prefixless_cache):
         is_whitelisted = True
+    elif hasattr(bot, 'temp_prefixless_users_cache') and message.author.id in bot.temp_prefixless_users_cache:
+        expires_at = bot.temp_prefixless_users_cache[message.author.id]
+        if expires_at == -1 or int(time.time()) < expires_at:
+            is_whitelisted = True
     elif hasattr(bot, 'prefixless_servers_cache') and message.guild.id in bot.prefixless_servers_cache:
         expires_at = bot.prefixless_servers_cache[message.guild.id]
         if expires_at == -1 or int(time.time()) < expires_at:
@@ -95,6 +99,7 @@ class SpaceXBot(commands.Bot):
         
         self.prefix_cache = {}
         self.prefixless_cache = set()
+        self.temp_prefixless_users_cache = {}
         self.prefixless_servers_cache = {}
         self.blacklist_cache = {}
         self.premium_cache = set()
@@ -382,6 +387,14 @@ class SpaceXBot(commands.Bot):
             user_id TEXT PRIMARY KEY
         )
         """)
+        
+        # TEMPORARY PREFIXLESS USERS TABLE
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS temp_prefixless_users (
+            user_id TEXT PRIMARY KEY,
+            expires_at INTEGER
+        )
+        """)
 
         # PREFIXLESS SERVERS TABLE
         cursor.execute("""
@@ -469,6 +482,48 @@ class SpaceXBot(commands.Bot):
         )
         """)
         
+        # JOINROLE & STICKY ROLES TABLES
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS joinrole_config (
+            server_id TEXT PRIMARY KEY,
+            role_id TEXT,
+            is_enabled INTEGER DEFAULT 1
+        )
+        """)
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS sticky_roles (
+            server_id TEXT,
+            user_id TEXT,
+            roles TEXT,
+            PRIMARY KEY (server_id, user_id)
+        )
+        """)
+        
+        # TRUTH AND DARE CONFIG TABLE
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS tnd_config (
+            server_id TEXT,
+            channel_id TEXT PRIMARY KEY,
+            is_enabled INTEGER DEFAULT 1
+        )
+        """)
+        
+        # COUNTING CONFIG & BLACKLIST TABLES
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS counting_config (
+            server_id TEXT,
+            channel_id TEXT PRIMARY KEY,
+            current_number INTEGER DEFAULT 1,
+            last_user_id TEXT
+        )
+        """)
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS counting_blacklist (
+            user_id TEXT PRIMARY KEY,
+            expires_at INTEGER
+        )
+        """)
+        
         self.db.commit()
         
         # 🧠 WARM UP CACHE ENGINE: Memory hydration on startup
@@ -481,6 +536,10 @@ class SpaceXBot(commands.Bot):
         cursor.execute("SELECT user_id FROM prefixless_users")
         for (u_id,) in cursor.fetchall():
             self.prefixless_cache.add(int(u_id))
+
+        cursor.execute("SELECT user_id, expires_at FROM temp_prefixless_users")
+        for u_id, exp_at in cursor.fetchall():
+            self.temp_prefixless_users_cache[int(u_id)] = exp_at
 
         cursor.execute("SELECT server_id, expires_at FROM prefixless_servers")
         for s_id, exp_at in cursor.fetchall():

@@ -65,7 +65,7 @@ class BotInfo(commands.Cog):
         
         embed = discord.Embed(
             title="🚀 Vote for SpaceX Bot!",
-            description=f"Agar aapko mera bot pasand hai, toh kripya top.gg par vote karke support karein! ❤️\n\n🎁 **Voting Reward:** 1 Rep Point aur **5,000 Specie**!\n\n🔗 **[Click Here to Vote on Top.gg]({vote_url})**",
+            description=f"Agar aapko mera bot pasand hai, toh kripya top.gg par vote karke support karein! ❤️\n\n🎁 **Voting Reward:** 1 Rep Point, **5,000 Specie**, aur **12 ghante ke liye Prefixless Perms**!\n\n🔗 **[Click Here to Vote on Top.gg]({vote_url})**",
             color=discord.Color.gold()
         )
         embed.set_thumbnail(url=self.bot.user.display_avatar.url if self.bot.user else None)
