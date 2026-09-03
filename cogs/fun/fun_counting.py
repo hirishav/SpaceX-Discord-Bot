@@ -4,6 +4,7 @@ import database
 import time
 import random
 import asyncio
+import datetime
 
 ROASTS = [
     "You should repeat class 2 to learn counting! 😂",
@@ -23,7 +24,6 @@ class FunCounting(commands.Cog):
         self.bot = bot
 
     @commands.command()
-    @commands.has_permissions(manage_channels=True)
     async def counting(self, ctx, channel: discord.TextChannel = None):
         """
         Set up a counting channel.
@@ -70,20 +70,6 @@ class FunCounting(commands.Cog):
         current_number = row[0]
         last_user_id = row[1]
         
-        # Check if user is blacklisted
-        cursor.execute("SELECT expires_at FROM counting_blacklist WHERE user_id = ?", (str(message.author.id),))
-        bl_row = cursor.fetchone()
-        if bl_row:
-            if time.time() < bl_row[0]:
-                await message.delete()
-                # Silently delete or send a temporary warning? Let's just delete to keep channel clean.
-                db.close()
-                return
-            else:
-                # Blacklist expired, remove from DB
-                cursor.execute("DELETE FROM counting_blacklist WHERE user_id = ?", (str(message.author.id),))
-                db.commit()
-                
         # Validate message
         content = message.content.strip()
         
@@ -117,18 +103,39 @@ class FunCounting(commands.Cog):
             WHERE channel_id = ?
             """, (str(message.channel.id),))
             
-            # Blacklist for 10 minutes (600 seconds)
-            expires_at = int(time.time()) + 600
+            # Track faults
+            cursor.execute("SELECT faults FROM counting_faults WHERE user_id = ?", (str(message.author.id),))
+            f_row = cursor.fetchone()
+            faults = (f_row[0] + 1) if f_row else 1
+            
             cursor.execute("""
-            INSERT INTO counting_blacklist (user_id, expires_at)
+            INSERT INTO counting_faults (user_id, faults)
             VALUES (?, ?)
-            ON CONFLICT(user_id) DO UPDATE SET expires_at=excluded.expires_at
-            """, (str(message.author.id), expires_at))
+            ON CONFLICT(user_id) DO UPDATE SET faults=excluded.faults
+            """, (str(message.author.id), faults))
             db.commit()
             
+            # calculate timeout duration: 30s * faults
+            timeout_seconds = 30 * faults
+            if timeout_seconds > 86400: # max 1d
+                timeout_seconds = 86400
+                
+            try:
+                duration = datetime.timedelta(seconds=timeout_seconds)
+                await message.author.timeout(duration, reason="Counting mistake")
+                timeout_str = f"{timeout_seconds} seconds"
+                if timeout_seconds >= 60:
+                    timeout_str = f"{timeout_seconds // 60} minutes"
+                if timeout_seconds >= 3600:
+                    timeout_str = f"{timeout_seconds // 3600} hours"
+                if timeout_seconds == 86400:
+                    timeout_str = "1 day"
+            except discord.Forbidden:
+                timeout_str = "(Failed to mute: Missing Permissions)"
+                
             fail_embed = discord.Embed(
                 title="❌ Streak Ruined!",
-                description=f"{message.author.mention} messed up! The next number was supposed to be **{current_number}**.\n\n**{roast}**\n\n*You are blacklisted from counting for 10 minutes. The count has been reset to **1**.*",
+                description=f"{message.author.mention} messed up! The next number was supposed to be **{current_number}**.\n\n**{roast}**\n\n*You are timed out for {timeout_str}. The count has been reset to **1**.*",
                 color=discord.Color.red()
             )
             await message.channel.send(embed=fail_embed)

@@ -523,6 +523,12 @@ class SpaceXBot(commands.Bot):
             expires_at INTEGER
         )
         """)
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS counting_faults (
+            user_id TEXT PRIMARY KEY,
+            faults INTEGER DEFAULT 0
+        )
+        """)
         
         self.db.commit()
         

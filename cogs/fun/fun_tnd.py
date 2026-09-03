@@ -1,5 +1,5 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 import random
 import database
 from .tnd_data import MORE_TRUTHS, MORE_DARES
@@ -11,7 +11,7 @@ TRUTHS = [
     "What is your biggest fear?",
     "If you could be invisible for a day, what would you do?",
     "What's the worst trouble you've ever been in?",
-    "Who was your first crush?",
+    "Who was your first and last crush?",
     "What's the most childish thing you still do?",
     "What is a habit you have that you think is completely gross?",
     "What's the longest you've gone without showering?",
@@ -91,9 +91,50 @@ class TNDView(discord.ui.View):
 class FunTND(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.active_channels = set()
+        self.tnd_loop.start()
+
+    def cog_unload(self):
+        self.tnd_loop.cancel()
+
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        if message.author.bot or not message.guild:
+            return
+        
+        # Check if channel is TND enabled
+        db = database.connect()
+        cursor = db.cursor()
+        cursor.execute("SELECT is_enabled FROM tnd_config WHERE channel_id = ?", (str(message.channel.id),))
+        row = cursor.fetchone()
+        db.close()
+        
+        if row and row[0] == 1:
+            self.active_channels.add(message.channel.id)
+
+    @tasks.loop(seconds=30)
+    async def tnd_loop(self):
+        await self.bot.wait_until_ready()
+        
+        channels_to_process = list(self.active_channels)
+        self.active_channels.clear()
+        
+        for channel_id in channels_to_process:
+            channel = self.bot.get_channel(channel_id)
+            if channel:
+                embed = discord.Embed(
+                    title="Truth or Dare",
+                    description="Are you brave enough? Choose Truth or Dare by clicking the buttons below!\nBe prepared for spicy questions or wild dares! 🔥",
+                    color=discord.Color.purple()
+                )
+                embed.set_footer(text="Click a button below to get your prompt!")
+                
+                try:
+                    await channel.send(embed=embed, view=TNDView())
+                except discord.Forbidden:
+                    pass
 
     @commands.group(invoke_without_command=True)
-    @commands.has_permissions(manage_channels=True)
     async def tnd(self, ctx):
         """
         Configure Truth and Dare for a channel.
@@ -104,7 +145,6 @@ class FunTND(commands.Cog):
         await ctx.send_help(ctx.command)
 
     @tnd.command(name="on")
-    @commands.has_permissions(manage_channels=True)
     async def tnd_on(self, ctx, channel: discord.TextChannel = None):
         """Enable Truth and Dare in the specified channel."""
         channel = channel or ctx.channel
@@ -131,7 +171,6 @@ class FunTND(commands.Cog):
             await ctx.send(f"✅ Truth and Dare has been enabled in {channel.mention}.")
 
     @tnd.command(name="off")
-    @commands.has_permissions(manage_channels=True)
     async def tnd_off(self, ctx, channel: discord.TextChannel = None):
         """Disable Truth and Dare in the specified channel."""
         channel = channel or ctx.channel
