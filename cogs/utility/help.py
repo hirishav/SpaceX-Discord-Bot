@@ -988,6 +988,16 @@ class Help(commands.Cog):
             usage = f"`{prefix}joinrole @role`\n`{prefix}joinrole on/off`"
             examples = f"`{prefix}joinrole @Member`"
 
+        elif cmd.name == "ignore":
+            description = "🚫 Kisi command ya module ko specific users ya roles ke liye ignore (disable) karne ke liye."
+            usage = f"`{prefix}ignore command <name> <@user/@role>`\n`{prefix}ignore module <name> <@user/@role>`"
+            examples = f"`{prefix}ignore command afk @everyone`\n`{prefix}ignore module fun @Guest`"
+
+        elif cmd.name == "unignore":
+            description = "✅ Kisi ignore kiye gaye command ya module ko kisi specific user/role ke liye wapas allow karne ke liye."
+            usage = f"`{prefix}unignore command <name> <@user/@role>`\n`{prefix}unignore module <name> <@user/@role>`"
+            examples = f"`{prefix}unignore command afk @everyone`"
+
         cmd_embed = discord.Embed(
             title=f"✦ Command: {cmd.name.capitalize()} ✦",
             description=f"> {description}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━",

@@ -112,6 +112,9 @@ class SpaceXBot(commands.Bot):
         self.disabled_modules_channel_cache = {} # channel_id -> set of modules
         self.enabled_modules_channel_cache = {} # channel_id -> set of modules
         
+        self.ignored_commands_cache = {} # server_id -> set of (target_id, command_name)
+        self.ignored_modules_cache = {} # server_id -> set of (target_id, module_name)
+        
         self.topgg_client = None
         self.add_check(self.check_disabled_commands)
         self.tree.interaction_check = self.tree_interaction_check
@@ -160,6 +163,23 @@ class SpaceXBot(commands.Bot):
         if disabled_reason:
             return False
             
+        # Ignore checks
+        if guild_id in self.ignored_commands_cache:
+            for target_id, cmd in self.ignored_commands_cache[guild_id]:
+                if cmd == command_name:
+                    if str(interaction.user.id) == target_id:
+                        return False
+                    if hasattr(interaction.user, 'roles') and any(str(role.id) == target_id for role in interaction.user.roles):
+                        return False
+                        
+        if guild_id in self.ignored_modules_cache:
+            for target_id, mod in self.ignored_modules_cache[guild_id]:
+                if mod == module_name:
+                    if str(interaction.user.id) == target_id:
+                        return False
+                    if hasattr(interaction.user, 'roles') and any(str(role.id) == target_id for role in interaction.user.roles):
+                        return False
+                        
         return True
 
     async def check_disabled_commands(self, ctx):
@@ -198,6 +218,23 @@ class SpaceXBot(commands.Bot):
         if disabled_reason:
             return False
             
+        # Ignore checks
+        if guild_id in self.ignored_commands_cache:
+            for target_id, cmd in self.ignored_commands_cache[guild_id]:
+                if cmd == command_name:
+                    if str(ctx.author.id) == target_id:
+                        return False
+                    if hasattr(ctx.author, 'roles') and any(str(role.id) == target_id for role in ctx.author.roles):
+                        return False
+                        
+        if guild_id in self.ignored_modules_cache:
+            for target_id, mod in self.ignored_modules_cache[guild_id]:
+                if mod == module_name:
+                    if str(ctx.author.id) == target_id:
+                        return False
+                    if hasattr(ctx.author, 'roles') and any(str(role.id) == target_id for role in ctx.author.roles):
+                        return False
+                        
         return True
 
     async def post_topgg_stats(self):
@@ -470,6 +507,26 @@ class SpaceXBot(commands.Bot):
             PRIMARY KEY (channel_id, module_name)
         )
         """)
+        
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS ignored_commands_target (
+            server_id TEXT,
+            target_id TEXT,
+            is_role INTEGER,
+            command_name TEXT,
+            PRIMARY KEY (server_id, target_id, command_name)
+        )
+        """)
+        
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS ignored_modules_target (
+            server_id TEXT,
+            target_id TEXT,
+            is_role INTEGER,
+            module_name TEXT,
+            PRIMARY KEY (server_id, target_id, module_name)
+        )
+        """)
 
         # TEMPORARY ROLES TABLE
         cursor.execute("""
@@ -620,6 +677,20 @@ class SpaceXBot(commands.Bot):
             if c_id_int not in self.enabled_modules_channel_cache:
                 self.enabled_modules_channel_cache[c_id_int] = set()
             self.enabled_modules_channel_cache[c_id_int].add(mod_name)
+            
+        cursor.execute("SELECT server_id, target_id, command_name FROM ignored_commands_target")
+        for s_id, t_id, cmd_name in cursor.fetchall():
+            s_id_int = int(s_id)
+            if s_id_int not in self.ignored_commands_cache:
+                self.ignored_commands_cache[s_id_int] = set()
+            self.ignored_commands_cache[s_id_int].add((t_id, cmd_name))
+            
+        cursor.execute("SELECT server_id, target_id, module_name FROM ignored_modules_target")
+        for s_id, t_id, mod_name in cursor.fetchall():
+            s_id_int = int(s_id)
+            if s_id_int not in self.ignored_modules_cache:
+                self.ignored_modules_cache[s_id_int] = set()
+            self.ignored_modules_cache[s_id_int].add((t_id, mod_name))
 
         cursor.close()    
         print("-> Database Connected & Speed Cache Engines Synchronized!")
