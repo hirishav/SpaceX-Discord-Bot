@@ -84,12 +84,12 @@ class SpaceXBot(commands.Bot):
     def __init__(self):
         super().__init__(
             command_prefix=get_prefix,
+            help_command=None,
             intents=intents,
             owner_ids={OWNER_ID, 1061268825913438358},
             chunk_guilds_at_startup=False,
             case_insensitive=True
         )
-        self.remove_command('help')
         
         # 🔥 MAINTENANCE GLOBALS
         self.maintenance_mode = False
