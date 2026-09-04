@@ -542,6 +542,14 @@ class SpaceXBot(commands.Bot):
         )
         """)
         
+        # HIDDEN CHANNELS TABLE
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS hidden_channels (
+            channel_id TEXT PRIMARY KEY,
+            previous_view_channel TEXT
+        )
+        """)
+        
         self.db.commit()
         
         # 🧠 WARM UP CACHE ENGINE: Memory hydration on startup
