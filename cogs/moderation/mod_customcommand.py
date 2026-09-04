@@ -50,6 +50,10 @@ class ModCustomCommand(commands.Cog):
                 return await ctx.send("❌ You must mention at least one role for `add` or `remove` action.")
             roles = [role.id for role in ctx.message.role_mentions]
             
+            # Remove the role mention from the message before saving
+            for role in ctx.message.role_mentions:
+                message = message.replace(role.mention, "").strip()
+            
         cursor = self.bot.db.cursor()
         role_str = ",".join(str(r) for r in roles)
         
@@ -171,11 +175,13 @@ class ModCustomCommand(commands.Cog):
                     
                 response_text = cmd_data["response"].replace("{user}", target.mention)
                 
-                # Optionally strip out role pings from the message so the bot doesn't ping the role itself
-                # if the manager included the role in the setup message.
+                # Remove role pings from the message so the bot doesn't ping the role itself
+                # or show the @RoleName as plain text.
                 for role in roles_to_modify:
-                    response_text = response_text.replace(role.mention, f"@{role.name}")
-                    
+                    response_text = response_text.replace(role.mention, "")
+                    response_text = response_text.replace(f"@{role.name}", "")
+                response_text = " ".join(response_text.split()) # Clean up extra spaces
+                
                 await message.channel.send(response_text)
                 
             # Text only action
