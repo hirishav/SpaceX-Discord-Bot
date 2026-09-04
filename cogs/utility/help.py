@@ -818,7 +818,11 @@ class Help(commands.Cog):
             examples = f"`{prefix}delcmd rules`"
 
         elif cmd.name in ["listcmds", "cc", "custom", "commands"]:
-            description = "📋 Server me bane hue saare custom commands ki list dekhne ke liye."
+            description = (
+                "📋 Server me bane hue saare custom commands ki list dekhne ke liye.\n\n"
+                "💡 **Did you mean to create or delete a custom command?**\n"
+                f"👉 Use `{prefix}addcmd` ya `{prefix}delcmd` check karein."
+            )
             usage = f"`{prefix}listcmds`"
             examples = f"`{prefix}listcmds`"
 
@@ -898,20 +902,7 @@ class Help(commands.Cog):
             description = "👑 Owner-Only: Kisi user ke rep points hatane ya reset karne ke liye."
             usage = f"`{prefix}removerep @user <amount/all>`"
             examples = f"`{prefix}removerep @User all`"
-        elif cmd.name == "addcmd":
-            description = "⚙️ Server me naya custom command banayein. (Add roles, remove roles, ya sirf text reply ke liye)"
-            usage = f"`{prefix}addcmd <add/remove/text> <name> [@Roles if add/remove] <message>`"
-            examples = f"`{prefix}addcmd add staff @Staff Welcome {{user}}!`\n`{prefix}addcmd text rules Please read #rules.`"
 
-        elif cmd.name == "delcmd":
-            description = "🗑️ Kisi bhi custom command ko delete karne ke liye."
-            usage = f"`{prefix}delcmd <name>`"
-            examples = f"`{prefix}delcmd staff`"
-
-        elif cmd.name == "listcmds":
-            description = "📜 Server ke saare custom commands ki list dekhne ke liye."
-            usage = f"`{prefix}listcmds`"
-            examples = f"`{prefix}listcmds`"
 
         elif cmd.name == "disable":
             description = "🚫 Server ya specific channel me kisi command ya poore module (jaise economy, fun) ko band (disable) karne ke liye."
