@@ -8,8 +8,7 @@ class ModHide(commands.Cog):
     @commands.hybrid_command(name="hide")
     @commands.has_permissions(manage_channels=True)
     async def hide(self, ctx, *, target: str = None):
-        """Hide the current channel or all channels from everyone.
-        Usage: !!hide, !!hide all, !!hide off"""
+        """Channel ko sabse hide karne ke liye (!!hide, !!hide all, !!hide off)."""
         target = target.lower().strip() if target else None
 
         if target == "off":
@@ -24,8 +23,7 @@ class ModHide(commands.Cog):
     @commands.hybrid_command(name="unhide")
     @commands.has_permissions(manage_channels=True)
     async def unhide(self, ctx, *, target: str = None):
-        """Unhide the current channel or all channels.
-        Usage: !!unhide, !!unhide all"""
+        """Hidden channel ko wapas dikhane aur purani permissions restore karne ke liye."""
         target = target.lower().strip() if target else None
 
         if target == "all":
