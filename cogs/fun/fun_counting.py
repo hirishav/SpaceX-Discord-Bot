@@ -115,27 +115,22 @@ class FunCounting(commands.Cog):
             """, (str(message.author.id), faults))
             db.commit()
             
-            # calculate timeout duration: 30s * faults
-            timeout_seconds = 30 * faults
-            if timeout_seconds > 86400: # max 1d
-                timeout_seconds = 86400
-                
-            try:
-                duration = datetime.timedelta(seconds=timeout_seconds)
-                await message.author.timeout(duration, reason="Counting mistake")
-                timeout_str = f"{timeout_seconds} seconds"
-                if timeout_seconds >= 60:
-                    timeout_str = f"{timeout_seconds // 60} minutes"
-                if timeout_seconds >= 3600:
-                    timeout_str = f"{timeout_seconds // 3600} hours"
-                if timeout_seconds == 86400:
-                    timeout_str = "1 day"
-            except discord.Forbidden:
-                timeout_str = "(Failed to mute: Missing Permissions)"
+            if faults == 1:
+                punishment_str = "*Warning: First warn! No timeout this time. Count has been reset to **1**.*"
+            elif faults == 2:
+                punishment_str = "*Warning: Last warn! Next mistake will result in a timeout. Count has been reset to **1**.*"
+            else:
+                timeout_seconds = 30
+                try:
+                    duration = datetime.timedelta(seconds=timeout_seconds)
+                    await message.author.timeout(duration, reason="Counting mistake: 3rd+ fault")
+                    punishment_str = f"*You are timed out for {timeout_seconds} seconds. The count has been reset to **1**.*"
+                except discord.Forbidden:
+                    punishment_str = "*(Failed to mute: Missing Permissions). The count has been reset to **1**.*"
                 
             fail_embed = discord.Embed(
                 title="❌ Streak Ruined!",
-                description=f"{message.author.mention} messed up! The next number was supposed to be **{current_number}**.\n\n**{roast}**\n\n*You are timed out for {timeout_str}. The count has been reset to **1**.*",
+                description=f"{message.author.mention} messed up! The next number was supposed to be **{current_number}**.\n\n**{roast}**\n\n{punishment_str}",
                 color=discord.Color.red()
             )
             await message.channel.send(embed=fail_embed)
