@@ -13,23 +13,65 @@ class OwnerInfo(commands.Cog):
         github_link = "https://github.com/hirishav" # Apni profile link lagao
         
         embed = discord.Embed(
-            title="🚀 SpaceX Bot Creator Info",
-            description="Here are the public details of the developer behind SpaceX.",
-            color=discord.Color.blue()
+            title="✨ Rishav Das | The Mastermind Behind the Blocks",
+            description=(
+                "> *\"I don't just write code; I engineer digital ecosystems.\"*\n\n"
+                "Building custom Minecraft experiences end-to-end — from optimized plugins "
+                "and APIs to high-quality resource packs and complex server setups."
+            ),
+            color=0x5ea2e8 # Aesthetic Blue matching the portfolio
         )
         
-        embed.add_field(name="👑 Developer", value=owner_username, inline=True)
-        embed.add_field(name="🆔 Discord ID", value=owner_id, inline=True)
-        embed.add_field(name="🌐 GitHub", value=f"[Click Here]({github_link})", inline=True)
-        embed.add_field(name="📚 Education", value="B.Tech CSE (2025-2029)", inline=False)
-        embed.add_field(name="💬 Languages Known", value="Python, C, C++, Java", inline=False)
-        embed.add_field(name="🛠️ Skills", value="Bot Development, LLMs, AI, AI/ML", inline=False)
-        embed.add_field(name="📊 Databases Known", value="MySQL, PostgreSQL, MongoDB", inline=False)
-        embed.add_field(name="📌 Hobbies", value="Coding, Gaming, AI Research, Music", inline=False)
-        embed.add_field(name="📫 Contact", value="You can reach me via Discord DM or GitHub or mail me.", inline=False)
-        embed.add_field(name="📧 Email", value="rishavproductions@gmail.com", inline=False)
-        embed.add_field(name="🖥️ Tech Stack", value="Python (Discord.py), Hosted on Render!", inline=False)
-        embed.set_footer(text="SpaceX Official Support • Secure & Verified Application")
+        # --- ROW 1: Identity & Links ---
+        embed.add_field(
+            name="👑 Developer", 
+            value=f"**{owner_username}**\n`{owner_id}`", 
+            inline=True
+        )
+        embed.add_field(
+            name="🌐 Connections", 
+            value=f"✦ [Portfolio](https://mcdevs.netlify.app/)\n✦ [GitHub]({github_link})", 
+            inline=True
+        )
+        embed.add_field(
+            name="📫 Contact", 
+            value="✦ `phrenic_rishav`\n✦ [Email](mailto:rishavproductions@gmail.com)", 
+            inline=True
+        )
+
+        # --- ROW 2: Stats & Roles ---
+        embed.add_field(
+            name="📈 Track Record", 
+            value="> 🏆 ` 4+ ` **Years Exp.**\n> 🚀 `50+ ` **Projects**\n> 🤝 `200+` **Clients**", 
+            inline=True
+        )
+        embed.add_field(
+            name="🎯 Core Specialties", 
+            value="> ✦ Plugin Developer\n> ✦ Resource Pack Creator\n> ✦ Full Stack Engineer", 
+            inline=True
+        )
+        embed.add_field(name="\u200b", value="\u200b", inline=True) # Invisible spacer for clean 3-column layout
+
+        # --- ROW 3: Tech Stack (YAML Codeblock for aesthetic) ---
+        embed.add_field(
+            name="💻 Tech Arsenal", 
+            value=(
+                "```yaml\n"
+                "Languages  :: Java, Python, C/C++, TS/JS, HTML/CSS\n"
+                "Databases  :: MySQL, MongoDB, PostgreSQL, Redis, SQLite\n"
+                "Frameworks :: Spigot/Paper, React, Next.js, Node.js\n"
+                "Tools      :: Git, Docker, Linux, LLMs, AI Integration\n"
+                "```"
+            ),
+            inline=False
+        )
+        
+        # --- ROW 4: Academics ---
+        embed.add_field(
+            name="🎓 Academics & Interests", 
+            value="**B.Tech CSE** (2025-2029) | Coding, Gaming, AI Research, Music", 
+            inline=False
+        )
         
         # Discord avatar fetch karne ke liye (Cog format)
         try:
