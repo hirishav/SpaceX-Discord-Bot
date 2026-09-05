@@ -126,6 +126,7 @@ class SpaceXBot(commands.Bot):
         if cog_name.startswith("Mod"): return "moderation"
         if cog_name.startswith("Eco") or cog_name.startswith("Stocks"): return "economy"
         if cog_name.startswith("Fun"): return "fun"
+        if cog_name.startswith("Gif"): return "gif"
         if cog_name.startswith("Gen"): return "general"
         return "utility"
 

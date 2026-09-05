@@ -25,7 +25,7 @@ def _cfg(name: str, default: str = "") -> str:
 # isliye naya cog add karne par bas iski file "Mod_/Eco_/Fun_/Gen_/Owner_"
 # naming convention follow kare toh help menu apne aap update ho jaata hai.
 # ─────────────────────────────────────────────────────────────
-CATEGORY_ORDER = ["chat", "voice", "economy", "fun", "utility", "general", "owner"]
+CATEGORY_ORDER = ["chat", "voice", "economy", "fun", "gif", "utility", "general", "owner"]
 
 CATEGORY_META = {
     "chat": {
@@ -48,9 +48,15 @@ CATEGORY_META = {
     },
     "fun": {
         "emoji": "🎮",
-        "label": "Fun & Comedy",
+        "label": "Fun",
         "aliases": ["fun", "comedy", "meme", "memes"],
         "blurb": "Masti-mazak aur entertainment ke liye commands.",
+    },
+    "gif": {
+        "emoji": "🎞️",
+        "label": "GIF & Actions",
+        "aliases": ["gif", "gifs", "reaction", "reactions", "action", "actions"],
+        "blurb": "Dosto ke sath interact karne ke liye anime GIFs aur actions.",
     },
     "utility": {
         "emoji": "🧰",

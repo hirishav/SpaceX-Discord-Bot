@@ -3,7 +3,7 @@ import discord
 from discord.ext import commands
 import aiohttp
 
-class FunActions(commands.Cog):
+class GifActions(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.api_base = "https://nekos.life/api/v2/img/"
@@ -428,4 +428,4 @@ class FunActions(commands.Cog):
             raise error
 
 async def setup(bot):
-    await bot.add_cog(FunActions(bot))
+    await bot.add_cog(GifActions(bot))
