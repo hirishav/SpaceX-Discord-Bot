@@ -7,7 +7,7 @@ class InfluencerLeaderboard(commands.Cog):
 
     @commands.group(invoke_without_command=True, aliases=['lb', 'top'])
     async def leaderboard(self, ctx):
-        await ctx.send("🏆 Use `!top clout` or `!top cash` to see the leaderboards.")
+        await ctx.send(f"🏆 Use `{ctx.prefix}top clout` or `{ctx.prefix}top cash` to see the leaderboards.")
         
     @leaderboard.command()
     async def clout(self, ctx):
@@ -20,9 +20,9 @@ class InfluencerLeaderboard(commands.Cog):
             
         desc = ""
         for idx, (user_id, clout) in enumerate(rows, 1):
-            desc += f"**{idx}.** <@{user_id}> — 🔥 `{clout:,}` Clout\n"
+            desc += f"**{idx}.** <@{user_id}> — ⭐ `{clout:,}` Clout\n"
             
-        embed = discord.Embed(title="🔥 Global Clout Leaderboard", description=desc, color=0x2b2d31)
+        embed = discord.Embed(title="⭐ Global Clout Leaderboard", description=desc, color=0x2b2d31)
         await ctx.send(embed=embed)
         
     @leaderboard.command()
@@ -36,9 +36,9 @@ class InfluencerLeaderboard(commands.Cog):
             
         desc = ""
         for idx, (user_id, cash) in enumerate(rows, 1):
-            desc += f"**{idx}.** <@{user_id}> — 💰 `${cash:,}`\n"
+            desc += f"**{idx}.** <@{user_id}> — 💵 `💵 {cash:,}`\n"
             
-        embed = discord.Embed(title="💰 Global Cash Leaderboard", description=desc, color=0x2b2d31)
+        embed = discord.Embed(title="💵 Global Cash Leaderboard", description=desc, color=0x2b2d31)
         await ctx.send(embed=embed)
 
 async def setup(bot):

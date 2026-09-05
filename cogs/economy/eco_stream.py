@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 import random
 import time
+from cogs.economy.eco_shop import SHOP_ITEMS
 
 class InfluencerStream(commands.Cog):
     def __init__(self, bot):
@@ -25,7 +26,10 @@ class InfluencerStream(commands.Cog):
         cursor.execute("SELECT item_id FROM influencer_gear WHERE user_id = ?", (user_id,))
         gear_items = [r[0] for r in cursor.fetchall()]
         
-        multiplier = 1.0 + (len(gear_items) * 0.2) # +20% per gear item
+        multiplier = 1.0
+        for g in gear_items:
+            if g in SHOP_ITEMS:
+                multiplier += SHOP_ITEMS[g].get('multiplier', 0.0)
         
         base_cash = random.randint(100, 500)
         base_clout = random.randint(10, 50)
@@ -61,8 +65,8 @@ class InfluencerStream(commands.Cog):
         
         embed = discord.Embed(title="🔴 You went LIVE!", color=0x2b2d31)
         embed.description = f"You streamed for a few hours and gained some traction!{event_text}"
-        embed.add_field(name="Earnings", value=f"💰 `${earned_cash:,}`\n🔥 `{earned_clout:,}` Clout")
-        embed.set_footer(text=f"Multiplier: {multiplier:.1f}x (from {len(gear_items)} gear items)")
+        embed.add_field(name="Earnings", value=f"💵 `💵 {earned_cash:,}`\n⭐ `{earned_clout:,}` Clout")
+        embed.set_footer(text=f"Multiplier: {multiplier:.2f}x (from {len(gear_items)} gear items)")
         
         await ctx.send(embed=embed)
 

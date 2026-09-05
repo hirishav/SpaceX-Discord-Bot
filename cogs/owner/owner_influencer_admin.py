@@ -14,7 +14,7 @@ class InfluencerAdmin(commands.Cog):
         cursor.execute("INSERT OR IGNORE INTO influencer_stats (user_id) VALUES (?)", (str(target.id),))
         cursor.execute("UPDATE influencer_stats SET cash = cash + ? WHERE user_id = ?", (amount, str(target.id)))
         self.bot.db.commit()
-        await ctx.send(f"✅ Added `${amount:,}` to **{target.display_name}**.")
+        await ctx.send(f"✅ Added `💵 {amount:,}` to **{target.display_name}**.")
 
     @commands.command()
     async def addclout(self, ctx, target: discord.Member, amount: int):
@@ -29,7 +29,7 @@ class InfluencerAdmin(commands.Cog):
         cursor = self.bot.db.cursor()
         cursor.execute("UPDATE influencer_stats SET cash = MAX(0, cash - ?) WHERE user_id = ?", (amount, str(target.id)))
         self.bot.db.commit()
-        await ctx.send(f"✅ Removed `${amount:,}` from **{target.display_name}**.")
+        await ctx.send(f"✅ Removed `💵 {amount:,}` from **{target.display_name}**.")
         
     @commands.command()
     async def removeclout(self, ctx, target: discord.Member, amount: int):

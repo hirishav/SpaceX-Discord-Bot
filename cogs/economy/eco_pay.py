@@ -8,7 +8,7 @@ class InfluencerPay(commands.Cog):
     @commands.command(aliases=['give', 'transfer', 'donate'])
     async def pay(self, ctx, target: discord.Member = None, amount: int = None):
         if not target or not amount:
-            return await ctx.send("❌ Usage: `!pay @user <amount>`")
+            return await ctx.send(f"❌ Usage: `{ctx.prefix}pay @user <amount>`")
             
         if amount <= 0:
             return await ctx.send("❌ Amount must be greater than 0.")
@@ -28,13 +28,13 @@ class InfluencerPay(commands.Cog):
         cash = cursor.fetchone()[0]
         
         if cash < amount:
-            return await ctx.send(f"❌ You don't have enough cash. You only have `${cash:,}`.")
+            return await ctx.send(f"❌ You don't have enough cash. You only have `💵 {cash:,}`.")
             
         cursor.execute("UPDATE influencer_stats SET cash = cash - ? WHERE user_id = ?", (amount, user_id))
         cursor.execute("UPDATE influencer_stats SET cash = cash + ? WHERE user_id = ?", (amount, target_id))
         self.bot.db.commit()
         
-        await ctx.send(f"💸 **{ctx.author.display_name}** donated `${amount:,}` to **{target.display_name}**!")
+        await ctx.send(f"💸 **{ctx.author.display_name}** donated `💵 {amount:,}` to **{target.display_name}**!")
 
 async def setup(bot):
     await bot.add_cog(InfluencerPay(bot))

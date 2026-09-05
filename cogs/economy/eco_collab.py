@@ -44,8 +44,8 @@ class InfluencerCollab(commands.Cog):
         
         embed = discord.Embed(title="🤝 Epic Collab!", color=0x2b2d31)
         embed.description = f"**{ctx.author.display_name}** and **{target.display_name}** just dropped a banger collab!"
-        embed.add_field(name=f"{ctx.author.display_name} gained", value=f"🔥 `{gained_clout_user:,}` Clout")
-        embed.add_field(name=f"{target.display_name} gained", value=f"🔥 `{gained_clout_target:,}` Clout")
+        embed.add_field(name=f"{ctx.author.display_name} gained", value=f"⭐ `{gained_clout_user:,}` Clout")
+        embed.add_field(name=f"{target.display_name} gained", value=f"⭐ `{gained_clout_target:,}` Clout")
         
         await ctx.send(embed=embed)
 

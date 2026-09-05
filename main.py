@@ -10,7 +10,7 @@ import sys
 import traceback
 
 try:
-    import uvloop
+    import uvloop # type: ignore
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 except ImportError:
     pass

@@ -6,7 +6,7 @@ class ModIgnore(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.hybrid_group(name="ignore", invoke_without_command=True)
+    @commands.hybrid_group(name="ignore", fallback="help")
     @commands.has_permissions(administrator=True)
     async def ignore(self, ctx):
         """Ignore commands or modules for specific users or roles."""
@@ -71,7 +71,7 @@ class ModIgnore(commands.Cog):
         
         await ctx.send(f"✅ Ignored module `{module_name}` for {target.mention}.")
 
-    @commands.hybrid_group(name="unignore", invoke_without_command=True)
+    @commands.hybrid_group(name="unignore", fallback="help")
     @commands.has_permissions(administrator=True)
     async def unignore(self, ctx):
         """Unignore commands or modules for specific users or roles."""

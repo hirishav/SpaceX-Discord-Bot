@@ -19,21 +19,33 @@ class InfluencerSponsor(commands.Cog):
         clout = cursor.fetchone()[0]
         
         # Payout scales with clout
-        if clout < 100: 
+        if clout < 500: 
             payout = 500
             brand = "Raid Shadow Legends (Bronze Tier)"
-        elif clout < 1000:
+        elif clout < 2000:
             payout = 2000
             brand = "G-Fuel"
         elif clout < 5000:
             payout = 5000
             brand = "NordVPN"
-        elif clout < 20000:
+        elif clout < 15000:
             payout = 15000
             brand = "SeatGeek"
-        else:
-            payout = 50000
+        elif clout < 30000:
+            payout = 30000
+            brand = "Manscaped"
+        elif clout < 100000:
+            payout = 75000
+            brand = "Corsair"
+        elif clout < 500000:
+            payout = 150000
+            brand = "Intel"
+        elif clout < 2000000:
+            payout = 300000
             brand = "MrBeast Burger"
+        else:
+            payout = 1000000
+            brand = "Tesla"
             
         cursor.execute("UPDATE influencer_stats SET cash = cash + ?, last_sponsor = ? WHERE user_id = ?", 
                        (payout, int(time.time()), user_id))
@@ -41,7 +53,7 @@ class InfluencerSponsor(commands.Cog):
         
         embed = discord.Embed(title="🤝 Brand Deal Secured!", color=0x2b2d31)
         embed.description = f"**{brand}** sponsored your latest content!"
-        embed.add_field(name="Sponsorship Payout", value=f"💰 `${payout:,}`")
+        embed.add_field(name="Sponsorship Payout", value=f"💵 `💵 {payout:,}`")
         embed.set_footer(text="Earn more Clout to get better sponsors!")
         
         await ctx.send(embed=embed)

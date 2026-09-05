@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 import random
 import time
+from cogs.economy.eco_shop import SHOP_ITEMS
 
 class InfluencerVideo(commands.Cog):
     def __init__(self, bot):
@@ -25,7 +26,11 @@ class InfluencerVideo(commands.Cog):
         cursor.execute("SELECT item_id FROM influencer_gear WHERE user_id = ?", (user_id,))
         gear_items = [r[0] for r in cursor.fetchall()]
         
-        multiplier = 1.0 + (len(gear_items) * 0.3) # +30% per gear item for videos
+        multiplier = 1.0
+        for g in gear_items:
+            if g in SHOP_ITEMS:
+                # Video has slightly better scaling for gear
+                multiplier += SHOP_ITEMS[g].get('multiplier', 0.0) * 1.5
         
         base_cash = random.randint(500, 2000)
         base_clout = random.randint(50, 200)
@@ -65,8 +70,8 @@ class InfluencerVideo(commands.Cog):
         if event == "cancel":
             embed.color = 0xff0000
         
-        embed.add_field(name="Earnings", value=f"💰 `${earned_cash:,}`\n🔥 `{earned_clout:,}` Clout")
-        embed.set_footer(text=f"Multiplier: {multiplier:.1f}x (from {len(gear_items)} gear items)")
+        embed.add_field(name="Earnings", value=f"💵 `💵 {earned_cash:,}`\n⭐ `{earned_clout:,}` Clout")
+        embed.set_footer(text=f"Multiplier: {multiplier:.2f}x (from {len(gear_items)} gear items)")
         
         await ctx.send(embed=embed)
 
