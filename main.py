@@ -393,12 +393,23 @@ class SpaceXBot(commands.Bot):
         )
         """)
         
-        # GLOBAL ECONOMY TABLE
+        # INFLUENCER ECONOMY TABLES
         cursor.execute("""
-        CREATE TABLE IF NOT EXISTS economy (
+        CREATE TABLE IF NOT EXISTS influencer_stats (
             user_id TEXT PRIMARY KEY,
-            wallet INTEGER DEFAULT 0,
-            bank INTEGER DEFAULT 0
+            cash INTEGER DEFAULT 0,
+            clout INTEGER DEFAULT 0,
+            last_stream INTEGER DEFAULT 0,
+            last_video INTEGER DEFAULT 0,
+            last_sponsor INTEGER DEFAULT 0
+        )
+        """)
+        
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS influencer_gear (
+            user_id TEXT,
+            item_id TEXT,
+            PRIMARY KEY (user_id, item_id)
         )
         """)
         

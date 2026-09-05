@@ -41,10 +41,10 @@ CATEGORY_META = {
         "blurb": "Voice channels ko control karne aur members manage karne ke tools.",
     },
     "economy": {
-        "emoji": "💰",
-        "label": "Economy & Gaming",
-        "aliases": ["eco", "economy", "gaming", "casino", "money", "stocks", "stock"],
-        "blurb": "Wallet, casino games aur live stock market — sab kuch ek jagah.",
+        "emoji": "📹",
+        "label": "Creator Economy",
+        "aliases": ["eco", "economy", "creator", "influencer", "streamer", "money"],
+        "blurb": "Start your streaming career, buy gear, collab, and gain Clout!",
     },
     "fun": {
         "emoji": "🎮",
@@ -96,7 +96,7 @@ def resolve_category(cmd: commands.Command) -> str:
         return "voice"
     if cog_name.startswith("Mod"):
         return "chat"
-    if cog_name.startswith("Eco") or cog_name.startswith("Stocks"):
+    if cog_name.startswith("Eco") or cog_name.startswith("Influencer"):
         return "economy"
     if cog_name.startswith("Fun"):
         return "fun"
