@@ -100,6 +100,8 @@ def resolve_category(cmd: commands.Command) -> str:
         return "economy"
     if cog_name.startswith("Fun"):
         return "fun"
+    if cog_name.startswith("Gif"):
+        return "gif"
     if cog_name.startswith("Gen"):
         return "general"
     return "utility"  # BotInfo, Invite, ServerInfo, OwnerInfo (public), UtilAvatar, etc.
