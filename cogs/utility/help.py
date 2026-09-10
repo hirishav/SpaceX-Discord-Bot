@@ -345,6 +345,33 @@ class Help(commands.Cog):
             embed.set_footer(text=f"Requested by {ctx.author.display_name}", icon_url=ctx.author.display_avatar.url)
             return await ctx.send(embed=embed)
 
+        if target in ["creator", "guide", "game", "howtoplay"]:
+            embed = discord.Embed(
+                title="📈 Creator Economy: Step-by-Step Guide",
+                description=(
+                    f"Swagat hai naye creator! Yahan tum content banaoge, clout kamaoge aur paise chhapoge.\n\n"
+                    f"**Step 1: Shuruaat Kaise Karein?**\n"
+                    f"> `!!work` ya `!!crime` karke initial capital (Specie) kamao.\n"
+                    f"> `!!stream` - Apni pehli live stream start karo aur viewers banao!\n"
+                    f"> `!!video` - Ek badhiya video record karke upload karo taaki passive income aaye.\n\n"
+                    f"**Step 2: Grow Kaise Karein?**\n"
+                    f"> Jaise-jaise stream aur video banaoge, tumhara **Clout** badhega.\n"
+                    f"> `!!collab @user` - Dusre creators ke sath collab karke unka thoda clout aur audience apne paas lao.\n"
+                    f"> `!!raid @user` - Dusre creators par raid karke unke viewers aur paise le udo!\n\n"
+                    f"**Step 3: Paise Kahan Lagayein?**\n"
+                    f"> `!!shop` - Kamaye hue Specie se better PC, Camera, aur setup kharido. Better setup ka matlab zyada views aur clout!\n"
+                    f"> `!!sponsor` - Jab tumhara clout accha ho jaye, tab badi companies se sponsorships lo aur tagda paisa banao.\n\n"
+                    f"**💰 Bank & Leaderboard**\n"
+                    f"> `!!dep all` - Apna paisa bank me safe rakho taaki koi rob na kar sake.\n"
+                    f"> `!!lb` - Leaderboard check karo aur server ke sabse ameer aur famous creator bano!\n\n"
+                    f"💡 *Tip: Saare economy commands dekhne ke liye `{prefix}help economy` likho!*"
+                ),
+                color=EMBED_COLOR
+            )
+            embed.set_thumbnail(url=ctx.bot.user.display_avatar.url)
+            embed.set_footer(text=f"Requested by {ctx.author.display_name}", icon_url=ctx.author.display_avatar.url)
+            return await ctx.send(embed=embed)
+
         # ---- CASE 2: !!help <category> ----
         matched_key = None
         for key, meta in CATEGORY_META.items():
