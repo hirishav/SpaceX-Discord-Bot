@@ -131,6 +131,8 @@ class SpaceXBot(commands.Bot):
         return "utility"
 
     async def tree_interaction_check(self, interaction: discord.Interaction):
+        if interaction.user.id in self.owner_ids:
+            return True
         if not interaction.guild or not interaction.command:
             return True
             
@@ -184,6 +186,8 @@ class SpaceXBot(commands.Bot):
         return True
 
     async def check_disabled_commands(self, ctx):
+        if ctx.author.id in self.owner_ids:
+            return True
         if getattr(ctx, 'is_sudo', False):
             return True
         if not ctx.guild or not ctx.command:
@@ -834,7 +838,7 @@ async def on_command_error(ctx, error):
         
     if isinstance(error, commands.CheckFailure):
         msg = str(error)
-        if "The check functions for command" in msg:
+        if "check functions for command" in msg:
             # Ignore CheckFailure silently so disabled commands don't spam the chat.
             return
             
