@@ -88,6 +88,7 @@ class ModLogsSetup(commands.Cog):
         )
         embed.set_author(name=message.author.name, icon_url=message.author.display_avatar.url)
         
+        files = []
         if message.attachments:
             # Join attachment URLs
             attachment_names = "\n".join([f"📎 [{att.filename}]({att.url})" for att in message.attachments])
@@ -96,13 +97,27 @@ class ModLogsSetup(commands.Cog):
                 attachment_names = attachment_names[:1000] + "..."
             embed.add_field(name="Attachments", value=attachment_names, inline=False)
             
+            for att in message.attachments:
+                if att.size < 8 * 1024 * 1024:  # Only attempt to download if less than 8MB
+                    try:
+                        file = await att.to_file(use_cached=True)
+                        files.append(file)
+                    except Exception as e:
+                        print(f"Failed to download attachment for log: {e}")
+            
+            # Show first image in embed if available
+            if files:
+                first_image = next((f for f in files if f.filename.lower().endswith(('png', 'jpg', 'jpeg', 'gif', 'webp'))), None)
+                if first_image:
+                    embed.set_image(url=f"attachment://{first_image.filename}")
+            
         if message.embeds:
             embed.add_field(name="Embeds", value=f"Message contained {len(message.embeds)} embed(s).", inline=False)
             
         embed.add_field(name="Channel", value=message.channel.mention)
         embed.set_footer(text=f"User ID: {message.author.id} | Message ID: {message.id}")
         
-        await send_mod_log(self.bot, message.guild, "msg_delete", embed)
+        await send_mod_log(self.bot, message.guild, "msg_delete", embed, files=files if files else None)
 
     @commands.Cog.listener()
     async def on_message_edit(self, before, after):
@@ -114,6 +129,10 @@ class ModLogsSetup(commands.Cog):
         embeds_changed = len(before.embeds) != len(after.embeds)
         
         if not (content_changed or attachments_changed or embeds_changed):
+            return
+            
+        # Ignore if only embeds changed (e.g., link unfurling or auto-embed) to avoid spam
+        if embeds_changed and not (content_changed or attachments_changed):
             return
             
         embed = discord.Embed(

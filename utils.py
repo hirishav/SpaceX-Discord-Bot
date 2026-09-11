@@ -3,7 +3,7 @@ import discord
 from discord.ext import commands
 import database as sqlite3
 
-async def send_mod_log(bot, guild, log_type, embed):
+async def send_mod_log(bot, guild, log_type, embed, files=None):
     """
     Helper function to send a log embed to the configured channel for a specific log type.
     Valid log_types: 'mod', 'msg_delete', 'msg_edit'
@@ -19,7 +19,10 @@ async def send_mod_log(bot, guild, log_type, embed):
             channel_id = int(row[0])
             channel = guild.get_channel(channel_id)
             if channel:
-                await channel.send(embed=embed)
+                kwargs = {'embed': embed}
+                if files:
+                    kwargs['files'] = files
+                await channel.send(**kwargs)
     except Exception as e:
         print(f"Error sending mod log: {e}")
 
