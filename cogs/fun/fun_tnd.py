@@ -25,21 +25,21 @@ TRUTHS = [
 TRUTHS.extend(MORE_TRUTHS)
 
 DARES = [
-    "Send a voice message of you singing the chorus of your favorite song.",
-    "Type a message using only your nose.",
-    "Send the most embarrassing photo in your camera roll.",
-    "Change your Discord nickname to something silly for the next 10 minutes.",
-    "Write a 3-line poem about the server owner.",
-    "Send a message to your crush saying 'I love you' (or a friend if you don't have one).",
-    "Act like a dog for your next 3 messages.",
-    "Post a selfie with a funny face.",
-    "Confess something embarrassing you did today.",
-    "Give a random server member a compliment.",
-    "Speak in Shakespearean English for the next 5 minutes.",
-    "Spam 5 random emojis in the chat.",
-    "Tell a joke. If no one laughs, you have to do another dare.",
-    "Send your most recently used emoji 10 times.",
-    "Change your profile picture to a meme for the rest of the day."
+    "Join a Voice Channel, turn on your camera, and make a funny face for 10 seconds.",
+    "Screen share and show us your YouTube homepage recommendations.",
+    "Send a voice message singing the 'Happy Birthday' song to a random server member.",
+    "Change your Discord nickname to 'Discord Kitten' for the next hour.",
+    "Turn on your camera in a Voice Channel and balance a spoon on your nose.",
+    "Screen share your Discord DMs list (without opening any messages!).",
+    "Join a VC and whisper everything you say for the next 5 minutes.",
+    "Send a selfie in the chat with the weirdest object in your room right now.",
+    "Screen share and type out a random Wikipedia article for 1 minute.",
+    "Turn on your camera in VC and do 10 jumping jacks while counting loudly.",
+    "Change your profile picture to the oldest photo in your gallery for 24 hours.",
+    "Join a VC and speak with a fake British accent for the next 5 minutes.",
+    "Send a voice message in chat barking like a dog.",
+    "Screen share your Google search history from the past 24 hours.",
+    "Go to the general chat and type 'I am a certified clown 🤡'."
 ]
 
 DARES.extend(MORE_DARES)

@@ -16,8 +16,8 @@ class InfluencerProfile(commands.Cog):
         if clout < 2000000: return ("Mega Star (500K-2M ⭐)", "🛑 Custom Creator Award")
         return ("God of the Internet (2M+ ⭐)", "🔴 Red Diamond Playbutton")
 
-    @commands.command(aliases=['profile', 'bal', 'balance', 'stats'])
-    async def influencer(self, ctx, member: discord.Member = None):
+    @commands.command(name="bal", aliases=['profile', 'balance', 'stats', 'influencer'])
+    async def bal(self, ctx, member: discord.Member = None):
         member = member or ctx.author
         cursor = self.bot.db.cursor()
         

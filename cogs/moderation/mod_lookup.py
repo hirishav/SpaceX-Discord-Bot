@@ -13,10 +13,12 @@ class ModLookup(commands.Cog):
         member = member or ctx.author
 
         # Gather clean sorting layout for safety perms checking
+        ordered_perms = ["administrator", "manage_guild", "manage_roles", "ban_members", "kick_members"]
         dangerous_perms = []
-        for perm, value in member.guild_permissions:
-            if value and perm in ["administrator", "manage_guild", "manage_roles", "ban_members", "kick_members"]:
-                dangerous_perms.append(perm.replace('_', ' ').title())
+        for perm in ordered_perms:
+            if getattr(member.guild_permissions, perm, False):
+                display_name = perm.replace('_', ' ').title().replace('Guild', 'Server')
+                dangerous_perms.append(display_name)
 
         roles = [role.mention for role in member.roles[1:]] # Skip @everyone
         roles.reverse() # High to low positioning order array
