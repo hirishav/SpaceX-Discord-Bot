@@ -24,6 +24,7 @@ class FunCounting(commands.Cog):
         self.bot = bot
 
     @commands.command()
+    @commands.has_permissions(administrator=True)
     async def counting(self, ctx, channel: discord.TextChannel = None):
         """
         Set up a counting channel.
@@ -61,6 +62,26 @@ class FunCounting(commands.Cog):
         cursor = db.cursor()
         cursor.execute("SELECT current_number, channel_id FROM counting_config WHERE server_id = ?", (str(ctx.guild.id),))
         row = cursor.fetchone()
+        
+        # Fallback if server_id is missing or incorrect due to legacy data
+        if not row:
+            cursor.execute("SELECT current_number, channel_id FROM counting_config WHERE channel_id = ?", (str(ctx.channel.id),))
+            row = cursor.fetchone()
+            if row:
+                cursor.execute("UPDATE counting_config SET server_id = ? WHERE channel_id = ?", (str(ctx.guild.id), str(ctx.channel.id)))
+                db.commit()
+                
+        # Second fallback: check all text channels in guild
+        if not row:
+            channel_ids = [str(c.id) for c in ctx.guild.text_channels]
+            cursor.execute("SELECT current_number, channel_id FROM counting_config WHERE server_id IS NULL OR server_id = ''")
+            for num, cid in cursor.fetchall():
+                if cid in channel_ids:
+                    row = (num, cid)
+                    cursor.execute("UPDATE counting_config SET server_id = ? WHERE channel_id = ?", (str(ctx.guild.id), cid))
+                    db.commit()
+                    break
+
         db.close()
         
         if row:
