@@ -277,7 +277,7 @@ class SpaceXBot(commands.Bot):
         await self.wait_until_ready()
         await self.post_topgg_stats()
 
-    @tasks.loop(minutes=60)
+    @tasks.loop(minutes=30)
     async def backup_db_task(self):
         await self.wait_until_ready()
         if not BACKUP_CHANNEL_ID:
@@ -402,12 +402,26 @@ class SpaceXBot(commands.Bot):
         CREATE TABLE IF NOT EXISTS influencer_stats (
             user_id TEXT PRIMARY KEY,
             cash INTEGER DEFAULT 0,
+            bank INTEGER DEFAULT 0,
             clout INTEGER DEFAULT 0,
             last_stream INTEGER DEFAULT 0,
             last_video INTEGER DEFAULT 0,
-            last_sponsor INTEGER DEFAULT 0
+            last_sponsor INTEGER DEFAULT 0,
+            last_weekly INTEGER DEFAULT 0
         )
         """)
+        
+        # Safely attempt to add bank and last_weekly if table already exists
+        try:
+            cursor.execute("ALTER TABLE influencer_stats ADD COLUMN bank INTEGER DEFAULT 0")
+        except Exception:
+            pass
+            
+        try:
+            cursor.execute("ALTER TABLE influencer_stats ADD COLUMN last_weekly INTEGER DEFAULT 0")
+        except Exception:
+            pass
+
         
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS influencer_gear (
@@ -724,7 +738,7 @@ class SpaceXBot(commands.Bot):
         # 🚀 START BACKUP TASK
         if BACKUP_CHANNEL_ID:
             self.backup_db_task.start()
-            print("-> DB Cloud Backup task started (60m interval)!")
+            print("-> DB Cloud Backup task started (30m interval)!")
 
         print('Modules load ho rahe hain...')
         if os.path.exists('./cogs'):

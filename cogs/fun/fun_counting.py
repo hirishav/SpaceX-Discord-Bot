@@ -51,6 +51,23 @@ class FunCounting(commands.Cog):
         if channel != ctx.channel:
             await ctx.send(f"✅ Counting game setup successfully in {channel.mention}.")
 
+    @commands.command()
+    async def seecounting(self, ctx):
+        """
+        Shows the current counting number for the server.
+        Usage: `!!seecounting`
+        """
+        db = database.connect()
+        cursor = db.cursor()
+        cursor.execute("SELECT current_number, channel_id FROM counting_config WHERE server_id = ?", (str(ctx.guild.id),))
+        row = cursor.fetchone()
+        db.close()
+        
+        if row:
+            await ctx.send(f"The next number to count in <#{row[1]}> is **{row[0]}**")
+        else:
+            await ctx.send("Counting is not set up in this server.")
+
     @commands.Cog.listener()
     async def on_message(self, message):
         if message.author.bot:
@@ -75,10 +92,14 @@ class FunCounting(commands.Cog):
         
         # Try to parse number
         is_valid = False
+        is_double_count = False
         try:
             num = int(content)
-            if num == current_number and str(message.author.id) != last_user_id:
-                is_valid = True
+            if num == current_number:
+                if str(message.author.id) != last_user_id:
+                    is_valid = True
+                else:
+                    is_double_count = True
         except ValueError:
             is_valid = False
 
@@ -94,7 +115,10 @@ class FunCounting(commands.Cog):
         else:
             # Failure
             await message.add_reaction("❌")
-            roast = random.choice(ROASTS)
+            if is_double_count:
+                roast = "You cannot count one after another! 🚫"
+            else:
+                roast = random.choice(ROASTS)
             
             # Reset counter
             cursor.execute("""

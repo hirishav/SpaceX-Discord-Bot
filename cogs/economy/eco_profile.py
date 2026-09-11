@@ -21,14 +21,14 @@ class InfluencerProfile(commands.Cog):
         member = member or ctx.author
         cursor = self.bot.db.cursor()
         
-        cursor.execute("SELECT cash, clout, last_stream, last_video FROM influencer_stats WHERE user_id = ?", (str(member.id),))
+        cursor.execute("SELECT cash, bank, clout, last_stream, last_video FROM influencer_stats WHERE user_id = ?", (str(member.id),))
         row = cursor.fetchone()
         
         if not row:
             # First time user
-            cash, clout = 0, 0
+            cash, bank, clout = 0, 0, 0
         else:
-            cash, clout, _, _ = row
+            cash, bank, clout, _, _ = row
             
         # Get gear count
         cursor.execute("SELECT COUNT(*) FROM influencer_gear WHERE user_id = ?", (str(member.id),))
@@ -40,6 +40,7 @@ class InfluencerProfile(commands.Cog):
         embed = discord.Embed(title=f"👤 {member.display_name}'s Profile", color=0x2b2d31)
         embed.set_thumbnail(url=member.display_avatar.url)
         embed.add_field(name="💵 Cash", value=f"`💵 {cash:,}`", inline=True)
+        embed.add_field(name="🏦 Bank", value=f"`🏦 {bank:,}`", inline=True)
         embed.add_field(name="⭐ Clout", value=f"`{clout:,}`", inline=True)
         embed.add_field(name="📈 Influencer Tier", value=f"`{tier}`", inline=False)
         if playbutton:

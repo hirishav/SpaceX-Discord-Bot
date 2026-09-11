@@ -22,7 +22,10 @@ class FunMatch(commands.Cog):
                 "💖 Laila Majnu fail hain inke aage! Kya bond hai bhai.",
                 "💍 Seedha shaadi ka card chhapwao, perfect match hai!",
                 "🔥 Aag laga denge dono milke! Ekdum top class compatibility.",
-                "✨ Inka alag hi parallel universe chal raha hai. Best duo!"
+                "✨ Inka alag hi parallel universe chal raha hai. Best duo!",
+                "🚀 Ye jodi sidha chaand pe jayegi! Best match ever.",
+                "💘 Cupid ka teer ekdum nishaane par laga hai!",
+                "⭐ Bollywood movie jaisi chemistry hai tum dono ki!"
             ]
         elif score > 50:
             comments = [
@@ -30,7 +33,10 @@ class FunMatch(commands.Cog):
                 "👍 Thik-thak hai, thodi aur mehnat ki zarurat hai dono ko.",
                 "⚖️ 50-50 chance hai, ya toh best friends banenge ya dushman.",
                 "👀 Dosti gehri hai, par peeth pichhe chugli chalu rehti hai.",
-                "🤔 Thoda complicated rishta hai, aage bhagwan hi maalik hai."
+                "🤔 Thoda complicated rishta hai, aage bhagwan hi maalik hai.",
+                "🙃 Friendship achhi hai but kabhi kabhi dimaag kharab kar dete ho ek dusre ka.",
+                "🤷‍♂️ Na completely pass, na completely fail. Beech ka rasta chal raha hai.",
+                "😅 Baat chit sahi hai, bas jyada ladhna mat yaar!"
             ]
         else:
             comments = [
@@ -38,7 +44,10 @@ class FunMatch(commands.Cog):
                 "💀 Ek minute ek kamre me nahi reh sakte dono, WW3 ho jayega.",
                 "🐍 Aasteen ke saanp hain dono ek dusre ke liye. Dur raho!",
                 "🚫 Ye rishta kya kehlata hai? Toxic! Ekdum toxic!",
-                "🤡 Dono ek dusre ko pagal kar denge, isse accha akele raho."
+                "🤡 Dono ek dusre ko pagal kar denge, isse accha akele raho.",
+                "😹 Tom and Jerry bhi inse accha bartaav karte hain!",
+                "🤦‍♂️ Bhagwan bachaye in dono ko ek sath dekh kar.",
+                "🧊 Cold war se kam thodi na hai tumhari ye dosti."
             ]
             
         comment = random.choice(comments)
