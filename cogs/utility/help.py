@@ -372,6 +372,30 @@ class Help(commands.Cog):
             embed.set_footer(text=f"Requested by {ctx.author.display_name}", icon_url=ctx.author.display_avatar.url)
             return await ctx.send(embed=embed)
 
+        if target in ["logs", "log", "logging", "logsetup"]:
+            embed = discord.Embed(
+                title="⚙️ Advanced Server Logging System",
+                description=(
+                    f"Server me har ek delete hua message, edit hua message aur moderation actions track karne ke liye logs setup karein!\n\n"
+                    f"**Kaise Set Karein?**\n"
+                    f"> `{prefix}logset <type> <#channel>` command use karke specific logs ke liye channel set karein.\n"
+                    f"> *Example: `{prefix}logset msg_delete #deleted-messages`*\n\n"
+                    f"**Available Log Types:**\n"
+                    f"> 🔹 `mod` - Moderation actions (ban, kick, mute, warn, etc.)\n"
+                    f"> 🔹 `msg_delete` - Jab koi message delete kare\n"
+                    f"> 🔹 `msg_edit` - Jab koi message edit kare\n\n"
+                    f"**Log Commands:**\n"
+                    f"> `{prefix}logset <type> <#channel>` - Naya log channel set karein.\n"
+                    f"> `{prefix}logremove <type>` - Kisi specific log type ko disable karein.\n"
+                    f"> `{prefix}logconfig` - Server me configured saare log channels check karein.\n\n"
+                    f"💡 *Tip: Saare moderation commands dekhne ke liye `{prefix}help chat` likho!*"
+                ),
+                color=EMBED_COLOR
+            )
+            embed.set_thumbnail(url=ctx.bot.user.display_avatar.url)
+            embed.set_footer(text=f"Requested by {ctx.author.display_name}", icon_url=ctx.author.display_avatar.url)
+            return await ctx.send(embed=embed)
+
         # ---- CASE 2: !!help <category> ----
         matched_key = None
         for key, meta in CATEGORY_META.items():
@@ -569,6 +593,21 @@ class Help(commands.Cog):
             description = "📢 Bot ke zariye chat me apni marzi ka message thukwane ke liye."
             usage = f"`{prefix}say <message>`"
             examples = f"`{prefix}say Hello Guys`"
+
+        elif cmd.name == "logset":
+            description = "⚙️ Server me specific type ke logs (jaise deleted messages, moderation actions) bhejne ke liye channel set karein."
+            usage = f"`{prefix}logset <log_type> <#channel>`\nValid types: `mod`, `msg_delete`, `msg_edit`"
+            examples = f"`{prefix}logset msg_delete #deleted-messages`\n`{prefix}logset mod #mod-logs`"
+
+        elif cmd.name == "logremove":
+            description = "🚫 Kisi specific log type ki tracking aur channel configuration band (disable) karne ke liye."
+            usage = f"`{prefix}logremove <log_type>`"
+            examples = f"`{prefix}logremove msg_edit`"
+
+        elif cmd.name == "logconfig":
+            description = "📊 Server me abhi kaun-kaun se logs enable hain aur kis channel me jaa rahe hain, iski saari details check karein."
+            usage = f"`{prefix}logconfig`"
+            examples = f"`{prefix}logconfig`"
 
         elif cmd.name == "modlogs":
             description = "📊 Server me kisi user ke upar chalaaye gaye saare mod action stats aur history ki details."
