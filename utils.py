@@ -1,6 +1,27 @@
 import re
 import discord
 from discord.ext import commands
+import database as sqlite3
+
+async def send_mod_log(bot, guild, log_type, embed):
+    """
+    Helper function to send a log embed to the configured channel for a specific log type.
+    Valid log_types: 'mod', 'msg_delete', 'msg_edit'
+    """
+    try:
+        conn = sqlite3.connect("warnings.db")
+        cursor = conn.cursor()
+        cursor.execute("SELECT channel_id FROM log_channels WHERE server_id = ? AND log_type = ?", (str(guild.id), log_type))
+        row = cursor.fetchone()
+        conn.close()
+        
+        if row:
+            channel_id = int(row[0])
+            channel = guild.get_channel(channel_id)
+            if channel:
+                await channel.send(embed=embed)
+    except Exception as e:
+        print(f"Error sending mod log: {e}")
 
 class SmartRoleConverter(commands.Converter):
     async def convert(self, ctx: commands.Context, argument: str) -> discord.Role:

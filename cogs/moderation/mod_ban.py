@@ -1,6 +1,7 @@
 # cogs/mod_ban.py
 import discord
 from discord.ext import commands
+from utils import send_mod_log
 
 class ModBan(commands.Cog):
     def __init__(self, bot):
@@ -43,6 +44,8 @@ class ModBan(commands.Cog):
             embed.add_field(name="🛡️ Staff", value=ctx.author.mention, inline=True)
             embed.add_field(name="📝 Reason", value=reason, inline=False)
             await ctx.send(embed=embed)
+            
+            await send_mod_log(self.bot, ctx.guild, "mod", embed)
 
             try:
                 await ctx.message.delete()
@@ -86,6 +89,9 @@ class ModBan(commands.Cog):
             embed.add_field(name="🛡️ Staff", value=ctx.author.mention, inline=True)
             embed.add_field(name="📝 Reason", value=reason, inline=False)
             await ctx.send(embed=embed)
+            
+            await send_mod_log(self.bot, ctx.guild, "mod", embed)
+            
         except discord.Forbidden:
             await ctx.send("❌ Main is user ko ban nahi kar sakta! Kripya permissions check karein.")
 

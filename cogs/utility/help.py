@@ -1024,6 +1024,26 @@ class Help(commands.Cog):
             usage = f"`{prefix}unignore command <name> <@user/@role>`\n`{prefix}unignore module <name> <@user/@role>`\n👉 Hint: `{prefix}allow` bhi use kar sakte ho!"
             examples = f"`{prefix}allow command afk @everyone`"
 
+        elif cmd.name == "seesay":
+            description = "🛡️ Server Managers: Server mein members dwara use kiye gaye 'say' command ki history dekhne ke liye."
+            usage = f"`{prefix}seesay [limit]`"
+            examples = f"`{prefix}seesay 15`"
+
+        elif cmd.name == "logset":
+            description = "⚙️ Server me specific log events (mod, msg_delete, msg_edit) ke liye log channel set karne ke liye."
+            usage = f"`{prefix}logset <log_type> <#channel>`"
+            examples = f"`{prefix}logset mod #mod-logs`"
+
+        elif cmd.name == "logremove":
+            description = "⚙️ Server se specific log event ka configuration hatane ke liye."
+            usage = f"`{prefix}logremove <log_type>`"
+            examples = f"`{prefix}logremove msg_delete`"
+
+        elif cmd.name == "logconfig":
+            description = "📊 Server me set kiye gaye saare active log channels ki configuration dekhne ke liye."
+            usage = f"`{prefix}logconfig`"
+            examples = f"`{prefix}logconfig`"
+
         cmd_embed = discord.Embed(
             title=f"✦ Command: {cmd.name.capitalize()} ✦",
             description=f"> {description}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━",

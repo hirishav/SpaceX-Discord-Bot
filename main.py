@@ -637,6 +637,28 @@ class SpaceXBot(commands.Bot):
         )
         """)
         
+        # SAY COMMAND LOGS TABLE
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS say_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            server_id TEXT,
+            user_id TEXT,
+            username TEXT,
+            message TEXT,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+        """)
+        
+        # LOG CHANNELS TABLE
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS log_channels (
+            server_id TEXT,
+            log_type TEXT,
+            channel_id TEXT,
+            PRIMARY KEY (server_id, log_type)
+        )
+        """)
+        
         self.db.commit()
         
         # 🧠 WARM UP CACHE ENGINE: Memory hydration on startup

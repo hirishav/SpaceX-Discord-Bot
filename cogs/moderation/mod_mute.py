@@ -4,6 +4,7 @@ from discord.ext import commands
 import datetime
 import re
 import asyncio
+from utils import send_mod_log
 
 class ModMute(commands.Cog):
     def __init__(self, bot):
@@ -61,6 +62,8 @@ class ModMute(commands.Cog):
             
             # Chat me instant reply jayega ab bina kisi delay ke
             await ctx.send(embed=embed)
+            
+            await send_mod_log(self.bot, ctx.guild, "mod", embed)
 
             # Command message delete karne ka try
             try:

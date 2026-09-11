@@ -1,6 +1,7 @@
 # cogs/mod_kick.py
 import discord
 from discord.ext import commands
+from utils import send_mod_log
 
 class ModKick(commands.Cog):
     def __init__(self, bot):
@@ -36,6 +37,8 @@ class ModKick(commands.Cog):
             embed.add_field(name="🛡️ Staff", value=ctx.author.mention, inline=True)
             embed.add_field(name="📝 Reason", value=reason, inline=False)
             await ctx.send(embed=embed)
+            
+            await send_mod_log(self.bot, ctx.guild, "mod", embed)
 
             try:
                 await ctx.message.delete()

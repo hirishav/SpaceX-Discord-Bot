@@ -1,77 +1,144 @@
-# cogs/mod_logs.py
+# cogs/moderation/mod_logs.py
 import discord
 from discord.ext import commands
 import database as sqlite3
+from utils import send_mod_log
 
-class ModLogs(commands.Cog):
+class ModLogsSetup(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.db_path = "warnings.db"
+        self.db_name = "warnings.db"
+        self.valid_log_types = ["mod", "msg_delete", "msg_edit"]
 
-    async def fetch_user_id(self, ctx, user_str):
+    @commands.hybrid_command(name="logset")
+    @commands.has_permissions(manage_guild=True)
+    async def logset(self, ctx, log_type: str, channel: discord.TextChannel):
+        """Set a channel for a specific log type (mod, msg_delete, msg_edit)."""
+        log_type = log_type.lower()
+        if log_type not in self.valid_log_types:
+            return await ctx.send(f"❌ Invalid log type! Valid types are: `{', '.join(self.valid_log_types)}`")
+            
         try:
-            member = await commands.MemberConverter().convert(ctx, user_str)
-            return str(member.id), member.name
-        except Exception:
-            try:
-                user = await self.bot.fetch_user(int(user_str))
-                return str(user.id), user.name
-            except Exception:
-                return None, None
+            conn = sqlite3.connect(self.db_name)
+            cursor = conn.cursor()
+            cursor.execute(
+                "INSERT OR REPLACE INTO log_channels (server_id, log_type, channel_id) VALUES (?, ?, ?)",
+                (str(ctx.guild.id), log_type, str(channel.id))
+            )
+            conn.commit()
+            conn.close()
+            await ctx.send(f"✅ Successfully set `{log_type}` logs to {channel.mention}.")
+        except Exception as e:
+            await ctx.send(f"❌ Database error: {e}")
 
-    @commands.hybrid_command(name="modlogs", aliases=["logs"])
-    @commands.has_permissions(manage_messages=True)
-    async def modlogs(self, ctx, user_str: str = None):
-        """Kisi user ke saare moderation history/stats dekhne ke liye."""
-        if not user_str:
-            return await ctx.send(f"❌ Sahi format: `{ctx.prefix}modlogs @user/ID`")
+    @commands.hybrid_command(name="logremove")
+    @commands.has_permissions(manage_guild=True)
+    async def logremove(self, ctx, log_type: str):
+        """Remove the log channel configuration for a specific log type."""
+        log_type = log_type.lower()
+        if log_type not in self.valid_log_types:
+            return await ctx.send(f"❌ Invalid log type! Valid types are: `{', '.join(self.valid_log_types)}`")
+            
+        try:
+            conn = sqlite3.connect(self.db_name)
+            cursor = conn.cursor()
+            cursor.execute(
+                "DELETE FROM log_channels WHERE server_id = ? AND log_type = ?",
+                (str(ctx.guild.id), log_type)
+            )
+            conn.commit()
+            conn.close()
+            await ctx.send(f"✅ Successfully disabled `{log_type}` logs.")
+        except Exception as e:
+            await ctx.send(f"❌ Database error: {e}")
 
-        user_id, username = await self.fetch_user_id(ctx, user_str)
-        if not user_id:
-            return await ctx.send("❌ Sahi user tag karo ya valid ID daalo bhai!")
+    @commands.hybrid_command(name="logconfig")
+    @commands.has_permissions(manage_guild=True)
+    async def logconfig(self, ctx):
+        """View the current log channels configuration."""
+        try:
+            conn = sqlite3.connect(self.db_name)
+            cursor = conn.cursor()
+            cursor.execute("SELECT log_type, channel_id FROM log_channels WHERE server_id = ?", (str(ctx.guild.id),))
+            rows = cursor.fetchall()
+            conn.close()
+            
+            if not rows:
+                return await ctx.send("ℹ️ No log channels are currently configured for this server.")
+                
+            embed = discord.Embed(title="⚙️ Log Channels Configuration", color=discord.Color.blue())
+            for log_type, channel_id in rows:
+                channel = ctx.guild.get_channel(int(channel_id))
+                channel_mention = channel.mention if channel else f"Unknown Channel ({channel_id})"
+                embed.add_field(name=log_type, value=channel_mention, inline=False)
+                
+            await ctx.send(embed=embed)
+        except Exception as e:
+            await ctx.send(f"❌ Database error: {e}")
 
-        await ctx.send(f"📊 **{username}** ki history dhoondh raha hoon...")
-
-        conn = sqlite3.connect(self.db_path)
-        cursor = conn.cursor()
-
-        # 1. Fetch data from central mod_logs
-        cursor.execute("SELECT action, moderator_id, reason, timestamp FROM mod_logs WHERE server_id = ? AND user_id = ? ORDER BY timestamp DESC", (str(ctx.guild.id), user_id))
-        logs = cursor.fetchall()
-
-        # 2. Fetch data from legacy warnings table (for backward compatibility)
-        cursor.execute("SELECT id, reason, timestamp FROM warnings WHERE server_id = ? AND user_id = ? ORDER BY timestamp DESC", (str(ctx.guild.id), user_id))
-        legacy_warns = cursor.fetchall()
+    @commands.Cog.listener()
+    async def on_message_delete(self, message):
+        if message.author.bot or not message.guild:
+            return
+            
+        embed = discord.Embed(
+            title="🗑️ Message Deleted",
+            description=message.content if message.content else "*No text content*",
+            color=discord.Color.red()
+        )
+        embed.set_author(name=message.author.name, icon_url=message.author.display_avatar.url)
         
-        conn.close()
-
-        # Formatting Logs
-        embed = discord.Embed(title=f"🛡️ Moderation History: {username}", color=discord.Color.red())
-        embed.set_footer(text=f"User ID: {user_id} • SpaceX Moderation")
-
-        log_text = ""
+        if message.attachments:
+            # Join attachment URLs
+            attachment_names = "\n".join([f"📎 [{att.filename}]({att.url})" for att in message.attachments])
+            # Embed fields have a 1024 char limit
+            if len(attachment_names) > 1000:
+                attachment_names = attachment_names[:1000] + "..."
+            embed.add_field(name="Attachments", value=attachment_names, inline=False)
+            
+        if message.embeds:
+            embed.add_field(name="Embeds", value=f"Message contained {len(message.embeds)} embed(s).", inline=False)
+            
+        embed.add_field(name="Channel", value=message.channel.mention)
+        embed.set_footer(text=f"User ID: {message.author.id} | Message ID: {message.id}")
         
-        # Central logs add karein
-        if logs:
-            for action, mod_id, reason, ts in logs:
-                log_text += f"➡️ **[{action.upper()}]** \n⏰ *{ts}* | Staff: <@{mod_id}>\n📝 Reason: `{reason}`\n\n"
+        await send_mod_log(self.bot, message.guild, "msg_delete", embed)
 
-        # Legacy warnings add karein (agar mod_logs me abhi tak entries nahi hui hain)
-        if legacy_warns:
-            log_text += "⚠️ **[ACTIVE WARNINGS]**\n"
-            for w_id, reason, ts in legacy_warns:
-                log_text += f"🆔 ID: `{w_id}` | ⏰ *{ts}*\n📝 Reason: `{reason}`\n\n"
-
-        if not log_text:
-            embed.description = "✅ Is user ka koi purana moderation record nahi mila. Ekdum sharif banda hai!"
-            embed.color = discord.Color.green()
-        else:
-            # Discord limit handle karne ke liye slicing
-            if len(log_text) > 4000:
-                log_text = log_text[:3900] + "\n...Logs bohot lambe hain!"
-            embed.description = log_text
-
-        await ctx.send(embed=embed)
+    @commands.Cog.listener()
+    async def on_message_edit(self, before, after):
+        if before.author.bot or not before.guild:
+            return
+            
+        content_changed = before.content != after.content
+        attachments_changed = len(before.attachments) != len(after.attachments)
+        embeds_changed = len(before.embeds) != len(after.embeds)
+        
+        if not (content_changed or attachments_changed or embeds_changed):
+            return
+            
+        embed = discord.Embed(
+            title="✏️ Message Edited",
+            url=after.jump_url,
+            color=discord.Color.orange()
+        )
+        embed.set_author(name=before.author.name, icon_url=before.author.display_avatar.url)
+        
+        if content_changed:
+            before_content = before.content[:1000] + "..." if len(before.content) > 1000 else before.content
+            after_content = after.content[:1000] + "..." if len(after.content) > 1000 else after.content
+            embed.add_field(name="Before", value=before_content or "*Empty*", inline=False)
+            embed.add_field(name="After", value=after_content or "*Empty*", inline=False)
+            
+        if attachments_changed:
+            embed.add_field(name="Attachments Changed", value=f"Before: {len(before.attachments)} | After: {len(after.attachments)}", inline=False)
+            
+        if embeds_changed:
+            embed.add_field(name="Embeds Changed", value=f"Before: {len(before.embeds)} | After: {len(after.embeds)}", inline=False)
+            
+        embed.add_field(name="Channel", value=before.channel.mention)
+        embed.set_footer(text=f"User ID: {before.author.id}")
+        
+        await send_mod_log(self.bot, before.guild, "msg_edit", embed)
 
 async def setup(bot):
-    await bot.add_cog(ModLogs(bot))
+    await bot.add_cog(ModLogsSetup(bot))

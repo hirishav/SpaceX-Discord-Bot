@@ -2,6 +2,7 @@
 import discord
 from discord.ext import commands
 import database as sqlite3
+from utils import send_mod_log
 
 class ModWarn(commands.Cog):
     def __init__(self, bot):
@@ -46,6 +47,8 @@ class ModWarn(commands.Cog):
         
         # Sabse pehle chat me embed bhejenge!
         await ctx.send(embed=chat_embed)
+        
+        await send_mod_log(self.bot, ctx.guild, "mod", chat_embed)
 
         # 3. MOD KA MESSAGE DELETE (Isko end me ekdum separate try me daal rahe hain taaki agar ye fail ho toh embed par asar na pade)
         try:
