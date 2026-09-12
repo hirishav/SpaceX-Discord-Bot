@@ -8,28 +8,40 @@ class ModHide(commands.Cog):
     @commands.hybrid_command(name="hide")
     @commands.has_permissions(manage_channels=True)
     async def hide(self, ctx, *, target: str = None):
-        """Channel ko sabse hide karne ke liye (!!hide, !!hide all, !!hide off)."""
-        target = target.lower().strip() if target else None
-
-        if target == "off":
-            return await self.unhide_channel(ctx, ctx.channel)
-        elif target == "off all":
-            return await self.unhide_all_channels(ctx)
-        elif target == "all":
-            return await self.hide_all_channels(ctx)
-        else:
+        """Channel ko sabse hide karne ke liye (!!hide, !!hide all, !!hide off, !!hide #channel)."""
+        if not target:
             return await self.hide_channel(ctx, ctx.channel)
+            
+        target_lower = target.lower().strip()
+        if target_lower == "off":
+            return await self.unhide_channel(ctx, ctx.channel)
+        elif target_lower == "off all":
+            return await self.unhide_all_channels(ctx)
+        elif target_lower == "all":
+            return await self.hide_all_channels(ctx)
+            
+        try:
+            channel = await commands.GuildChannelConverter().convert(ctx, target)
+            return await self.hide_channel(ctx, channel)
+        except commands.ChannelNotFound:
+            return await ctx.send("❌ Channel not found or invalid argument. Use `all`, `off`, `off all`, or mention a valid channel.")
 
     @commands.hybrid_command(name="unhide")
     @commands.has_permissions(manage_channels=True)
     async def unhide(self, ctx, *, target: str = None):
         """Hidden channel ko wapas dikhane aur purani permissions restore karne ke liye."""
-        target = target.lower().strip() if target else None
-
-        if target == "all":
-            return await self.unhide_all_channels(ctx)
-        else:
+        if not target:
             return await self.unhide_channel(ctx, ctx.channel)
+            
+        target_lower = target.lower().strip()
+        if target_lower == "all":
+            return await self.unhide_all_channels(ctx)
+            
+        try:
+            channel = await commands.GuildChannelConverter().convert(ctx, target)
+            return await self.unhide_channel(ctx, channel)
+        except commands.ChannelNotFound:
+            return await ctx.send("❌ Channel not found or invalid argument. Use `all` or mention a valid channel.")
 
     async def hide_channel(self, ctx, channel):
         # We only hide regular guild channels
