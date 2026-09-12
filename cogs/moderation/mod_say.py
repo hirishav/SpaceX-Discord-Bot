@@ -12,7 +12,7 @@ class ModSay(commands.Cog):
         self.db_name = "warnings.db"
 
     @commands.hybrid_command(name="say", aliases=["echo", "repeat"])
-    @commands.has_permissions(manage_messages=True)
+    @commands.has_guild_permissions(manage_messages=True)
     async def say(self, ctx, channel: typing.Optional[discord.TextChannel] = None, *, message_content: str = None):
         """Bot se apni marzi ka message bulwane ke liye (Moderation Command)."""
         
