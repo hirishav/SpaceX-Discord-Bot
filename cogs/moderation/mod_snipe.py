@@ -40,7 +40,7 @@ class ModSnipe(commands.Cog):
         if len(self.sniped_messages[channel_id]) > 3:
             self.sniped_messages[channel_id].pop()
 
-    @commands.hybrid_command(name="snipe", aliases=["s"])
+    @commands.hybrid_command(name="snipe")
     @commands.has_permissions(manage_messages=True)
     async def snipe(self, ctx):
         """Shows the last 3 deleted messages in this channel."""
