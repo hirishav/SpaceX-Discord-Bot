@@ -164,6 +164,7 @@ class ModLogsSetup(commands.Cog):
         if member.bot or not member.guild:
             return
             
+        import asyncio
         if before.channel is None and after.channel is not None:
             # vcjoin
             embed = discord.Embed(title="🎙️ Joined Voice Channel", color=discord.Color.green())
@@ -175,7 +176,23 @@ class ModLogsSetup(commands.Cog):
         elif before.channel is not None and after.channel is None:
             # vcleft
             embed = discord.Embed(title="🎙️ Left Voice Channel", color=discord.Color.red())
-            embed.set_author(name=member.name, icon_url=member.display_avatar.url)
+            
+            kicker = None
+            try:
+                await asyncio.sleep(0.5)
+                async for entry in member.guild.audit_logs(limit=5, action=discord.AuditLogAction.member_disconnect):
+                    if entry.target.id == member.id and (discord.utils.utcnow() - entry.created_at).total_seconds() < 10:
+                        kicker = entry.user
+                        break
+            except Exception:
+                pass
+                
+            if kicker:
+                embed.title = "🎙️ Disconnected from Voice Channel"
+                embed.set_author(name=f"{member.name} (Disconnected by {kicker.name})", icon_url=member.display_avatar.url)
+            else:
+                embed.set_author(name=member.name, icon_url=member.display_avatar.url)
+                
             embed.add_field(name="Channel", value=before.channel.mention)
             embed.set_footer(text=f"User ID: {member.id}")
             await send_mod_log(self.bot, member.guild, "vcleft", embed)
@@ -183,7 +200,22 @@ class ModLogsSetup(commands.Cog):
         elif before.channel is not None and after.channel is not None and before.channel != after.channel:
             # vcdrag / move
             embed = discord.Embed(title="✈️ Moved Voice Channel", color=discord.Color.blue())
-            embed.set_author(name=member.name, icon_url=member.display_avatar.url)
+            
+            mover = None
+            try:
+                await asyncio.sleep(0.5)
+                async for entry in member.guild.audit_logs(limit=5, action=discord.AuditLogAction.member_move):
+                    if entry.target.id == member.id and (discord.utils.utcnow() - entry.created_at).total_seconds() < 10:
+                        mover = entry.user
+                        break
+            except Exception:
+                pass
+                
+            if mover:
+                embed.set_author(name=f"{member.name} (Moved by {mover.name})", icon_url=member.display_avatar.url)
+            else:
+                embed.set_author(name=member.name, icon_url=member.display_avatar.url)
+                
             embed.add_field(name="Before", value=before.channel.mention, inline=True)
             embed.add_field(name="After", value=after.channel.mention, inline=True)
             embed.set_footer(text=f"User ID: {member.id}")
@@ -192,24 +224,84 @@ class ModLogsSetup(commands.Cog):
     @commands.Cog.listener()
     async def on_guild_role_create(self, role):
         embed = discord.Embed(title="🎭 Role Created", description=f"Role: {role.mention}", color=discord.Color.green())
+        
+        creator = None
+        try:
+            import asyncio
+            await asyncio.sleep(0.5)
+            async for entry in role.guild.audit_logs(limit=3, action=discord.AuditLogAction.role_create):
+                if entry.target.id == role.id and (discord.utils.utcnow() - entry.created_at).total_seconds() < 10:
+                    creator = entry.user
+                    break
+        except Exception:
+            pass
+            
+        if creator:
+            embed.set_author(name=creator.name, icon_url=creator.display_avatar.url)
+            
         embed.set_footer(text=f"Role ID: {role.id}")
         await send_mod_log(self.bot, role.guild, "role_changes", embed)
 
     @commands.Cog.listener()
     async def on_guild_role_delete(self, role):
         embed = discord.Embed(title="🎭 Role Deleted", description=f"Role: **{role.name}**", color=discord.Color.red())
+        
+        deleter = None
+        try:
+            import asyncio
+            await asyncio.sleep(0.5)
+            async for entry in role.guild.audit_logs(limit=3, action=discord.AuditLogAction.role_delete):
+                if entry.target.id == role.id and (discord.utils.utcnow() - entry.created_at).total_seconds() < 10:
+                    deleter = entry.user
+                    break
+        except Exception:
+            pass
+            
+        if deleter:
+            embed.set_author(name=deleter.name, icon_url=deleter.display_avatar.url)
+            
         embed.set_footer(text=f"Role ID: {role.id}")
         await send_mod_log(self.bot, role.guild, "role_changes", embed)
 
     @commands.Cog.listener()
     async def on_guild_channel_create(self, channel):
         embed = discord.Embed(title="📁 Channel Created", description=f"Channel: {channel.mention} ({channel.type})", color=discord.Color.green())
+        
+        creator = None
+        try:
+            import asyncio
+            await asyncio.sleep(0.5)
+            async for entry in channel.guild.audit_logs(limit=3, action=discord.AuditLogAction.channel_create):
+                if entry.target.id == channel.id and (discord.utils.utcnow() - entry.created_at).total_seconds() < 10:
+                    creator = entry.user
+                    break
+        except Exception:
+            pass
+            
+        if creator:
+            embed.set_author(name=creator.name, icon_url=creator.display_avatar.url)
+            
         embed.set_footer(text=f"Channel ID: {channel.id}")
         await send_mod_log(self.bot, channel.guild, "channel_changes", embed)
 
     @commands.Cog.listener()
     async def on_guild_channel_delete(self, channel):
         embed = discord.Embed(title="📁 Channel Deleted", description=f"Channel: **{channel.name}** ({channel.type})", color=discord.Color.red())
+        
+        deleter = None
+        try:
+            import asyncio
+            await asyncio.sleep(0.5)
+            async for entry in channel.guild.audit_logs(limit=3, action=discord.AuditLogAction.channel_delete):
+                if entry.target.id == channel.id and (discord.utils.utcnow() - entry.created_at).total_seconds() < 10:
+                    deleter = entry.user
+                    break
+        except Exception:
+            pass
+            
+        if deleter:
+            embed.set_author(name=deleter.name, icon_url=deleter.display_avatar.url)
+            
         embed.set_footer(text=f"Channel ID: {channel.id}")
         await send_mod_log(self.bot, channel.guild, "channel_changes", embed)
 
@@ -217,10 +309,135 @@ class ModLogsSetup(commands.Cog):
     async def on_guild_role_update(self, before, after):
         if before.permissions != after.permissions:
             embed = discord.Embed(title="🛡️ Role Permissions Changed", description=f"Role: {after.mention}", color=discord.Color.orange())
-            embed.add_field(name="Before", value=str(before.permissions.value), inline=True)
-            embed.add_field(name="After", value=str(after.permissions.value), inline=True)
+            
+            # Fetch who made the change from audit logs
+            modifier = None
+            try:
+                async for entry in after.guild.audit_logs(limit=1, action=discord.AuditLogAction.role_update):
+                    if entry.target.id == after.id:
+                        modifier = entry.user
+                        break
+            except discord.Forbidden:
+                pass
+            
+            if modifier:
+                embed.set_author(name=f"{modifier.name}", icon_url=modifier.display_avatar.url)
+
+            added_perms = []
+            removed_perms = []
+            
+            before_perms = dict(before.permissions)
+            
+            for perm, value in after.permissions:
+                if before_perms.get(perm) != value:
+                    formatted_perm = perm.replace('_', ' ').title()
+                    if value:
+                        added_perms.append(f"`{formatted_perm}`")
+                    else:
+                        removed_perms.append(f"`{formatted_perm}`")
+            
+            if added_perms:
+                embed.add_field(name="✅ Added", value=", ".join(added_perms), inline=False)
+            if removed_perms:
+                embed.add_field(name="❌ Removed", value=", ".join(removed_perms), inline=False)
+                
             embed.set_footer(text=f"Role ID: {after.id}")
             await send_mod_log(self.bot, after.guild, "perm_changes", embed)
+
+    @commands.Cog.listener()
+    async def on_guild_channel_update(self, before, after):
+        if before.overwrites != after.overwrites:
+            embed = discord.Embed(title="🛡️ Channel Permissions Changed", description=f"Channel: {after.mention}", color=discord.Color.orange())
+            
+            modifier = None
+            try:
+                # Try to find the latest overwrite update
+                async for entry in after.guild.audit_logs(limit=5):
+                    if entry.target.id == after.id and entry.action in [
+                        discord.AuditLogAction.channel_overwrite_update,
+                        discord.AuditLogAction.channel_overwrite_create,
+                        discord.AuditLogAction.channel_overwrite_delete
+                    ]:
+                        modifier = entry.user
+                        break
+            except discord.Forbidden:
+                pass
+            
+            if modifier:
+                embed.set_author(name=f"{modifier.name}", icon_url=modifier.display_avatar.url)
+
+            changed_targets = []
+            for target, overwrite in after.overwrites.items():
+                before_overwrite = before.overwrites.get(target)
+                if before_overwrite != overwrite:
+                    changed_targets.append((target, before_overwrite, overwrite))
+            
+            for target in before.overwrites:
+                if target not in after.overwrites:
+                    changed_targets.append((target, before.overwrites[target], None))
+            
+            for target, before_overwrite, after_overwrite in changed_targets:
+                if before_overwrite is None:
+                    before_dict = {}
+                else:
+                    before_dict = dict(before_overwrite)
+                
+                if after_overwrite is None:
+                    # If overwrite was deleted, all perms revert to None (default)
+                    after_dict = {perm: None for perm in before_dict}
+                else:
+                    after_dict = dict(after_overwrite)
+                    
+                target_added = []
+                target_removed = []
+                target_neutral = []
+                
+                all_perms = set(before_dict.keys()).union(after_dict.keys())
+                for perm in all_perms:
+                    b_val = before_dict.get(perm)
+                    a_val = after_dict.get(perm)
+                    if b_val != a_val:
+                        formatted_perm = perm.replace('_', ' ').title()
+                        if a_val is True:
+                            target_added.append(f"`{formatted_perm}`")
+                        elif a_val is False:
+                            target_removed.append(f"`{formatted_perm}`")
+                        elif a_val is None:
+                            target_neutral.append(f"`{formatted_perm}`")
+                
+                if target_added or target_removed or target_neutral:
+                    target_type = "Role" if isinstance(target, discord.Role) else "Member"
+                    embed.add_field(name=f"Target: {target.name} ({target_type})", value="​", inline=False)
+                    
+                    if target_added:
+                        embed.add_field(name="✅ Granted", value=", ".join(target_added), inline=False)
+                    if target_removed:
+                        embed.add_field(name="❌ Denied", value=", ".join(target_removed), inline=False)
+                    if target_neutral:
+                        embed.add_field(name="🔄 Reset", value=", ".join(target_neutral), inline=False)
+                
+            embed.set_footer(text=f"Channel ID: {after.id}")
+            await send_mod_log(self.bot, after.guild, "perm_changes", embed)
+            
+        elif before.name != after.name:
+            embed = discord.Embed(title="📁 Channel Renamed", description=f"Channel: {after.mention}", color=discord.Color.blue())
+            
+            modifier = None
+            try:
+                async for entry in after.guild.audit_logs(limit=3, action=discord.AuditLogAction.channel_update):
+                    if entry.target.id == after.id:
+                        modifier = entry.user
+                        break
+            except discord.Forbidden:
+                pass
+                
+            if modifier:
+                embed.set_author(name=f"{modifier.name}", icon_url=modifier.display_avatar.url)
+                
+            embed.add_field(name="Before", value=before.name, inline=True)
+            embed.add_field(name="After", value=after.name, inline=True)
+            embed.set_footer(text=f"Channel ID: {after.id}")
+            await send_mod_log(self.bot, after.guild, "channel_changes", embed)
 
 async def setup(bot):
     await bot.add_cog(ModLogsSetup(bot))
