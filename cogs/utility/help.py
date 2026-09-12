@@ -25,7 +25,7 @@ def _cfg(name: str, default: str = "") -> str:
 # isliye naya cog add karne par bas iski file "Mod_/Eco_/Fun_/Gen_/Owner_"
 # naming convention follow kare toh help menu apne aap update ho jaata hai.
 # ─────────────────────────────────────────────────────────────
-CATEGORY_ORDER = ["chat", "voice", "fun", "gif", "utility", "general", "owner"]
+CATEGORY_ORDER = ["chat", "voice", "economy", "fun", "gif", "utility", "general", "owner"]
 
 CATEGORY_META = {
     "chat": {
@@ -39,6 +39,12 @@ CATEGORY_META = {
         "label": "Voice Moderation",
         "aliases": ["voice", "vc", "vcm", "voicemod"],
         "blurb": "Voice channels ko control karne aur members manage karne ke tools.",
+    },
+    "economy": {
+        "emoji": "📹",
+        "label": "Creator Economy",
+        "aliases": ["eco", "economy", "creator", "influencer", "streamer", "money"],
+        "blurb": "Start your streaming career, buy gear, collab, and gain Clout!",
     },
     "fun": {
         "emoji": "🎮",
@@ -90,6 +96,8 @@ def resolve_category(cmd: commands.Command) -> str:
         return "voice"
     if cog_name.startswith("Mod"):
         return "chat"
+    if cog_name.startswith("Eco") or cog_name.startswith("Influencer"):
+        return "economy"
     if cog_name.startswith("Fun"):
         return "fun"
     if cog_name.startswith("Gif"):
@@ -337,7 +345,32 @@ class Help(commands.Cog):
             embed.set_footer(text=f"Requested by {ctx.author.display_name}", icon_url=ctx.author.display_avatar.url)
             return await ctx.send(embed=embed)
 
-
+        if target in ["creator", "guide", "game", "howtoplay"]:
+            embed = discord.Embed(
+                title="📈 Creator Economy: Step-by-Step Guide",
+                description=(
+                    f"Swagat hai naye creator! Yahan tum content banaoge, clout kamaoge aur paise chhapoge.\n\n"
+                    f"**Step 1: Shuruaat Kaise Karein?**\n"
+                    f"> `!!work` ya `!!crime` karke initial capital (Specie) kamao.\n"
+                    f"> `!!stream` - Apni pehli live stream start karo aur viewers banao!\n"
+                    f"> `!!video` - Ek badhiya video record karke upload karo taaki passive income aaye.\n\n"
+                    f"**Step 2: Grow Kaise Karein?**\n"
+                    f"> Jaise-jaise stream aur video banaoge, tumhara **Clout** badhega.\n"
+                    f"> `!!collab @user` - Dusre creators ke sath collab karke unka thoda clout aur audience apne paas lao.\n"
+                    f"> `!!raid @user` - Dusre creators par raid karke unke viewers aur paise le udo!\n\n"
+                    f"**Step 3: Paise Kahan Lagayein?**\n"
+                    f"> `!!shop` - Kamaye hue Specie se better PC, Camera, aur setup kharido. Better setup ka matlab zyada views aur clout!\n"
+                    f"> `!!sponsor` - Jab tumhara clout accha ho jaye, tab badi companies se sponsorships lo aur tagda paisa banao.\n\n"
+                    f"**💰 Bank & Leaderboard**\n"
+                    f"> `!!dep all` - Apna paisa bank me safe rakho taaki koi rob na kar sake.\n"
+                    f"> `!!lb` - Leaderboard check karo aur server ke sabse ameer aur famous creator bano!\n\n"
+                    f"💡 *Tip: Saare economy commands dekhne ke liye `{prefix}help economy` likho!*"
+                ),
+                color=EMBED_COLOR
+            )
+            embed.set_thumbnail(url=ctx.bot.user.display_avatar.url)
+            embed.set_footer(text=f"Requested by {ctx.author.display_name}", icon_url=ctx.author.display_avatar.url)
+            return await ctx.send(embed=embed)
 
         if target in ["logs", "log", "logging", "logsetup"]:
             embed = discord.Embed(
@@ -946,14 +979,14 @@ class Help(commands.Cog):
 
 
         elif cmd.name == "disable":
-            description = "🚫 Server ya specific channel me kisi command ya poore module (jaise fun, gif) ko band (disable) karne ke liye."
+            description = "🚫 Server ya specific channel me kisi command ya poore module (jaise economy, fun) ko band (disable) karne ke liye."
             usage = f"`{prefix}disable module <name> [#channel]`\n`{prefix}disable command <name> [#channel]`"
-            examples = f"`{prefix}disable module fun`\n`{prefix}disable command ban #general`"
+            examples = f"`{prefix}disable module economy`\n`{prefix}disable command ban #general`"
 
         elif cmd.name == "enable":
             description = "✅ Kisi disabled command ya module ko wapas chalu (enable) karne ke liye."
             usage = f"`{prefix}enable module <name> [#channel]`\n`{prefix}enable command <name> [#channel]`"
-            examples = f"`{prefix}enable module fun`\n`{prefix}enable command ban #general`"
+            examples = f"`{prefix}enable module economy`\n`{prefix}enable command ban #general`"
 
         elif cmd.name == "help":
             description = "📖 Bot ke saare commands ki premium, category-wise list dikhata hai."

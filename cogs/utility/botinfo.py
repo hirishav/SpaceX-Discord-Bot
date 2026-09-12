@@ -65,7 +65,7 @@ class BotInfo(commands.Cog):
         
         embed = discord.Embed(
             title="🚀 Vote for SpaceX Bot!",
-            description=f"Agar aapko mera bot pasand hai, toh kripya top.gg par vote karke support karein! ❤️\n\n🎁 **Voting Reward:** 1 Rep Point, aur **12 ghante ke liye Prefixless Perms**!\n\n🔗 **[Click Here to Vote on Top.gg]({vote_url})**",
+            description=f"Agar aapko mera bot pasand hai, toh kripya top.gg par vote karke support karein! ❤️\n\n🎁 **Voting Reward:** 1 Rep Point, **5,000 Specie**, aur **12 ghante ke liye Prefixless Perms**!\n\n🔗 **[Click Here to Vote on Top.gg]({vote_url})**",
             color=discord.Color.gold()
         )
         embed.set_thumbnail(url=self.bot.user.display_avatar.url if self.bot.user else None)
@@ -76,37 +76,6 @@ class BotInfo(commands.Cog):
         view.add_item(button)
         
         await ctx.send(embed=embed, view=view)
-
-    @commands.Cog.listener()
-    async def on_message(self, message):
-        if message.author.bot:
-            return
-            
-        if message.content.strip().lower() == "vote":
-            ctx = await self.bot.get_context(message)
-            if ctx.valid:
-                pass # let the normal command handler handle it if it matched somehow (e.g. if the prefix is empty)
-            else:
-                # Manually invoke the vote command
-                # We can't directly invoke without a context, but we can just send the embed here or create a fake ctx.
-                # Actually, the easiest way is to just call self.vote(ctx) but we need a context.
-                # Since we don't have a prefix, we can just build the embed and send it.
-                bot_id = self.bot.user.id if self.bot.user else "863883947073200128"
-                vote_url = f"https://top.gg/bot/{bot_id}/vote"
-                
-                embed = discord.Embed(
-                    title="🚀 Vote for SpaceX Bot!",
-                    description=f"Agar aapko mera bot pasand hai, toh kripya top.gg par vote karke support karein! ❤️\n\n🎁 **Voting Reward:** 1 Rep Point, aur **12 ghante ke liye Prefixless Perms**!\n\n🔗 **[Click Here to Vote on Top.gg]({vote_url})**",
-                    color=discord.Color.gold()
-                )
-                embed.set_thumbnail(url=self.bot.user.display_avatar.url if self.bot.user else None)
-                embed.set_footer(text="Aapke har ek vote se bot ki reach badhti hai! Thank you! 🙏")
-                
-                button = discord.ui.Button(label="Vote on Top.gg 🚀", url=vote_url, style=discord.ButtonStyle.link)
-                view = discord.ui.View()
-                view.add_item(button)
-                
-                await message.channel.send(embed=embed, view=view)
 
     @commands.hybrid_command(name="support")
     async def support(self, ctx):

@@ -11,6 +11,10 @@ class UserProfile(commands.Cog):
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         
+        # Fetch Economy
+        cursor.execute("SELECT wallet, bank FROM economy WHERE user_id = ?", (user_id,))
+        eco_row = cursor.fetchone()
+        wallet, bank = eco_row if eco_row else (0, 0)
         
         # Fetch Badges
         cursor.execute("SELECT badge FROM user_badges WHERE user_id = ?", (user_id,))
@@ -21,14 +25,15 @@ class UserProfile(commands.Cog):
         warn_count = cursor.fetchone()[0]
         
         conn.close()
-        return badges, warn_count
+        return wallet, bank, badges, warn_count
 
-    @commands.hybrid_command(name="userinfo", aliases=["ui", "pr"])
-    async def userinfo(self, ctx, member: discord.Member = None):
-        """User ki puri information aur badges dekhne ke liye."""
+    @commands.hybrid_command(name="profile", aliases=["userinfo", "pr"])
+    async def profile(self, ctx, member: discord.Member = None):
+        """User ki puri profile aur badges dekhne ke liye."""
         member = member or ctx.author
         
-        badges, warn_count = self.get_user_data(str(member.id))
+        wallet, bank, badges, warn_count = self.get_user_data(str(member.id))
+        total_wealth = wallet + bank
         
         embed = discord.Embed(title=f"👤 {member.name}'s Profile", color=member.color if member.color != discord.Color.default() else discord.Color.blue())
         embed.set_thumbnail(url=member.display_avatar.url)
@@ -39,6 +44,8 @@ class UserProfile(commands.Cog):
         else:
             embed.description = "*No badges yet.*"
 
+        # Economy Details
+        embed.add_field(name="💰 Net Worth", value=f"✨ `{total_wealth:,}` Specie\n(Wallet: {wallet:,} | Bank: {bank:,})", inline=False)
         
         # Account Info
         joined_server = member.joined_at.strftime("%d %b %Y") if member.joined_at else "Unknown"

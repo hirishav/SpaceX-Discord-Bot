@@ -2,7 +2,7 @@
 import discord
 from discord.ext import commands
 
-VALID_MODULES = {"moderation", "fun", "utility", "general"}
+VALID_MODULES = {"moderation", "economy", "fun", "utility", "general"}
 
 def is_admin_or_owner():
     async def predicate(ctx):
