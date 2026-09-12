@@ -138,7 +138,7 @@ class SpaceXBot(commands.Bot):
             
         command_name = interaction.command.qualified_name.split()[0]
         
-        if command_name in {"disable", "enable", "help"}: 
+        if command_name in {"disable", "enable", "help", "seecounting", "counting"}: 
             return True
             
         guild_id = interaction.guild.id
@@ -195,7 +195,7 @@ class SpaceXBot(commands.Bot):
             
         command_name = ctx.command.qualified_name.split()[0]
             
-        if command_name in {"disable", "enable", "help"}:
+        if command_name in {"disable", "enable", "help", "seecounting", "counting"}:
             return True
             
         guild_id = ctx.guild.id
