@@ -354,9 +354,9 @@ class ModLogsSetup(commands.Cog):
                 # Try to find the latest overwrite update
                 async for entry in after.guild.audit_logs(limit=5):
                     if entry.target.id == after.id and entry.action in [
-                        discord.AuditLogAction.channel_overwrite_update,
-                        discord.AuditLogAction.channel_overwrite_create,
-                        discord.AuditLogAction.channel_overwrite_delete
+                        discord.AuditLogAction.overwrite_update,
+                        discord.AuditLogAction.overwrite_create,
+                        discord.AuditLogAction.overwrite_delete
                     ]:
                         modifier = entry.user
                         break
@@ -416,8 +416,9 @@ class ModLogsSetup(commands.Cog):
                     if target_neutral:
                         embed.add_field(name="🔄 Reset", value=", ".join(target_neutral), inline=False)
                 
-            embed.set_footer(text=f"Channel ID: {after.id}")
-            await send_mod_log(self.bot, after.guild, "perm_changes", embed)
+            if len(embed.fields) > 0:
+                embed.set_footer(text=f"Channel ID: {after.id}")
+                await send_mod_log(self.bot, after.guild, "perm_changes", embed)
             
         elif before.name != after.name:
             embed = discord.Embed(title="📁 Channel Renamed", description=f"Channel: {after.mention}", color=discord.Color.blue())
