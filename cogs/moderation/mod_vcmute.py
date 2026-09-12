@@ -10,6 +10,9 @@ class ModVcmute(commands.Cog):
     @commands.has_guild_permissions(mute_members=True)
     async def vcmute(self, ctx, member: discord.Member, *, reason: str = "Koi reason nahi diya gaya"):
         """Kisi member ko voice channel me server mute karne ke liye."""
+        if member.top_role >= ctx.author.top_role and ctx.author.id != ctx.guild.owner_id:
+            return await ctx.send("❌ Aap apne se unche ya barabar ke role waale member ko vcmute nahi kar sakte!")
+
         if not member.voice or not member.voice.channel:
             return await ctx.send("❌ Ye member kisi voice channel me nahi hai!")
             

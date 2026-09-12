@@ -12,6 +12,9 @@ class ModBan(commands.Cog):
     async def ban(self, ctx, member: discord.Member, *, reason: str = "No reason provided"):
         """Kisi member ko server se permanent ban karne ke liye (Role Check & DM Bug Fixed)."""
         
+        if member.guild_permissions.administrator:
+            return await ctx.send("❌ Aap kisi Admin ko ban nahi kar sakte!")
+
         # FIX: Agar target ka role bada ya barabar hai, toh 'return' lagakar code ko yahi rok do!
         if member.top_role >= ctx.author.top_role and ctx.author.id != ctx.guild.owner_id:
             return await ctx.send("❌ Aap apne se unche ya barabar ke role waale member ko ban nahi kar sakte!")

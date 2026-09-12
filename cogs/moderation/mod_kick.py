@@ -11,6 +11,9 @@ class ModKick(commands.Cog):
     @commands.has_permissions(kick_members=True)
     async def kick(self, ctx, member: discord.Member, *, reason: str = "No reason provided"):
         """Kisi member ko server se kick karne ke liye."""
+        if member.guild_permissions.administrator:
+            return await ctx.send("❌ Aap kisi Admin ko kick nahi kar sakte!")
+
         if member.top_role >= ctx.author.top_role and ctx.author.id != ctx.guild.owner_id:
             return await ctx.send("❌ Aap apne se unche ya barabar ke role waale member ko kick nahi kar sakte!")
 

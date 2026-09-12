@@ -34,6 +34,9 @@ class ModMute(commands.Cog):
     async def mute(self, ctx, member: discord.Member, duration_str: str, *, reason: str = "No reason provided"):
         """Kisi member ko flexible time (10m/5s/1d) ke liye timeout karne ke liye (Super Fast)."""
         
+        if member.guild_permissions.administrator:
+            return await ctx.send("❌ Aap kisi Admin ko mute nahi kar sakte!")
+
         if member.top_role >= ctx.author.top_role and ctx.author.id != ctx.guild.owner_id:
             return await ctx.send("❌ Aap apne se baray ya barabar ke role waale member ko mute nahi kar sakte!")
 

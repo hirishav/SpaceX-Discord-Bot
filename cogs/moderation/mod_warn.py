@@ -14,6 +14,9 @@ class ModWarn(commands.Cog):
     async def warn(self, ctx, member: discord.Member, *, reason: str = "No reason provided"):
         """Kisi user ko warn karne ke liye (Sari errors se mukt code)."""
         
+        if member.top_role >= ctx.author.top_role and ctx.author.id != ctx.guild.owner_id:
+            return await ctx.send("❌ Aap apne se unche ya barabar ke role waale member ko warn nahi kar sakte!")
+
         server_id = str(ctx.guild.id)
         user_id = str(member.id)
 
