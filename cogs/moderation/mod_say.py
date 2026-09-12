@@ -4,6 +4,8 @@ from discord.ext import commands
 
 import database as sqlite3
 
+import typing
+
 class ModSay(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -11,11 +13,13 @@ class ModSay(commands.Cog):
 
     @commands.hybrid_command(name="say", aliases=["echo", "repeat"])
     @commands.has_permissions(manage_messages=True)
-    async def say(self, ctx, *, message_content: str = None):
+    async def say(self, ctx, channel: typing.Optional[discord.TextChannel] = None, *, message_content: str = None):
         """Bot se apni marzi ka message bulwane ke liye (Moderation Command)."""
         
         if message_content is None:
-            return await ctx.send(f"❌ Rishav bhai, kuch likho toh sahi! Sahi tarika: `{ctx.prefix}say <aapka message>`")
+            return await ctx.send(f"❌ Rishav bhai, kuch likho toh sahi! Sahi tarika: `{ctx.prefix}say [channel] <aapka message>`")
+
+        target_channel = channel or ctx.channel
 
         try:
             await ctx.message.delete()
@@ -35,7 +39,13 @@ class ModSay(commands.Cog):
         except Exception as e:
             print(f"Failed to log say command: {e}")
 
-        await ctx.send(message_content)
+        try:
+            await target_channel.send(message_content)
+            if target_channel != ctx.channel:
+                await ctx.send(f"✅ Message {target_channel.mention} me bhej diya gaya hai.", delete_after=3)
+        except discord.Forbidden:
+            if target_channel != ctx.channel:
+                await ctx.send(f"❌ Mere paas {target_channel.mention} me message bhejne ki permission nahi hai.")
 
     @say.error
     async def say_error(self, ctx, error):
