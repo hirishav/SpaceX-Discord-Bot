@@ -124,7 +124,6 @@ class SpaceXBot(commands.Bot):
         if cog_name == "OwnerInfo": return "utility"
         if getattr(cmd, 'hidden', False) or cog_name.startswith("Owner") or cmd.name in {"blacklist"}: return "owner"
         if cog_name.startswith("Mod"): return "moderation"
-        if cog_name.startswith("Eco") or cog_name.startswith("Stocks"): return "economy"
         if cog_name.startswith("Fun"): return "fun"
         if cog_name.startswith("Gif"): return "gif"
         if cog_name.startswith("Gen"): return "general"
@@ -394,40 +393,6 @@ class SpaceXBot(commands.Bot):
             reason TEXT,
             timestamp INTEGER,
             PRIMARY KEY (server_id, user_id)
-        )
-        """)
-        
-        # INFLUENCER ECONOMY TABLES
-        cursor.execute("""
-        CREATE TABLE IF NOT EXISTS influencer_stats (
-            user_id TEXT PRIMARY KEY,
-            cash INTEGER DEFAULT 0,
-            bank INTEGER DEFAULT 0,
-            clout INTEGER DEFAULT 0,
-            last_stream INTEGER DEFAULT 0,
-            last_video INTEGER DEFAULT 0,
-            last_sponsor INTEGER DEFAULT 0,
-            last_weekly INTEGER DEFAULT 0
-        )
-        """)
-        
-        # Safely attempt to add bank and last_weekly if table already exists
-        try:
-            cursor.execute("ALTER TABLE influencer_stats ADD COLUMN bank INTEGER DEFAULT 0")
-        except Exception:
-            pass
-            
-        try:
-            cursor.execute("ALTER TABLE influencer_stats ADD COLUMN last_weekly INTEGER DEFAULT 0")
-        except Exception:
-            pass
-
-        
-        cursor.execute("""
-        CREATE TABLE IF NOT EXISTS influencer_gear (
-            user_id TEXT,
-            item_id TEXT,
-            PRIMARY KEY (user_id, item_id)
         )
         """)
         
@@ -766,10 +731,6 @@ class SpaceXBot(commands.Bot):
         if os.path.exists('./cogs'):
             for path in Path('./cogs').rglob('*.py'):
                 filename = path.name
-                if filename in ['eco_stocks_core.py', 'eco_stocks_list.py']:
-                    print(f'-> Skipped Non-Cog Utility File: {filename}')
-                    continue
-                    
                 # Extract parts without '.py'
                 module_path = '.'.join(path.parts)[:-3]
                 
