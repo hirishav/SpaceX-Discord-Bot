@@ -20,7 +20,10 @@ class ModVCUnlock(commands.Cog):
             return await ctx.send(f"⚠️ `{channel.name}` pehle se hi unlocked hai!")
 
         overwrite.connect = None
-        await channel.set_permissions(ctx.guild.default_role, overwrite=overwrite, reason=f"VC Unlocked by {ctx.author}")
+        if overwrite.is_empty():
+            await channel.set_permissions(ctx.guild.default_role, overwrite=None, reason=f"VC Unlocked by {ctx.author}")
+        else:
+            await channel.set_permissions(ctx.guild.default_role, overwrite=overwrite, reason=f"VC Unlocked by {ctx.author}")
         
         await ctx.send(f"🔓 **{channel.name}** successfully unlock kar diya gaya hai! Ab sab join kar sakte hain.")
 

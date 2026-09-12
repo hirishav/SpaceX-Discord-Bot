@@ -20,7 +20,10 @@ class ModVCUnhide(commands.Cog):
             return await ctx.send(f"⚠️ `{channel.name}` pehle se hi sabko dikh raha hai!")
 
         overwrite.view_channel = None
-        await channel.set_permissions(ctx.guild.default_role, overwrite=overwrite, reason=f"VC Unhidden by {ctx.author}")
+        if overwrite.is_empty():
+            await channel.set_permissions(ctx.guild.default_role, overwrite=None, reason=f"VC Unhidden by {ctx.author}")
+        else:
+            await channel.set_permissions(ctx.guild.default_role, overwrite=overwrite, reason=f"VC Unhidden by {ctx.author}")
         
         await ctx.send(f"👁️ **{channel.name}** successfully unhide kar diya gaya hai! Ab ye wapas sabko dikhega.")
 
