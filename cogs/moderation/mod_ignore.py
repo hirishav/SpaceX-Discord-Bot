@@ -89,7 +89,7 @@ class ModIgnore(commands.Cog):
         
         await ctx.send(f"✅ Ignored module `{module_name}` for {target_mention}.", allowed_mentions=discord.AllowedMentions.none())
 
-    @commands.hybrid_group(name="unignore", aliases=["allow"], fallback="help")
+    @commands.hybrid_group(name="unignore", fallback="help")
     @commands.has_permissions(administrator=True)
     async def unignore(self, ctx):
         """Unignore (allow) commands or modules for specific users or roles."""

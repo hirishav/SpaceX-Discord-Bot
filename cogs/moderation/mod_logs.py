@@ -8,7 +8,7 @@ class ModLogsSetup(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.db_name = "warnings.db"
-        self.valid_log_types = ["mod", "msg_delete", "msg_edit"]
+        self.valid_log_types = ["mod", "msg_delete", "msg_edit", "vcjoin", "vcleft", "vcdrag", "role_changes", "channel_changes", "perm_changes"]
 
     @commands.hybrid_command(name="logset")
     @commands.has_permissions(manage_guild=True)
@@ -158,6 +158,69 @@ class ModLogsSetup(commands.Cog):
         embed.set_footer(text=f"User ID: {before.author.id}")
         
         await send_mod_log(self.bot, before.guild, "msg_edit", embed)
+
+    @commands.Cog.listener()
+    async def on_voice_state_update(self, member, before, after):
+        if member.bot or not member.guild:
+            return
+            
+        if before.channel is None and after.channel is not None:
+            # vcjoin
+            embed = discord.Embed(title="🎙️ Joined Voice Channel", color=discord.Color.green())
+            embed.set_author(name=member.name, icon_url=member.display_avatar.url)
+            embed.add_field(name="Channel", value=after.channel.mention)
+            embed.set_footer(text=f"User ID: {member.id}")
+            await send_mod_log(self.bot, member.guild, "vcjoin", embed)
+            
+        elif before.channel is not None and after.channel is None:
+            # vcleft
+            embed = discord.Embed(title="🎙️ Left Voice Channel", color=discord.Color.red())
+            embed.set_author(name=member.name, icon_url=member.display_avatar.url)
+            embed.add_field(name="Channel", value=before.channel.mention)
+            embed.set_footer(text=f"User ID: {member.id}")
+            await send_mod_log(self.bot, member.guild, "vcleft", embed)
+            
+        elif before.channel is not None and after.channel is not None and before.channel != after.channel:
+            # vcdrag / move
+            embed = discord.Embed(title="✈️ Moved Voice Channel", color=discord.Color.blue())
+            embed.set_author(name=member.name, icon_url=member.display_avatar.url)
+            embed.add_field(name="Before", value=before.channel.mention, inline=True)
+            embed.add_field(name="After", value=after.channel.mention, inline=True)
+            embed.set_footer(text=f"User ID: {member.id}")
+            await send_mod_log(self.bot, member.guild, "vcdrag", embed)
+
+    @commands.Cog.listener()
+    async def on_guild_role_create(self, role):
+        embed = discord.Embed(title="🎭 Role Created", description=f"Role: {role.mention}", color=discord.Color.green())
+        embed.set_footer(text=f"Role ID: {role.id}")
+        await send_mod_log(self.bot, role.guild, "role_changes", embed)
+
+    @commands.Cog.listener()
+    async def on_guild_role_delete(self, role):
+        embed = discord.Embed(title="🎭 Role Deleted", description=f"Role: **{role.name}**", color=discord.Color.red())
+        embed.set_footer(text=f"Role ID: {role.id}")
+        await send_mod_log(self.bot, role.guild, "role_changes", embed)
+
+    @commands.Cog.listener()
+    async def on_guild_channel_create(self, channel):
+        embed = discord.Embed(title="📁 Channel Created", description=f"Channel: {channel.mention} ({channel.type})", color=discord.Color.green())
+        embed.set_footer(text=f"Channel ID: {channel.id}")
+        await send_mod_log(self.bot, channel.guild, "channel_changes", embed)
+
+    @commands.Cog.listener()
+    async def on_guild_channel_delete(self, channel):
+        embed = discord.Embed(title="📁 Channel Deleted", description=f"Channel: **{channel.name}** ({channel.type})", color=discord.Color.red())
+        embed.set_footer(text=f"Channel ID: {channel.id}")
+        await send_mod_log(self.bot, channel.guild, "channel_changes", embed)
+
+    @commands.Cog.listener()
+    async def on_guild_role_update(self, before, after):
+        if before.permissions != after.permissions:
+            embed = discord.Embed(title="🛡️ Role Permissions Changed", description=f"Role: {after.mention}", color=discord.Color.orange())
+            embed.add_field(name="Before", value=str(before.permissions.value), inline=True)
+            embed.add_field(name="After", value=str(after.permissions.value), inline=True)
+            embed.set_footer(text=f"Role ID: {after.id}")
+            await send_mod_log(self.bot, after.guild, "perm_changes", embed)
 
 async def setup(bot):
     await bot.add_cog(ModLogsSetup(bot))

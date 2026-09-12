@@ -60,7 +60,20 @@ def get_prefix(bot, message):
         expires_at = bot.temp_prefixless_users_cache[message.author.id]
         if expires_at == -1 or int(time.time()) < expires_at:
             is_whitelisted = True
-    elif hasattr(bot, 'prefixless_servers_cache') and message.guild.id in bot.prefixless_servers_cache:
+            
+    # Check User Roles for Prefixless
+    if not is_whitelisted and hasattr(message.author, 'roles'):
+        for role in message.author.roles:
+            if hasattr(bot, 'prefixless_cache') and role.id in bot.prefixless_cache:
+                is_whitelisted = True
+                break
+            elif hasattr(bot, 'temp_prefixless_users_cache') and role.id in bot.temp_prefixless_users_cache:
+                expires_at = bot.temp_prefixless_users_cache[role.id]
+                if expires_at == -1 or int(time.time()) < expires_at:
+                    is_whitelisted = True
+                    break
+
+    if not is_whitelisted and hasattr(bot, 'prefixless_servers_cache') and message.guild.id in bot.prefixless_servers_cache:
         expires_at = bot.prefixless_servers_cache[message.guild.id]
         if expires_at == -1 or int(time.time()) < expires_at:
             is_whitelisted = True
@@ -114,6 +127,8 @@ class SpaceXBot(commands.Bot):
         
         self.ignored_commands_cache = {} # server_id -> set of (target_id, command_name)
         self.ignored_modules_cache = {} # server_id -> set of (target_id, module_name)
+        
+        self.allowed_commands_cache = {} # server_id -> { target_id: { command_or_module: expires_at } }
         
         self.topgg_client = None
         self.add_check(self.check_disabled_commands)
@@ -465,6 +480,18 @@ class SpaceXBot(commands.Bot):
             server_id TEXT PRIMARY KEY
         )
         """)
+        
+        # COMMAND ALLOWS TABLE
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS command_allows (
+            guild_id TEXT,
+            target_id TEXT,
+            command_or_module TEXT,
+            expires_at INTEGER,
+            reason TEXT,
+            allowed_by TEXT
+        )
+        """)
 
         # PREMIUM SERVERS TABLE
         cursor.execute("""
@@ -716,6 +743,16 @@ class SpaceXBot(commands.Bot):
                 self.ignored_commands_cache[s_id_int] = set()
             self.ignored_commands_cache[s_id_int].add((t_id, cmd_name))
             
+        cursor.execute("SELECT guild_id, target_id, command_or_module, expires_at FROM command_allows")
+        for g_id, t_id, cmd_mod, exp in cursor.fetchall():
+            g_id_int = int(g_id)
+            t_id_int = int(t_id)
+            if g_id_int not in self.allowed_commands_cache:
+                self.allowed_commands_cache[g_id_int] = {}
+            if t_id_int not in self.allowed_commands_cache[g_id_int]:
+                self.allowed_commands_cache[g_id_int][t_id_int] = {}
+            self.allowed_commands_cache[g_id_int][t_id_int][cmd_mod] = exp
+            
         cursor.execute("SELECT server_id, target_id, module_name FROM ignored_modules_target")
         for s_id, t_id, mod_name in cursor.fetchall():
             s_id_int = int(s_id)
@@ -883,6 +920,35 @@ async def on_message(message):
     is_whitelisted = False
     if message.author.id in bot.owner_ids or message.author.id in bot.prefixless_cache:
         is_whitelisted = True
+        
+    if not is_whitelisted and hasattr(message.author, 'roles'):
+        for role in message.author.roles:
+            if role.id in bot.prefixless_cache:
+                is_whitelisted = True
+                break
+                
+    if hasattr(bot, 'temp_prefixless_users_cache'):
+        current_time = int(time.time())
+        to_remove = []
+        
+        # Check user
+        if message.author.id in bot.temp_prefixless_users_cache:
+            if bot.temp_prefixless_users_cache[message.author.id] != -1 and current_time >= bot.temp_prefixless_users_cache[message.author.id]:
+                to_remove.append(message.author.id)
+                
+        # Check roles
+        if hasattr(message.author, 'roles'):
+            for role in message.author.roles:
+                if role.id in bot.temp_prefixless_users_cache:
+                    if bot.temp_prefixless_users_cache[role.id] != -1 and current_time >= bot.temp_prefixless_users_cache[role.id]:
+                        to_remove.append(role.id)
+                        
+        if to_remove:
+            cursor = bot.db.cursor()
+            for tid in to_remove:
+                del bot.temp_prefixless_users_cache[tid]
+                cursor.execute("DELETE FROM temp_prefixless_users WHERE user_id = ?", (str(tid),))
+            bot.db.commit()
     elif message.guild and message.guild.id in bot.prefixless_servers_cache:
         expires_at = bot.prefixless_servers_cache[message.guild.id]
         if expires_at == -1 or int(time.time()) < expires_at:
@@ -959,6 +1025,38 @@ async def on_message(message):
         return await message.channel.send(embed=embed)
 
     await bot.process_commands(message)
+
+# ----------------- MONKEY PATCH COMMAND.CAN_RUN -----------------
+original_can_run = commands.Command.can_run
+
+async def patched_can_run(self, ctx):
+    if ctx.guild and hasattr(ctx.bot, 'allowed_commands_cache'):
+        guild_id = ctx.guild.id
+        if guild_id in ctx.bot.allowed_commands_cache:
+            is_allowed = False
+            targets = [ctx.author.id] + [r.id for r in getattr(ctx.author, 'roles', [])]
+            for t_id in targets:
+                allowed_items = ctx.bot.allowed_commands_cache[guild_id].get(t_id, {})
+                cmd_name = self.name
+                cog_name = getattr(self.cog, 'qualified_name', '') if self.cog else ''
+                module_name = ctx.bot._resolve_module(self) if hasattr(ctx.bot, '_resolve_module') else ''
+
+                for check_name in (cmd_name, cog_name, module_name):
+                    if check_name and check_name in allowed_items:
+                        exp = allowed_items[check_name]
+                        if exp == -1 or int(time.time()) < exp:
+                            is_allowed = True
+                            break
+                if is_allowed:
+                    break
+            
+            if is_allowed:
+                return True
+
+    return await original_can_run(self, ctx)
+
+commands.Command.can_run = patched_can_run
+# ----------------------------------------------------------------
 
 if __name__ == '__main__':
     if BOT_TOKEN:

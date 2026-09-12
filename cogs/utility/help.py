@@ -350,7 +350,11 @@ class Help(commands.Cog):
                     f"**Available Log Types:**\n"
                     f"> 🔹 `mod` - Moderation actions (ban, kick, mute, warn, etc.)\n"
                     f"> 🔹 `msg_delete` - Jab koi message delete kare\n"
-                    f"> 🔹 `msg_edit` - Jab koi message edit kare\n\n"
+                    f"> 🔹 `msg_edit` - Jab koi message edit kare\n"
+                    f"> 🔹 `vcjoin` / `vcleft` / `vcdrag` - Voice channel activities\n"
+                    f"> 🔹 `role_changes` - Role create/delete actions\n"
+                    f"> 🔹 `channel_changes` - Channel create/delete actions\n"
+                    f"> 🔹 `perm_changes` - Server or Role permission updates\n\n"
                     f"**Log Commands:**\n"
                     f"> `{prefix}logset <type> <#channel>` - Naya log channel set karein.\n"
                     f"> `{prefix}logremove <type>` - Kisi specific log type ko disable karein.\n"
@@ -563,7 +567,7 @@ class Help(commands.Cog):
 
         elif cmd.name == "logset":
             description = "⚙️ Server me specific type ke logs (jaise deleted messages, moderation actions) bhejne ke liye channel set karein."
-            usage = f"`{prefix}logset <log_type> <#channel>`\nValid types: `mod`, `msg_delete`, `msg_edit`"
+            usage = f"`{prefix}logset <log_type> <#channel>`\nValid types: `mod`, `msg_delete`, `msg_edit`, `vcjoin`, `vcleft`, `vcdrag`, `role_changes`, `channel_changes`, `perm_changes`"
             examples = f"`{prefix}logset msg_delete #deleted-messages`\n`{prefix}logset mod #mod-logs`"
 
         elif cmd.name == "logremove":
@@ -1005,6 +1009,26 @@ class Help(commands.Cog):
             usage = f"`{prefix}vcmove @user #channel_name/ID [reason]`"
             examples = f"`{prefix}vcmove @User 1234567890`"
 
+        elif cmd.name == "vclock":
+            description = "🔒 Kisi voice channel ko instantly lock karne ke liye."
+            usage = f"`{prefix}vclock [vc_id]`"
+            examples = f"`{prefix}vclock`"
+
+        elif cmd.name == "vcunlock":
+            description = "🔓 Kisi locked voice channel ko instantly unlock karne ke liye."
+            usage = f"`{prefix}vcunlock [vc_id]`"
+            examples = f"`{prefix}vcunlock`"
+
+        elif cmd.name == "vchide":
+            description = "👻 Kisi voice channel ko hide karne ke liye (list se gayab karne)."
+            usage = f"`{prefix}vchide [vc_id]`"
+            examples = f"`{prefix}vchide`"
+
+        elif cmd.name == "vcunhide":
+            description = "👁️ Kisi hidden voice channel ko wapas unhide karne ke liye."
+            usage = f"`{prefix}vcunhide [vc_id]`"
+            examples = f"`{prefix}vcunhide`"
+
         elif cmd.name == "tnd":
             description = "💬 Channel mein Truth and Dare game chalu (on) ya band (off) karne ke liye."
             usage = f"`{prefix}tnd on [#channel]`\n`{prefix}tnd off [#channel]`"
@@ -1025,10 +1049,25 @@ class Help(commands.Cog):
             usage = f"`{prefix}ignore command <name> <@user/@role>`\n`{prefix}ignore module <name> <@user/@role>`"
             examples = f"`{prefix}ignore command afk @everyone`\n`{prefix}ignore module fun @Guest`"
 
-        elif cmd.name in ["unignore", "allow"]:
-            description = "✅ Kisi ignore kiye gaye command ya module ko kisi specific user/role ke liye wapas allow karne ke liye."
-            usage = f"`{prefix}unignore command <name> <@user/@role>`\n`{prefix}unignore module <name> <@user/@role>`\n👉 Hint: `{prefix}allow` bhi use kar sakte ho!"
-            examples = f"`{prefix}allow command afk @everyone`"
+        elif cmd.name == "unignore":
+            description = "✅ Kisi ignore kiye gaye command ya module ko kisi specific user/role ke liye wapas revert/unignore karne ke liye."
+            usage = f"`{prefix}unignore command <name> <@user/@role>`\n`{prefix}unignore module <name> <@user/@role>`"
+            examples = f"`{prefix}unignore command afk @everyone`"
+
+        elif cmd.name == "allow":
+            description = "✅ Kisi user/role ko permission bypass (allow) karne ke liye. (Owner commands allow nahi ho sakte)"
+            usage = f"`{prefix}allow <@user/@role> <command/module> <duration> [reason]`"
+            examples = f"`{prefix}allow @user ban 1h For Testing`\n`{prefix}allow @role moderation 1week New Mod`"
+
+        elif cmd.name in ["disallow", "unallow"]:
+            description = "🚫 Kisi pehle se allow (bypassed) command/module ko wapas hatane ke liye."
+            usage = f"`{prefix}disallow <@user/@role> <command/module>`"
+            examples = f"`{prefix}disallow @user ban`"
+
+        elif cmd.name == "listallows":
+            description = "📋 Server me active command allows/bypasses ki list dekhne ke liye."
+            usage = f"`{prefix}listallows`"
+            examples = f"`{prefix}listallows`"
 
         elif cmd.name == "seesay":
             description = "🛡️ Server Managers: Server mein members dwara use kiye gaye 'say' command ki history dekhne ke liye."
@@ -1036,7 +1075,7 @@ class Help(commands.Cog):
             examples = f"`{prefix}seesay 15`"
 
         elif cmd.name == "logset":
-            description = "⚙️ Server me specific log events (mod, msg_delete, msg_edit) ke liye log channel set karne ke liye."
+            description = "⚙️ Server me specific log events ke liye log channel set karne ke liye.\nValid types: `mod`, `msg_delete`, `msg_edit`, `vcjoin`, `vcleft`, `vcdrag`, `role_changes`, `channel_changes`, `perm_changes`"
             usage = f"`{prefix}logset <log_type> <#channel>`"
             examples = f"`{prefix}logset mod #mod-logs`"
 
