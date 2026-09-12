@@ -1,9 +1,12 @@
 import discord
 from discord.ext import commands
 
+import sqlite3
+
 class ModVCUnlock(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.db_name = "warnings.db"
 
     @commands.hybrid_command(name="vcunlock")
     @commands.has_permissions(manage_channels=True)
@@ -19,7 +22,24 @@ class ModVCUnlock(commands.Cog):
         if overwrite.connect is True or overwrite.connect is None:
             return await ctx.send(f"⚠️ `{channel.name}` pehle se hi unlocked hai!")
 
-        overwrite.connect = None
+        original_connect = None
+        with sqlite3.connect(self.db_name) as conn:
+            cursor = conn.execute('SELECT connect_state FROM vc_states WHERE channel_id = ?', (str(channel.id),))
+            row = cursor.fetchone()
+            if row and row[0]:
+                original_connect = row[0]
+            
+            # Clear it out from db once unlocked
+            conn.execute('UPDATE vc_states SET connect_state = NULL WHERE channel_id = ?', (str(channel.id),))
+            conn.commit()
+
+        if original_connect == "True":
+            overwrite.connect = True
+        elif original_connect == "False":
+            overwrite.connect = False
+        else:
+            overwrite.connect = None
+
         if overwrite.is_empty():
             await channel.set_permissions(ctx.guild.default_role, overwrite=None, reason=f"VC Unlocked by {ctx.author}")
         else:

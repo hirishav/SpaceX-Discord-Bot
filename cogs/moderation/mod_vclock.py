@@ -1,9 +1,24 @@
 import discord
 from discord.ext import commands
 
+import sqlite3
+
 class ModVCLock(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.db_name = "warnings.db"
+        self._init_db()
+
+    def _init_db(self):
+        with sqlite3.connect(self.db_name) as conn:
+            conn.execute('''
+                CREATE TABLE IF NOT EXISTS vc_states (
+                    channel_id TEXT PRIMARY KEY,
+                    connect_state TEXT,
+                    view_state TEXT
+                )
+            ''')
+            conn.commit()
 
     @commands.hybrid_command(name="vclock")
     @commands.has_permissions(manage_channels=True)
@@ -18,6 +33,15 @@ class ModVCLock(commands.Cog):
         
         if overwrite.connect is False:
             return await ctx.send(f"⚠️ `{channel.name}` pehle se hi locked hai!")
+
+        current_connect = str(overwrite.connect)
+        with sqlite3.connect(self.db_name) as conn:
+            conn.execute('''
+                INSERT INTO vc_states (channel_id, connect_state)
+                VALUES (?, ?)
+                ON CONFLICT(channel_id) DO UPDATE SET connect_state = ?
+            ''', (str(channel.id), current_connect, current_connect))
+            conn.commit()
 
         overwrite.connect = False
         await channel.set_permissions(ctx.guild.default_role, overwrite=overwrite, reason=f"VC Locked by {ctx.author}")
