@@ -397,39 +397,6 @@ class SpaceXBot(commands.Bot):
         )
         """)
         
-        # INFLUENCER ECONOMY TABLES
-        cursor.execute("""
-        CREATE TABLE IF NOT EXISTS influencer_stats (
-            user_id TEXT PRIMARY KEY,
-            cash INTEGER DEFAULT 0,
-            bank INTEGER DEFAULT 0,
-            clout INTEGER DEFAULT 0,
-            last_stream INTEGER DEFAULT 0,
-            last_video INTEGER DEFAULT 0,
-            last_sponsor INTEGER DEFAULT 0,
-            last_weekly INTEGER DEFAULT 0
-        )
-        """)
-        
-        # Safely attempt to add bank and last_weekly if table already exists
-        try:
-            cursor.execute("ALTER TABLE influencer_stats ADD COLUMN bank INTEGER DEFAULT 0")
-        except Exception:
-            pass
-            
-        try:
-            cursor.execute("ALTER TABLE influencer_stats ADD COLUMN last_weekly INTEGER DEFAULT 0")
-        except Exception:
-            pass
-
-        
-        cursor.execute("""
-        CREATE TABLE IF NOT EXISTS influencer_gear (
-            user_id TEXT,
-            item_id TEXT,
-            PRIMARY KEY (user_id, item_id)
-        )
-        """)
         
         # GLOBAL BLACKLIST TABLE
         cursor.execute("""

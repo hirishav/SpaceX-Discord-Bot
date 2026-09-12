@@ -49,15 +49,11 @@ async def topgg_webhook():
         db = sqlite3.connect("warnings.db", check_same_thread=False, isolation_level=None)
         cursor = db.cursor()
         cursor.execute("INSERT OR IGNORE INTO reps (user_id, rep_points) VALUES (?, 0)", (user_id,))
-        cursor.execute("INSERT OR IGNORE INTO economy (user_id, wallet, bank) VALUES (?, 0, 0)", (user_id,))
         
         # Determine rep points: e.g., 1 point for normal and weekend votes
         rep_amount = 1
-        specie_reward = 5000
         
         cursor.execute("UPDATE reps SET rep_points = rep_points + ? WHERE user_id = ?", (rep_amount, user_id))
-        cursor.execute("UPDATE economy SET wallet = wallet + ? WHERE user_id = ?", (specie_reward, user_id))
-        
         expires_at = int(time.time()) + (12 * 3600)
         cursor.execute("""
         INSERT INTO temp_prefixless_users (user_id, expires_at)
@@ -82,7 +78,7 @@ async def topgg_webhook():
                     if user:
                         embed = discord.Embed(
                             title="✅ Vote ke liye Sukriya! ✅",
-                            description=f"Aapke vote ke liye bahut bahut dhanyawad! ❤️\n\nIske inaam mein aapko mila hai **{rep_amount} Rep Point**, **💠 {specie_reward:,} Specie**, aur **12 ghante ke liye Prefixless Perms**! ✨\n**Total Rep Points:** `{total_rep}`\n\nAise hi support karte rahiye aur aur bhi inaam kamate rahiye! 🚀",
+                            description=f"Aapke vote ke liye bahut bahut dhanyawad! ❤️\n\nIske inaam mein aapko mila hai **{rep_amount} Rep Point** aur **12 ghante ke liye Prefixless Perms**! ✨\n**Total Rep Points:** `{total_rep}`\n\nAise hi support karte rahiye aur aur bhi inaam kamate rahiye! 🚀",
                             color=discord.Color.brand_green()
                         )
                         embed.set_footer(text="SpaceX Bot Team")

@@ -47,7 +47,7 @@ class ModIgnore(commands.Cog):
     @commands.has_permissions(administrator=True)
     async def ignore_module(self, ctx, module_name: str, target: typing.Union[discord.User, discord.Role]):
         """Ignore an entire module for a user or role."""
-        valid_modules = {"utility", "owner", "moderation", "economy", "fun", "general"}
+        valid_modules = {"utility", "owner", "moderation", "fun", "general"}
         module_name = module_name.lower()
         if module_name not in valid_modules:
             return await ctx.send(f"❌ Invalid module name. Valid modules are: {', '.join(valid_modules)}")
