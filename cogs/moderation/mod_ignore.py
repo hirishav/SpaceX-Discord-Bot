@@ -14,7 +14,7 @@ class ModIgnore(commands.Cog):
 
     @ignore.command(name="command")
     @commands.has_permissions(administrator=True)
-    async def ignore_command(self, ctx, command_name: str, target: typing.Union[discord.User, discord.Role]):
+    async def ignore_command(self, ctx, command_name: str, *, target: typing.Union[discord.User, discord.Role, str]):
         """Ignore a specific command for a user or role."""
         cmd = self.bot.get_command(command_name)
         if not cmd:
@@ -24,14 +24,23 @@ class ModIgnore(commands.Cog):
         if command_name in {"ignore", "unignore", "enable", "disable", "help"}:
             return await ctx.send("❌ You cannot ignore core commands.")
             
-        is_role = 1 if isinstance(target, discord.Role) else 0
-        target_id_str = str(target.id)
+        if isinstance(target, str):
+            if target.lower() in ["everyone", "@everyone"]:
+                target_id_str = str(ctx.guild.id)
+                is_role = 1
+                target_mention = "@everyone"
+            else:
+                return await ctx.send("❌ Invalid target. Please mention a user, a role, or type `everyone`.")
+        else:
+            is_role = 1 if isinstance(target, discord.Role) else 0
+            target_id_str = str(target.id)
+            target_mention = target.mention
         
         cursor = self.bot.db.cursor()
         cursor.execute("SELECT 1 FROM ignored_commands_target WHERE server_id = ? AND target_id = ? AND command_name = ?", 
                        (str(ctx.guild.id), target_id_str, command_name))
         if cursor.fetchone():
-            return await ctx.send(f"❌ Command `{command_name}` is already ignored for {target.mention}.")
+            return await ctx.send(f"❌ Command `{command_name}` is already ignored for {target_mention}.", allowed_mentions=discord.AllowedMentions.none())
             
         cursor.execute("INSERT INTO ignored_commands_target (server_id, target_id, is_role, command_name) VALUES (?, ?, ?, ?)",
                        (str(ctx.guild.id), target_id_str, is_role, command_name))
@@ -41,25 +50,34 @@ class ModIgnore(commands.Cog):
             self.bot.ignored_commands_cache[ctx.guild.id] = set()
         self.bot.ignored_commands_cache[ctx.guild.id].add((target_id_str, command_name))
         
-        await ctx.send(f"✅ Ignored command `{command_name}` for {target.mention}.", allowed_mentions=discord.AllowedMentions.none())
+        await ctx.send(f"✅ Ignored command `{command_name}` for {target_mention}.", allowed_mentions=discord.AllowedMentions.none())
 
     @ignore.command(name="module")
     @commands.has_permissions(administrator=True)
-    async def ignore_module(self, ctx, module_name: str, target: typing.Union[discord.User, discord.Role]):
+    async def ignore_module(self, ctx, module_name: str, *, target: typing.Union[discord.User, discord.Role, str]):
         """Ignore an entire module for a user or role."""
         valid_modules = {"utility", "owner", "moderation", "fun", "general"}
         module_name = module_name.lower()
         if module_name not in valid_modules:
             return await ctx.send(f"❌ Invalid module name. Valid modules are: {', '.join(valid_modules)}")
             
-        is_role = 1 if isinstance(target, discord.Role) else 0
-        target_id_str = str(target.id)
+        if isinstance(target, str):
+            if target.lower() in ["everyone", "@everyone"]:
+                target_id_str = str(ctx.guild.id)
+                is_role = 1
+                target_mention = "@everyone"
+            else:
+                return await ctx.send("❌ Invalid target. Please mention a user, a role, or type `everyone`.")
+        else:
+            is_role = 1 if isinstance(target, discord.Role) else 0
+            target_id_str = str(target.id)
+            target_mention = target.mention
         
         cursor = self.bot.db.cursor()
         cursor.execute("SELECT 1 FROM ignored_modules_target WHERE server_id = ? AND target_id = ? AND module_name = ?", 
                        (str(ctx.guild.id), target_id_str, module_name))
         if cursor.fetchone():
-            return await ctx.send(f"❌ Module `{module_name}` is already ignored for {target.mention}.", allowed_mentions=discord.AllowedMentions.none())
+            return await ctx.send(f"❌ Module `{module_name}` is already ignored for {target_mention}.", allowed_mentions=discord.AllowedMentions.none())
             
         cursor.execute("INSERT INTO ignored_modules_target (server_id, target_id, is_role, module_name) VALUES (?, ?, ?, ?)",
                        (str(ctx.guild.id), target_id_str, is_role, module_name))
@@ -69,7 +87,7 @@ class ModIgnore(commands.Cog):
             self.bot.ignored_modules_cache[ctx.guild.id] = set()
         self.bot.ignored_modules_cache[ctx.guild.id].add((target_id_str, module_name))
         
-        await ctx.send(f"✅ Ignored module `{module_name}` for {target.mention}.", allowed_mentions=discord.AllowedMentions.none())
+        await ctx.send(f"✅ Ignored module `{module_name}` for {target_mention}.", allowed_mentions=discord.AllowedMentions.none())
 
     @commands.hybrid_group(name="unignore", aliases=["allow"], fallback="help")
     @commands.has_permissions(administrator=True)
@@ -79,46 +97,63 @@ class ModIgnore(commands.Cog):
 
     @unignore.command(name="command")
     @commands.has_permissions(administrator=True)
-    async def unignore_command(self, ctx, command_name: str, target: typing.Union[discord.User, discord.Role]):
+    async def unignore_command(self, ctx, command_name: str, *, target: typing.Union[discord.User, discord.Role, str]):
         """Unignore (allow) a specific command for a user or role."""
         cmd = self.bot.get_command(command_name)
         if cmd:
             command_name = cmd.qualified_name.split()[0]
             
-        target_id_str = str(target.id)
+        if isinstance(target, str):
+            if target.lower() in ["everyone", "@everyone"]:
+                target_id_str = str(ctx.guild.id)
+                target_mention = "@everyone"
+            else:
+                return await ctx.send("❌ Invalid target. Please mention a user, a role, or type `everyone`.")
+        else:
+            target_id_str = str(target.id)
+            target_mention = target.mention
         
         cursor = self.bot.db.cursor()
         cursor.execute("DELETE FROM ignored_commands_target WHERE server_id = ? AND target_id = ? AND command_name = ?", 
                        (str(ctx.guild.id), target_id_str, command_name))
         if cursor.rowcount == 0:
-            return await ctx.send(f"❌ Command `{command_name}` is not ignored for {target.mention}.", allowed_mentions=discord.AllowedMentions.none())
+            return await ctx.send(f"❌ Command `{command_name}` is not ignored for {target_mention}.", allowed_mentions=discord.AllowedMentions.none())
             
         self.bot.db.commit()
         
         if ctx.guild.id in self.bot.ignored_commands_cache:
             self.bot.ignored_commands_cache[ctx.guild.id].discard((target_id_str, command_name))
         
-        await ctx.send(f"✅ Unignored command `{command_name}` for {target.mention}.", allowed_mentions=discord.AllowedMentions.none())
+        await ctx.send(f"✅ Unignored command `{command_name}` for {target_mention}.", allowed_mentions=discord.AllowedMentions.none())
 
     @unignore.command(name="module")
     @commands.has_permissions(administrator=True)
-    async def unignore_module(self, ctx, module_name: str, target: typing.Union[discord.User, discord.Role]):
+    async def unignore_module(self, ctx, module_name: str, *, target: typing.Union[discord.User, discord.Role, str]):
         """Unignore (allow) an entire module for a user or role."""
         module_name = module_name.lower()
-        target_id_str = str(target.id)
+        
+        if isinstance(target, str):
+            if target.lower() in ["everyone", "@everyone"]:
+                target_id_str = str(ctx.guild.id)
+                target_mention = "@everyone"
+            else:
+                return await ctx.send("❌ Invalid target. Please mention a user, a role, or type `everyone`.")
+        else:
+            target_id_str = str(target.id)
+            target_mention = target.mention
         
         cursor = self.bot.db.cursor()
         cursor.execute("DELETE FROM ignored_modules_target WHERE server_id = ? AND target_id = ? AND module_name = ?", 
                        (str(ctx.guild.id), target_id_str, module_name))
         if cursor.rowcount == 0:
-            return await ctx.send(f"❌ Module `{module_name}` is not ignored for {target.mention}.", allowed_mentions=discord.AllowedMentions.none())
+            return await ctx.send(f"❌ Module `{module_name}` is not ignored for {target_mention}.", allowed_mentions=discord.AllowedMentions.none())
             
         self.bot.db.commit()
         
         if ctx.guild.id in self.bot.ignored_modules_cache:
             self.bot.ignored_modules_cache[ctx.guild.id].discard((target_id_str, module_name))
         
-        await ctx.send(f"✅ Unignored module `{module_name}` for {target.mention}.", allowed_mentions=discord.AllowedMentions.none())
+        await ctx.send(f"✅ Unignored module `{module_name}` for {target_mention}.", allowed_mentions=discord.AllowedMentions.none())
 
 async def setup(bot):
     await bot.add_cog(ModIgnore(bot))

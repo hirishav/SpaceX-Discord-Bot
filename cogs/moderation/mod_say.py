@@ -17,7 +17,8 @@ class ModSay(commands.Cog):
         """Bot se apni marzi ka message bulwane ke liye (Moderation Command)."""
         
         if message_content is None:
-            return await ctx.send(f"❌ Rishav bhai, kuch likho toh sahi! Sahi tarika: `{ctx.prefix}say [channel] <aapka message>`")
+            display_prefix = ctx.prefix if ctx.prefix else "!!"
+            return await ctx.send(f"❌ {ctx.author.mention}, kuch likho toh sahi! Sahi tarika: `{display_prefix}say [channel] <aapka message>`")
 
         target_channel = channel or ctx.channel
 

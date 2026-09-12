@@ -166,6 +166,12 @@ class SpaceXBot(commands.Bot):
         if disabled_reason:
             return False
             
+        # Mods, Admins, and Managers bypass the ignore system
+        if hasattr(interaction.user, 'guild_permissions'):
+            perms = interaction.user.guild_permissions
+            if perms.administrator or perms.manage_guild or perms.manage_messages:
+                return True
+            
         # Ignore checks
         if guild_id in self.ignored_commands_cache:
             for target_id, cmd in self.ignored_commands_cache[guild_id]:
@@ -222,6 +228,12 @@ class SpaceXBot(commands.Bot):
             
         if disabled_reason:
             return False
+            
+        # Mods, Admins, and Managers bypass the ignore system
+        if hasattr(ctx.author, 'guild_permissions'):
+            perms = ctx.author.guild_permissions
+            if perms.administrator or perms.manage_guild or perms.manage_messages:
+                return True
             
         # Ignore checks
         if guild_id in self.ignored_commands_cache:
