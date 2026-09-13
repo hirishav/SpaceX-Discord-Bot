@@ -97,14 +97,6 @@ class TicketCloseConfirmView(discord.ui.View):
             
         await cog.force_close_ticket_logic(interaction, self.reason)
 
-    @discord.ui.button(label="Cancel", emoji="❌", style=discord.ButtonStyle.secondary, custom_id="spacex_ticket_cancel_close_btn")
-    async def cancel_close_button(self, interaction: discord.Interaction, button: discord.ui.Button):
-        try:
-            await interaction.message.delete()
-        except discord.NotFound:
-            pass
-        await interaction.response.send_message("❌ Ticket close operation cancelled.", ephemeral=True)
-
 
 # ─────────────────────────────────────────────────────────────
 # 🎫 TICKET COG
@@ -573,7 +565,7 @@ class Ticket(commands.Cog):
     # ⌨️ TICKET COMMANDS (GROUP & SUBCOMMANDS)
     # ─────────────────────────────────────────────────────────────
 
-    @commands.hybrid_group(name="ticket", invoke_without_command=True)
+    @commands.hybrid_group(name="ticket", aliases=["tic"], invoke_without_command=True)
     async def ticket(self, ctx):
         """SpaceX Ticket System — Support tickets create aur manage karne ke liye commands."""
         embed = discord.Embed(

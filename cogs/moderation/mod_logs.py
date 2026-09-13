@@ -179,9 +179,10 @@ class ModLogsSetup(commands.Cog):
             
             kicker = None
             try:
-                await asyncio.sleep(0.5)
-                async for entry in member.guild.audit_logs(limit=5, action=discord.AuditLogAction.member_disconnect):
-                    if entry.target.id == member.id and (discord.utils.utcnow() - entry.created_at).total_seconds() < 10:
+                await asyncio.sleep(2)  # Increased sleep to allow audit log to populate
+                async for entry in member.guild.audit_logs(limit=10, action=discord.AuditLogAction.member_disconnect):
+                    time_diff = (discord.utils.utcnow() - entry.created_at).total_seconds()
+                    if entry.target.id == member.id and abs(time_diff) < 15:
                         kicker = entry.user
                         break
             except Exception:
@@ -189,7 +190,8 @@ class ModLogsSetup(commands.Cog):
                 
             if kicker:
                 embed.title = "🎙️ Disconnected from Voice Channel"
-                embed.set_author(name=f"{member.name} (Disconnected by {kicker.name})", icon_url=member.display_avatar.url)
+                embed.set_author(name=f"{member.name}", icon_url=member.display_avatar.url)
+                embed.add_field(name="Disconnected By", value=kicker.mention, inline=False)
             else:
                 embed.set_author(name=member.name, icon_url=member.display_avatar.url)
                 
@@ -199,22 +201,25 @@ class ModLogsSetup(commands.Cog):
             
         elif before.channel is not None and after.channel is not None and before.channel != after.channel:
             # vcdrag / move
-            embed = discord.Embed(title="✈️ Moved Voice Channel", color=discord.Color.blue())
+            embed = discord.Embed(title="✈️ Switched Voice Channel", color=discord.Color.blue())
             
             mover = None
             try:
-                await asyncio.sleep(0.5)
-                async for entry in member.guild.audit_logs(limit=5, action=discord.AuditLogAction.member_move):
-                    if entry.target.id == member.id and (discord.utils.utcnow() - entry.created_at).total_seconds() < 10:
+                await asyncio.sleep(2)  # Increased sleep to allow audit log to populate
+                async for entry in member.guild.audit_logs(limit=10, action=discord.AuditLogAction.member_move):
+                    # Check if the log is recent (within 15 seconds, handling possible clock skew)
+                    time_diff = (discord.utils.utcnow() - entry.created_at).total_seconds()
+                    if entry.target.id == member.id and abs(time_diff) < 15:
                         mover = entry.user
                         break
             except Exception:
                 pass
                 
+            embed.set_author(name=member.name, icon_url=member.display_avatar.url)
+                
             if mover:
-                embed.set_author(name=f"{member.name} (Moved by {mover.name})", icon_url=member.display_avatar.url)
-            else:
-                embed.set_author(name=member.name, icon_url=member.display_avatar.url)
+                embed.title = "✈️ Dragged/Moved Voice Channel"
+                embed.add_field(name="Moved By", value=mover.mention, inline=False)
                 
             embed.add_field(name="Before", value=before.channel.mention, inline=True)
             embed.add_field(name="After", value=after.channel.mention, inline=True)
