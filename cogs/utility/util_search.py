@@ -94,14 +94,14 @@ class UtilitySearch(commands.Cog):
                     elif resp.status == 429 and bot_name == "ChatGPT":
                         fallback_msg = await ctx.send("⚠️ ChatGPT is rate-limited or out of quota (429). Falling back to Grok AI...")
                         
-                        groq_key = os.getenv("GROQ_API_KEY")
-                        if not groq_key:
+                        or_key = os.getenv("OPENROUTER_API_KEY")
+                        if not or_key:
                             return await fallback_msg.edit(content="⚠️ ChatGPT is rate-limited, and Grok fallback failed (API key missing).")
                             
-                        headers["Authorization"] = f"Bearer {groq_key}"
-                        payload["model"] = "qwen/qwen3.8-27b"
+                        headers["Authorization"] = f"Bearer {or_key}"
+                        payload["model"] = "meta-llama/llama-3.1-8b-instruct:free"
                         
-                        async with session.post("https://api.groq.com/openai/v1/chat/completions", headers=headers, json=payload) as fallback_resp:
+                        async with session.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, json=payload) as fallback_resp:
                             if fallback_resp.status == 200:
                                 data = await fallback_resp.json()
                                 answer = data['choices'][0]['message']['content']
@@ -139,10 +139,10 @@ class UtilitySearch(commands.Cog):
         await self._handle_ai_command(
             ctx, 
             query, 
-            api_url="https://api.groq.com/openai/v1/chat/completions", 
-            api_key=os.getenv("GROQ_API_KEY"), 
-            model_name="qwen/qwen3.8-27b", 
-            bot_name="Grok AI (via Groq)"
+            api_url="https://openrouter.ai/api/v1/chat/completions", 
+            api_key=os.getenv("OPENROUTER_API_KEY"), 
+            model_name="meta-llama/llama-3.1-8b-instruct:free", 
+            bot_name="Grok AI (via OpenRouter)"
         )
 
     @commands.command(name="search", aliases=["wiki", "wikipedia"])
