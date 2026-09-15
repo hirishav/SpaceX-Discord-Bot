@@ -161,8 +161,18 @@ class UtilitySearch(commands.Cog):
             headers = {'User-Agent': 'SpaceXBot/1.0 (Discord Bot, https://github.com/hirishav/SpaceX-Discord-Bot)'}
             async with aiohttp.ClientSession(headers=headers) as session:
                 # 1. Search Wikipedia for the best matching page title
-                safe_query = urllib.parse.quote(query)
-                search_url = f"https://en.wikipedia.org/w/api.php?action=opensearch&search={safe_query}&limit=1&namespace=0&format=json"
+                clean_query = query.lower()
+                prefixes_to_remove = ["what is a ", "what is an ", "what is ", "who is ", "where is ", "meaning of ", "define ", "what are "]
+                for prefix in prefixes_to_remove:
+                    if clean_query.startswith(prefix):
+                        clean_query = clean_query[len(prefix):]
+                        break
+                clean_query = clean_query.rstrip("?").strip()
+                if not clean_query:
+                    clean_query = query
+                    
+                safe_query = urllib.parse.quote(clean_query)
+                search_url = f"https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch={safe_query}&utf8=&format=json&srlimit=1"
                 
                 async with session.get(search_url) as resp:
                     if resp.status != 200:
@@ -170,11 +180,11 @@ class UtilitySearch(commands.Cog):
                         
                     data = await resp.json()
                     
-                    if not data[1]:
+                    if 'query' not in data or not data['query']['search']:
                         return await ctx.send(f"❌ No results found on Wikipedia for `{query}`.")
                         
-                    page_title = data[1][0]
-                    page_link = data[3][0]
+                    page_title = data['query']['search'][0]['title']
+                    page_link = f"https://en.wikipedia.org/wiki/{urllib.parse.quote(page_title.replace(' ', '_'))}"
                     
                 # 2. Fetch the summary for that page
                 summary_url = f"https://en.wikipedia.org/api/rest_v1/page/summary/{urllib.parse.quote(page_title.replace(' ', '_'))}"
