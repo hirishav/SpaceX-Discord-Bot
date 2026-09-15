@@ -5,8 +5,6 @@ import os
 import re
 import urllib.parse
 
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-CHATGPT_API_KEY = os.getenv("CHATGPT_API_KEY")
 
 async def fetch_url_content(url):
     try:
@@ -105,7 +103,7 @@ class UtilitySearch(commands.Cog):
             ctx, 
             query, 
             api_url="https://api.openai.com/v1/chat/completions", 
-            api_key=CHATGPT_API_KEY, 
+            api_key=os.getenv("CHATGPT_API_KEY"), 
             model_name="gpt-4o-mini", 
             bot_name="ChatGPT"
         )
@@ -116,7 +114,7 @@ class UtilitySearch(commands.Cog):
             ctx, 
             query, 
             api_url="https://api.groq.com/openai/v1/chat/completions", 
-            api_key=GROQ_API_KEY, 
+            api_key=os.getenv("GROQ_API_KEY"), 
             model_name="llama3-8b-8192", 
             bot_name="Grok AI (via Groq)"
         )
