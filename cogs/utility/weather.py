@@ -23,7 +23,8 @@ class Weather(commands.Cog):
         safe_location = urllib.parse.quote(location)
         
         try:
-            async with aiohttp.ClientSession() as session:
+            headers = {'User-Agent': 'SpaceXBot/1.0 (Discord Bot, https://github.com/hirishav/SpaceX-Discord-Bot)'}
+            async with aiohttp.ClientSession(headers=headers) as session:
                 geocode_url = f"https://geocoding-api.open-meteo.com/v1/search?name={safe_location}&count=1"
                 async with session.get(geocode_url) as geo_resp:
                     if geo_resp.status != 200:
