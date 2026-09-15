@@ -162,12 +162,28 @@ class UtilitySearch(commands.Cog):
             async with aiohttp.ClientSession(headers=headers) as session:
                 # 1. Search Wikipedia for the best matching page title
                 clean_query = query.lower()
-                prefixes_to_remove = ["what is a ", "what is an ", "what is ", "who is ", "where is ", "meaning of ", "define ", "what are "]
+                prefixes_to_remove = ["what is a ", "what is an ", "what is ", "who is ", "where is ", "meaning of ", "define ", "what are ", "kya hai "]
+                suffixes_to_remove = [" kya hai", " kise kehte hai", " kise kehte hain", " ka matlab", " ka kya matlab hai"]
+                
                 for prefix in prefixes_to_remove:
                     if clean_query.startswith(prefix):
                         clean_query = clean_query[len(prefix):]
                         break
+                        
+                for suffix in suffixes_to_remove:
+                    if clean_query.endswith(suffix):
+                        clean_query = clean_query[:-len(suffix)]
+                        break
+                        
                 clean_query = clean_query.rstrip("?").strip()
+                
+                # Check suffixes again in case the question mark was removed
+                for suffix in suffixes_to_remove:
+                    if clean_query.endswith(suffix):
+                        clean_query = clean_query[:-len(suffix)]
+                        break
+                        
+                clean_query = clean_query.strip()
                 if not clean_query:
                     clean_query = query
                     
