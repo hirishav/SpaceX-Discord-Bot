@@ -91,6 +91,31 @@ class UtilitySearch(commands.Cog):
                         )
                         embed.set_footer(text=f"Requested by {ctx.author.name} | Powered by {bot_name}", icon_url=ctx.author.display_avatar.url)
                         await ctx.send(embed=embed)
+                    elif resp.status == 429 and bot_name == "ChatGPT":
+                        fallback_msg = await ctx.send("⚠️ ChatGPT is rate-limited or out of quota (429). Falling back to Grok AI...")
+                        
+                        groq_key = os.getenv("GROQ_API_KEY")
+                        if not groq_key:
+                            return await fallback_msg.edit(content="⚠️ ChatGPT is rate-limited, and Grok fallback failed (API key missing).")
+                            
+                        headers["Authorization"] = f"Bearer {groq_key}"
+                        payload["model"] = "llama3-8b-8192"
+                        
+                        async with session.post("https://api.groq.com/openai/v1/chat/completions", headers=headers, json=payload) as fallback_resp:
+                            if fallback_resp.status == 200:
+                                data = await fallback_resp.json()
+                                answer = data['choices'][0]['message']['content']
+                                if len(answer) > 4000:
+                                    answer = answer[:3996] + "..."
+                                embed = discord.Embed(
+                                    title="🤖 Grok AI Result (Fallback)",
+                                    description=answer,
+                                    color=discord.Color.blurple()
+                                )
+                                embed.set_footer(text=f"Requested by {ctx.author.name} | Fallback from ChatGPT", icon_url=ctx.author.display_avatar.url)
+                                await fallback_msg.edit(content=None, embed=embed)
+                            else:
+                                await fallback_msg.edit(content=f"⚠️ Fallback search failed. Grok AI returned status `{fallback_resp.status}`.")
                     else:
                         error_text = await resp.text()
                         await ctx.send(f"⚠️ Search failed. {bot_name} API returned status `{resp.status}`.")
