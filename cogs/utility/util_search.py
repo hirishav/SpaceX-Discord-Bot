@@ -8,7 +8,8 @@ import urllib.parse
 
 async def fetch_url_content(url):
     try:
-        async with aiohttp.ClientSession() as session:
+        headers = {'User-Agent': 'SpaceXBot/1.0 (Discord Bot)'}
+        async with aiohttp.ClientSession(headers=headers) as session:
             async with session.get(url, timeout=5) as resp:
                 if resp.status == 200:
                     html = await resp.text()
@@ -132,7 +133,8 @@ class UtilitySearch(commands.Cog):
         await ctx.typing()
         
         try:
-            async with aiohttp.ClientSession() as session:
+            headers = {'User-Agent': 'SpaceXBot/1.0 (Discord Bot)'}
+            async with aiohttp.ClientSession(headers=headers) as session:
                 # 1. Search Wikipedia for the best matching page title
                 safe_query = urllib.parse.quote(query)
                 search_url = f"https://en.wikipedia.org/w/api.php?action=opensearch&search={safe_query}&limit=1&namespace=0&format=json"
