@@ -3,8 +3,10 @@ from discord.ext import commands
 import aiohttp
 import os
 import re
+import urllib.parse
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+CHATGPT_API_KEY = os.getenv("CHATGPT_API_KEY")
 
 async def fetch_url_content(url):
     try:
@@ -12,13 +14,9 @@ async def fetch_url_content(url):
             async with session.get(url, timeout=5) as resp:
                 if resp.status == 200:
                     html = await resp.text()
-                    # Remove script and style tags
                     html = re.sub(r'<(script|style).*?>.*?</\1>', '', html, flags=re.IGNORECASE | re.DOTALL)
-                    # Remove HTML tags
                     text = re.sub(r'<.*?>', ' ', html)
-                    # Remove extra whitespace
                     text = re.sub(r'\s+', ' ', text).strip()
-                    # Limit the text to avoid token limits
                     return text[:3000]
     except Exception:
         pass
@@ -28,32 +26,28 @@ class UtilitySearch(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="search", aliases=["ask", "gpt", "grok", "gemini"])
-    async def search_command(self, ctx, *, query: str = None):
+    async def _handle_ai_command(self, ctx, query, api_url, api_key, model_name, bot_name):
         if not query:
             embed = discord.Embed(
                 title="❌ Error",
-                description=f"Please provide something to search for.\nUsage: `{ctx.prefix}search <query>`",
+                description=f"Please provide something to ask.\nUsage: `{ctx.prefix}{ctx.invoked_with} <query>`",
                 color=discord.Color.red()
             )
             return await ctx.send(embed=embed)
             
-        if not GROQ_API_KEY:
-            return await ctx.send("The search API is currently unavailable (API key missing).")
+        if not api_key:
+            return await ctx.send(f"The {bot_name} API is currently unavailable (API key missing).")
             
-        # Send a typing indicator while processing the request
         await ctx.typing()
         
-        # Extract URLs from the query
         urls = re.findall(r'(https?://\S+)', query)
         url_contents = {}
         if urls:
-            for url in urls[:2]: # Max 2 URLs to prevent abuse/timeout
+            for url in urls[:2]:
                 content = await fetch_url_content(url)
                 if content:
                     url_contents[url] = content
                     
-        # Construct the context if URLs were found
         context = ""
         if url_contents:
             context = "\n\nContext from provided links:\n"
@@ -63,16 +57,16 @@ class UtilitySearch(commands.Cog):
         try:
             async with aiohttp.ClientSession() as session:
                 headers = {
-                    "Authorization": f"Bearer {GROQ_API_KEY}",
+                    "Authorization": f"Bearer {api_key}",
                     "Content-Type": "application/json"
                 }
                 
                 payload = {
-                    "model": "llama3-8b-8192",  # Fast and smart model provided by Groq
+                    "model": model_name,
                     "messages": [
                         {
                             "role": "system", 
-                            "content": "You are a helpful and knowledgeable Discord bot assistant. Answer the user's questions concisely, accurately, and format your output using Discord's markdown features (bolding, code blocks, bullet points) when appropriate. Keep your answers straight to the point."
+                            "content": f"You are a helpful and knowledgeable Discord bot assistant powered by {bot_name}. Answer the user's questions concisely, accurately, and format your output using Discord's markdown features (bolding, code blocks, bullet points) when appropriate. Keep your answers straight to the point."
                         },
                         {
                             "role": "user", 
@@ -83,26 +77,106 @@ class UtilitySearch(commands.Cog):
                     "max_tokens": 2048
                 }
                 
-                async with session.post("https://api.groq.com/openai/v1/chat/completions", headers=headers, json=payload) as resp:
+                async with session.post(api_url, headers=headers, json=payload) as resp:
                     if resp.status == 200:
                         data = await resp.json()
                         answer = data['choices'][0]['message']['content']
                         
-                        # Discord limits embed descriptions to 4096 chars.
-                        # We will send the message out directly or in an embed.
                         if len(answer) > 4000:
                             answer = answer[:3996] + "..."
                             
                         embed = discord.Embed(
-                            title=f"🔍 Search Result",
+                            title=f"🤖 {bot_name} Result",
                             description=answer,
-                            color=discord.Color.blurple()
+                            color=discord.Color.green() if bot_name == "ChatGPT" else discord.Color.blurple()
                         )
-                        embed.set_footer(text=f"Requested by {ctx.author.name} | Powered by Groq AI", icon_url=ctx.author.display_avatar.url)
+                        embed.set_footer(text=f"Requested by {ctx.author.name} | Powered by {bot_name}", icon_url=ctx.author.display_avatar.url)
                         await ctx.send(embed=embed)
                     else:
                         error_text = await resp.text()
-                        await ctx.send(f"⚠️ Search failed. AI API returned status `{resp.status}`.")
+                        await ctx.send(f"⚠️ Search failed. {bot_name} API returned status `{resp.status}`.")
+        except Exception as e:
+            await ctx.send(f"⚠️ An error occurred while communicating with {bot_name}: `{str(e)}`")
+
+
+    @commands.command(name="gpt", aliases=["chatgpt"])
+    async def gpt_command(self, ctx, *, query: str = None):
+        await self._handle_ai_command(
+            ctx, 
+            query, 
+            api_url="https://api.openai.com/v1/chat/completions", 
+            api_key=CHATGPT_API_KEY, 
+            model_name="gpt-4o-mini", 
+            bot_name="ChatGPT"
+        )
+
+    @commands.command(name="grok")
+    async def grok_command(self, ctx, *, query: str = None):
+        await self._handle_ai_command(
+            ctx, 
+            query, 
+            api_url="https://api.groq.com/openai/v1/chat/completions", 
+            api_key=GROQ_API_KEY, 
+            model_name="llama3-8b-8192", 
+            bot_name="Grok AI (via Groq)"
+        )
+
+    @commands.command(name="search", aliases=["wiki", "wikipedia"])
+    async def search_command(self, ctx, *, query: str = None):
+        if not query:
+            embed = discord.Embed(
+                title="❌ Error",
+                description=f"Please provide something to search for.\nUsage: `{ctx.prefix}search <query>`",
+                color=discord.Color.red()
+            )
+            return await ctx.send(embed=embed)
+            
+        await ctx.typing()
+        
+        try:
+            async with aiohttp.ClientSession() as session:
+                # 1. Search Wikipedia for the best matching page title
+                safe_query = urllib.parse.quote(query)
+                search_url = f"https://en.wikipedia.org/w/api.php?action=opensearch&search={safe_query}&limit=1&namespace=0&format=json"
+                
+                async with session.get(search_url) as resp:
+                    if resp.status != 200:
+                        return await ctx.send("⚠️ Failed to connect to Wikipedia.")
+                        
+                    data = await resp.json()
+                    
+                    if not data[1]:
+                        return await ctx.send(f"❌ No results found on Wikipedia for `{query}`.")
+                        
+                    page_title = data[1][0]
+                    page_link = data[3][0]
+                    
+                # 2. Fetch the summary for that page
+                summary_url = f"https://en.wikipedia.org/api/rest_v1/page/summary/{urllib.parse.quote(page_title.replace(' ', '_'))}"
+                async with session.get(summary_url) as sum_resp:
+                    if sum_resp.status != 200:
+                        return await ctx.send("⚠️ Failed to fetch Wikipedia summary.")
+                        
+                    sum_data = await sum_resp.json()
+                    extract = sum_data.get('extract', 'No summary available.')
+                    thumbnail = sum_data.get('thumbnail', {}).get('source', None)
+                    
+                    if len(extract) > 4000:
+                        extract = extract[:3996] + "..."
+                        
+                    embed = discord.Embed(
+                        title=f"🔍 Wikipedia: {page_title}",
+                        url=page_link,
+                        description=extract,
+                        color=discord.Color.blue()
+                    )
+                    
+                    if thumbnail:
+                        embed.set_thumbnail(url=thumbnail)
+                        
+                    embed.set_footer(text=f"Requested by {ctx.author.name}", icon_url=ctx.author.display_avatar.url)
+                    await ctx.send(embed=embed)
+                    
         except Exception as e:
             await ctx.send(f"⚠️ An error occurred while searching: `{str(e)}`")
 

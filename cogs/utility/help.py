@@ -424,7 +424,32 @@ class Help(commands.Cog):
         category = CATEGORY_META[cmd_category]["label"]
 
         # ---- 📦 SAARE CUSTOM DESCRIPTIONS KA BACCHAFULL EXTENDED DATABASE ----
-        if cmd.name == "blacklist":
+        if cmd.name == "search":
+            description = "🔍 Normal internet search (powered by Wikipedia) to get information and summaries instantly."
+            usage = f"`{prefix}search <query>`\nAliases: `{prefix}wiki`, `{prefix}wikipedia`"
+            examples = f"`{prefix}search What is the capital of India?`"
+            
+        elif cmd.name == "gpt":
+            description = "🤖 Smart AI powered by ChatGPT. It can answer questions and read website links you provide!"
+            usage = f"`{prefix}gpt <query or link>`\nAlias: `{prefix}chatgpt`"
+            examples = f"`{prefix}gpt write a python script`\n`{prefix}gpt https://example.com summarize this website`"
+
+        elif cmd.name == "grok":
+            description = "🧠 Fast AI powered by Grok (Groq). It can answer questions and read website links you provide!"
+            usage = f"`{prefix}grok <query or link>`"
+            examples = f"`{prefix}grok write a python script`\n`{prefix}grok https://example.com summarize this website`"
+
+        elif cmd.name == "addowner":
+            description = "👑 Kisi bhi trusted user ko bot ka owner access dene ke liye (Main Owner Only)."
+            usage = f"`{prefix}addowner @user/ID`\nAlias: `{prefix}ao`"
+            examples = f"`{prefix}addowner @Rishav`"
+
+        elif cmd.name == "removeowner":
+            description = "🚫 Kisi user ka owner access permanently hatane ke liye (Main Owner Only)."
+            usage = f"`{prefix}removeowner @user/ID`\nAlias: `{prefix}ro`"
+            examples = f"`{prefix}removeowner @Rishav`"
+
+        elif cmd.name == "blacklist":
             description = "🚨 Strictly for Bot Owner! Rules todne par kisi user ko globally bot se block karne ke liye."
             usage = f"`{prefix}blacklist @user/ID <duration> [reason]`"
             examples = f"`{prefix}blacklist @User 30s Rules bypass`"
