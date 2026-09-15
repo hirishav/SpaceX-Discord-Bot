@@ -99,7 +99,7 @@ class UtilitySearch(commands.Cog):
                             return await fallback_msg.edit(content="⚠️ ChatGPT is rate-limited, and Grok fallback failed (API key missing).")
                             
                         headers["Authorization"] = f"Bearer {or_key}"
-                        payload["model"] = "meta-llama/llama-3.1-8b-instruct:free"
+                        payload["model"] = "google/gemma-4-31b-it:free"
                         
                         async with session.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, json=payload) as fallback_resp:
                             if fallback_resp.status == 200:
@@ -141,7 +141,7 @@ class UtilitySearch(commands.Cog):
             query, 
             api_url="https://openrouter.ai/api/v1/chat/completions", 
             api_key=os.getenv("OPENROUTER_API_KEY"), 
-            model_name="meta-llama/llama-3.1-8b-instruct:free", 
+            model_name="google/gemma-4-31b-it:free", 
             bot_name="Grok AI (via OpenRouter)"
         )
 
