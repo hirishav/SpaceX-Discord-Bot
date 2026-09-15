@@ -367,6 +367,26 @@ class Help(commands.Cog):
             embed.set_footer(text=f"Requested by {ctx.author.display_name}", icon_url=ctx.author.display_avatar.url)
             return await ctx.send(embed=embed)
 
+        if target in ["guess", "guessing", "guessgame"]:
+            embed = discord.Embed(
+                title="🎮 Guessing Game (Fun)",
+                description=(
+                    f"Test your knowledge! Guess the dog breed, Pokémon, or country flag.\n\n"
+                    f"**Kaise Set Karein?**\n"
+                    f"> `{prefix}setguesschannel <#channel>` command use karke game channel set karein. (Admin Only)\n\n"
+                    f"**Game Commands:**\n"
+                    f"> `{prefix}guess start` - Game chalu karein.\n"
+                    f"> `{prefix}guess stop` - Game rokein.\n"
+                    f"> `{prefix}hint` - Current question ka hint dekhein.\n"
+                    f"> `{prefix}guess end` - Game end karein aur server ka leaderboard dekhein.\n\n"
+                    f"💡 *Rules: Har round 1 minute ka hota hai. Sahi jawab do aur point pao!*"
+                ),
+                color=EMBED_COLOR
+            )
+            embed.set_thumbnail(url=ctx.bot.user.display_avatar.url)
+            embed.set_footer(text=f"Requested by {ctx.author.display_name}", icon_url=ctx.author.display_avatar.url)
+            return await ctx.send(embed=embed)
+
         # ---- CASE 2: !!help <category> ----
         matched_key = None
         for key, meta in CATEGORY_META.items():
