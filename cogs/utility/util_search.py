@@ -99,7 +99,7 @@ class UtilitySearch(commands.Cog):
                             return await fallback_msg.edit(content="⚠️ ChatGPT is rate-limited, and Grok fallback failed (API key missing).")
                             
                         headers["Authorization"] = f"Bearer {groq_key}"
-                        payload["model"] = "llama3-8b-8192"
+                        payload["model"] = "llama-3.1-8b-instant"
                         
                         async with session.post("https://api.groq.com/openai/v1/chat/completions", headers=headers, json=payload) as fallback_resp:
                             if fallback_resp.status == 200:
@@ -141,7 +141,7 @@ class UtilitySearch(commands.Cog):
             query, 
             api_url="https://api.groq.com/openai/v1/chat/completions", 
             api_key=os.getenv("GROQ_API_KEY"), 
-            model_name="llama3-8b-8192", 
+            model_name="llama-3.1-8b-instant", 
             bot_name="Grok AI (via Groq)"
         )
 
