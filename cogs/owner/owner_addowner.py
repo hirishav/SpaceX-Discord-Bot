@@ -1,7 +1,12 @@
 import discord
 from discord.ext import commands
 import sqlite3
-import config
+import os
+
+try:
+    import config
+except ImportError:
+    config = None
 
 class OwnerAddOwner(commands.Cog):
     def __init__(self, bot):
@@ -76,7 +81,7 @@ class OwnerAddOwner(commands.Cog):
             )
             return await ctx.send(embed=embed)
 
-        main_owner_id = getattr(config, 'OWNER_ID', 727718500663033897)
+        main_owner_id = getattr(config, 'OWNER_ID', 727718500663033897) if config else int(os.environ.get('OWNER_ID', 727718500663033897))
         if user.id == main_owner_id:
             embed = discord.Embed(
                 title="❌ Permission Denied",

@@ -25,6 +25,35 @@ class Weather(commands.Cog):
         try:
             headers = {'User-Agent': 'SpaceXBot/1.0 (Discord Bot, https://github.com/hirishav/SpaceX-Discord-Bot)'}
             async with aiohttp.ClientSession(headers=headers) as session:
+                weather_api_key = os.getenv("WEATHER_API_KEY")
+                
+                # First try WeatherAPI if key is available
+                if weather_api_key:
+                    wapi_url = f"http://api.weatherapi.com/v1/current.json?key={weather_api_key}&q={safe_location}"
+                    async with session.get(wapi_url) as wapi_resp:
+                        if wapi_resp.status == 200:
+                            data = await wapi_resp.json()
+                            loc = data['location']
+                            cur = data['current']
+                            
+                            region_text = f", {loc.get('region')}" if loc.get('region') else ""
+                            embed = discord.Embed(
+                                title=f"☁️ Weather in {loc['name']}{region_text}, {loc.get('country', '')}",
+                                color=discord.Color.blue()
+                            )
+                            embed.add_field(name="🌡️ Temperature", value=f"{cur['temp_c']}°C / {cur['temp_f']}°F", inline=True)
+                            embed.add_field(name="🌤️ Condition", value=cur['condition']['text'], inline=True)
+                            embed.add_field(name="💧 Humidity", value=f"{cur['humidity']}%", inline=True)
+                            embed.add_field(name="💨 Wind", value=f"{cur['wind_kph']} km/h", inline=True)
+                            embed.add_field(name="🤒 Feels Like", value=f"{cur['feelslike_c']}°C", inline=True)
+                            
+                            if 'uv' in cur:
+                                embed.add_field(name="☀️ UV Index", value=str(cur['uv']), inline=True)
+                                
+                            embed.set_footer(text=f"Requested by {ctx.author.name} | Data from WeatherAPI", icon_url=ctx.author.display_avatar.url)
+                            return await ctx.send(embed=embed)
+                
+                # Fallback to Open-Meteo (might hit 429 on Render)
                 geocode_url = f"https://geocoding-api.open-meteo.com/v1/search?name={safe_location}&count=1"
                 async with session.get(geocode_url) as geo_resp:
                     if geo_resp.status != 200:
@@ -41,7 +70,7 @@ class Weather(commands.Cog):
                     
                     async with session.get(weather_url) as weather_resp:
                         if weather_resp.status != 200:
-                            return await ctx.send(f"⚠️ Weather API returned an error: `{weather_resp.status}`")
+                            return await ctx.send(f"⚠️ Weather API returned an error: `{weather_resp.status}` (This usually happens on cloud hosts like Render due to rate limits)")
                         
                         w_data = await weather_resp.json()
                         current = w_data['current']

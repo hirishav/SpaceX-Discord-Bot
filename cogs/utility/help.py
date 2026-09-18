@@ -1134,6 +1134,29 @@ class Help(commands.Cog):
             usage = f"`{prefix}logconfig`"
             examples = f"`{prefix}logconfig`"
 
+        elif cmd.name == "delchannel":
+            description = "🗑️ Current channel ya specific channel ko delete karne ke liye (confirmation ke sath)."
+            usage = f"`{prefix}delchannel [#channel]`"
+            examples = f"`{prefix}delchannel`\n`{prefix}delchannel #spam`"
+
+        elif cmd.name == "fake":
+            description = "🤡 Fun category ke fake moderation aur utility commands. Dosto ke sath prank karne ke liye!"
+            usage = (
+                f"`{prefix}fake ban @user reason`\n"
+                f"`{prefix}fake mute @user reason`\n"
+                f"`{prefix}fake kick @user reason`\n"
+                f"`{prefix}fake warn @user reason`\n"
+                f"`{prefix}fake delchannel`\n"
+                f"`{prefix}fake tic create`\n"
+                f"`{prefix}fake afk`\n"
+                f"`{prefix}fake role add @user reason`\n"
+                f"`{prefix}fake temprole @user 1h Role`\n"
+                f"`{prefix}fake hide all`\n"
+                f"`{prefix}fake unhide all`\n"
+                f"`{prefix}fake slowmode 1h`"
+            )
+            examples = f"`{prefix}fake ban @Rishav Spamming`\n`{prefix}fake delchannel`"
+
         cmd_embed = discord.Embed(
             title=f"✦ Command: {cmd.name.capitalize()} ✦",
             description=f"> {description}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━",

@@ -447,7 +447,7 @@ class Ticket(commands.Cog):
         creator = guild.get_member(int(creator_id))
         if creator:
             try:
-                await channel.set_permissions(creator, view_channel=True, send_messages=False, read_messages=True)
+                await channel.set_permissions(creator, view_channel=False, send_messages=False, read_messages=False)
             except Exception:
                 pass
 
