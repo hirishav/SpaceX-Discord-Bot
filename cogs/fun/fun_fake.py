@@ -9,8 +9,6 @@ class FunFake(commands.Cog):
     def check_hierarchy(self, ctx, user):
         if user.id == ctx.guild.owner_id:
             return "❌ You cannot perform this action on the server owner."
-        if ctx.author.id != ctx.guild.owner_id and user.top_role >= ctx.author.top_role:
-            return f"❌ You cannot perform this action on {user.mention} because their highest role is equal to or higher than yours."
         if user.id == self.bot.user.id:
             return "❌ I cannot perform this action on myself."
         return None
