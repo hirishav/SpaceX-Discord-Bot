@@ -134,7 +134,7 @@ class FunTND(commands.Cog):
                 except discord.Forbidden:
                     pass
 
-    @commands.group(invoke_without_command=True)
+    @commands.group(invoke_without_command=True)  # type: ignore
     async def tnd(self, ctx):
         """
         Configure Truth and Dare for a channel.

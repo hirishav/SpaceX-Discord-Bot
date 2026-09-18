@@ -599,7 +599,7 @@ class Ticket(commands.Cog):
     # ⌨️ TICKET COMMANDS (GROUP & SUBCOMMANDS)
     # ─────────────────────────────────────────────────────────────
 
-    @commands.hybrid_group(name="ticket", aliases=["tic"], invoke_without_command=True)
+    @commands.hybrid_group(name="ticket", aliases=["tic"], invoke_without_command=True)  # type: ignore
     async def ticket(self, ctx):
         """SpaceX Ticket System — Support tickets create aur manage karne ke liye commands."""
         embed = discord.Embed(

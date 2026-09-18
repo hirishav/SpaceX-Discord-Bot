@@ -18,7 +18,7 @@ class ModConfig(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.hybrid_group(name="disable", invoke_without_command=True)
+    @commands.hybrid_group(name="disable", invoke_without_command=True)  # type: ignore
     @is_admin_or_owner()
     async def disable(self, ctx):
         """Disable a module or command in this server or channel."""
@@ -131,7 +131,7 @@ class ModConfig(commands.Cog):
                 
             await ctx.send(f"🚫 Command `{command_name}` is now disabled globally in this server (Channel overrides removed).")
 
-    @commands.hybrid_group(name="enable", invoke_without_command=True)
+    @commands.hybrid_group(name="enable", invoke_without_command=True)  # type: ignore
     @is_admin_or_owner()
     async def enable(self, ctx):
         """Enable a module or command in this server or channel."""

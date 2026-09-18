@@ -6,7 +6,7 @@ class ModJoinRole(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.group(invoke_without_command=True)
+    @commands.group(invoke_without_command=True)  # type: ignore
     @commands.has_permissions(manage_roles=True)
     async def joinrole(self, ctx, *, role: discord.Role = None):
         """

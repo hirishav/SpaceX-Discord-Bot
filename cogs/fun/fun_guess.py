@@ -225,7 +225,7 @@ class FunGuess(commands.Cog):
                 print(f"[GuessGame] Game Loop Error: {e}")
                 await asyncio.sleep(5)
 
-    @commands.group(invoke_without_command=True)
+    @commands.group(invoke_without_command=True)  # type: ignore
     async def guess(self, ctx):
         """Guessing game commands."""
         embed = discord.Embed(title="🎮 Guessing Game", color=discord.Color.green())

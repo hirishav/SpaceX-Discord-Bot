@@ -18,7 +18,7 @@ class RepSystem(commands.Cog):
             except Exception:
                 return None, None
 
-    @commands.hybrid_group(name="rep", invoke_without_command=True)
+    @commands.hybrid_group(name="rep", invoke_without_command=True)  # type: ignore
     async def rep(self, ctx, user_str: str = None):
         """Check yours or someone else's rep points!"""
         if ctx.invoked_subcommand is None:

@@ -6,7 +6,17 @@ class FunFake(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.hybrid_group(name="fake", invoke_without_command=True)
+    def check_hierarchy(self, ctx, user):
+        if user.id == ctx.guild.owner_id:
+            return "❌ You cannot perform this action on the server owner."
+        if ctx.author.id != ctx.guild.owner_id and user.top_role >= ctx.author.top_role:
+            return f"❌ You cannot perform this action on {user.mention} because their highest role is equal to or higher than yours."
+        if user.id == self.bot.user.id:
+            return "❌ I cannot perform this action on myself."
+        return None
+
+    @commands.hybrid_group(name="fake", invoke_without_command=True)  # type: ignore
+    @commands.has_permissions(manage_messages=True)
     async def fake(self, ctx):
         """Fake moderation/utility commands group for fun."""
         await ctx.send("Available fake commands: ban, mute, kick, warn, delchannel, tic create, afk, role add, temprole, hide all, unhide all, slowmode", delete_after=10)
@@ -15,40 +25,68 @@ class FunFake(commands.Cog):
 
     @fake.command(name="ban")
     async def fake_ban(self, ctx, user: discord.Member, *, reason: str = "No reason provided"):
+        error = self.check_hierarchy(ctx, user)
+        if error:
+            return await ctx.send(error)
         embed = discord.Embed(
-            description=f"✅ {user.mention} has been **banned** | {reason}",
-            color=discord.Color.green()
+            title="🔨 Member Banned",
+            description=f"**{user.name}** ko hamesha ke liye ban kar diya gaya hai.",
+            color=discord.Color.red()
         )
+        embed.add_field(name="👤 Target", value=f"{user.mention} (`{user.id}`)", inline=True)
+        embed.add_field(name="🛡️ Staff", value=ctx.author.mention, inline=True)
+        embed.add_field(name="📝 Reason", value=reason, inline=False)
         await ctx.send(embed=embed)
         try: await ctx.message.delete()
         except: pass
 
     @fake.command(name="mute")
     async def fake_mute(self, ctx, user: discord.Member, *, reason: str = "No reason provided"):
+        error = self.check_hierarchy(ctx, user)
+        if error:
+            return await ctx.send(error)
         embed = discord.Embed(
-            description=f"✅ {user.mention} has been **muted** | {reason}",
-            color=discord.Color.green()
+            title="🔇 Member Muted",
+            description=f"**{user.name}** ko server me mute kar diya gaya hai.",
+            color=discord.Color.red()
         )
+        embed.add_field(name="👤 Target", value=f"{user.mention} (`{user.id}`)", inline=True)
+        embed.add_field(name="🛡️ Staff", value=ctx.author.mention, inline=True)
+        embed.add_field(name="📝 Reason", value=reason, inline=False)
         await ctx.send(embed=embed)
         try: await ctx.message.delete()
         except: pass
 
     @fake.command(name="kick")
     async def fake_kick(self, ctx, user: discord.Member, *, reason: str = "No reason provided"):
+        error = self.check_hierarchy(ctx, user)
+        if error:
+            return await ctx.send(error)
         embed = discord.Embed(
-            description=f"✅ {user.mention} has been **kicked** | {reason}",
-            color=discord.Color.green()
+            title="👢 Member Kicked",
+            description=f"**{user.name}** ko server se kick kar diya gaya hai.",
+            color=discord.Color.orange()
         )
+        embed.add_field(name="👤 Target", value=f"{user.mention} (`{user.id}`)", inline=True)
+        embed.add_field(name="🛡️ Staff", value=ctx.author.mention, inline=True)
+        embed.add_field(name="📝 Reason", value=reason, inline=False)
         await ctx.send(embed=embed)
         try: await ctx.message.delete()
         except: pass
 
     @fake.command(name="warn")
     async def fake_warn(self, ctx, user: discord.Member, *, reason: str = "No reason provided"):
+        error = self.check_hierarchy(ctx, user)
+        if error:
+            return await ctx.send(error)
         embed = discord.Embed(
-            description=f"⚠️ {user.mention} has been **warned** | {reason}",
+            title="⚠️ Member Warned",
+            description=f"**{user.name}** ko ek warning di gayi hai.",
             color=discord.Color.orange()
         )
+        embed.add_field(name="👤 Target", value=f"{user.mention} (`{user.id}`)", inline=True)
+        embed.add_field(name="🛡️ Staff", value=ctx.author.mention, inline=True)
+        embed.add_field(name="📝 Reason", value=reason, inline=False)
         await ctx.send(embed=embed)
         try: await ctx.message.delete()
         except: pass
@@ -65,7 +103,7 @@ class FunFake(commands.Cog):
         except: pass
 
     # 'fake tic' and 'fake tic create'
-    @fake.group(name="tic", invoke_without_command=True)
+    @fake.group(name="tic", invoke_without_command=True)  # type: ignore
     async def fake_tic(self, ctx):
         pass
 
@@ -90,12 +128,15 @@ class FunFake(commands.Cog):
         except: pass
 
     # 'fake role' and 'fake role add'
-    @fake.group(name="role", invoke_without_command=True)
+    @fake.group(name="role", invoke_without_command=True)  # type: ignore
     async def fake_role(self, ctx):
         pass
 
     @fake_role.command(name="add")
     async def fake_role_add(self, ctx, user: discord.Member, role_name: str = "Admin", *, reason: str = "No reason provided"):
+        error = self.check_hierarchy(ctx, user)
+        if error:
+            return await ctx.send(error)
         embed = discord.Embed(
             description=f"✅ Added role **{role_name}** to {user.mention} | {reason}",
             color=discord.Color.green()
@@ -106,6 +147,9 @@ class FunFake(commands.Cog):
 
     @fake.command(name="temprole")
     async def fake_temprole(self, ctx, user: discord.Member, duration: str = "1h", role_name: str = "VIP"):
+        error = self.check_hierarchy(ctx, user)
+        if error:
+            return await ctx.send(error)
         embed = discord.Embed(
             description=f"✅ Added temp role **{role_name}** to {user.mention} for **{duration}**.",
             color=discord.Color.green()
@@ -115,7 +159,7 @@ class FunFake(commands.Cog):
         except: pass
 
     # 'fake hide' and 'fake hide all'
-    @fake.group(name="hide", invoke_without_command=True)
+    @fake.group(name="hide", invoke_without_command=True)  # type: ignore
     async def fake_hide(self, ctx):
         pass
 
@@ -130,7 +174,7 @@ class FunFake(commands.Cog):
         except: pass
 
     # 'fake unhide' and 'fake unhide all'
-    @fake.group(name="unhide", invoke_without_command=True)
+    @fake.group(name="unhide", invoke_without_command=True)  # type: ignore
     async def fake_unhide(self, ctx):
         pass
 

@@ -38,7 +38,7 @@ class ModPurge(commands.Cog):
         except discord.HTTPException as e:
             await ctx.send(f"❌ Error deleting messages: {e}")
 
-    @commands.hybrid_group(name="purge", aliases=["clean", "clear"], invoke_without_command=True)
+    @commands.hybrid_group(name="purge", aliases=["clean", "clear"], invoke_without_command=True)  # type: ignore
     @commands.has_permissions(manage_messages=True)
     async def purge(self, ctx, amount: int = None):
         """Chat se messages saaf karne ke liye normal command."""

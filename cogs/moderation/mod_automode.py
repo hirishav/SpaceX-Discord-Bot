@@ -86,7 +86,7 @@ class ModAutoMode(commands.Cog):
         elif unit == 'd': return datetime.timedelta(days=amount)
         return None
 
-    @commands.group(name="automod", aliases=["am", "automode"], invoke_without_command=True)
+    @commands.group(name="automod", aliases=["am", "automode"], invoke_without_command=True)  # type: ignore
     @commands.has_permissions(manage_guild=True)
     async def am(self, ctx):
         """AutoMod System Configuration"""
@@ -167,7 +167,7 @@ class ModAutoMode(commands.Cog):
     async def am_mentions(self, ctx):
         await self.am_toggle(ctx, "mentions")
 
-    @am.group(name="set", invoke_without_command=True)
+    @am.group(name="set", invoke_without_command=True)  # type: ignore
     @commands.has_permissions(manage_guild=True)
     async def am_set(self, ctx):
         """Set configuration"""
