@@ -15,7 +15,7 @@ class FunFake(commands.Cog):
             return "❌ I cannot perform this action on myself."
         return None
 
-    @commands.hybrid_group(name="fake", invoke_without_command=True)  # type: ignore
+    @commands.group(name="fake", invoke_without_command=True)
     async def fake(self, ctx):
         """Fake moderation/utility commands group for fun."""
         await ctx.send("Available fake commands: ban, mute, kick, warn, delchannel, tic create, afk, role add, temprole, hide all, unhide all, slowmode", delete_after=10)

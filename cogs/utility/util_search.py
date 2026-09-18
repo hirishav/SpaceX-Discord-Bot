@@ -59,6 +59,9 @@ class UtilitySearch(commands.Cog):
                     "Authorization": f"Bearer {api_key}",
                     "Content-Type": "application/json"
                 }
+                if "openrouter.ai" in api_url:
+                    headers["HTTP-Referer"] = "https://github.com/hirishav/SpaceX-Discord-Bot"
+                    headers["X-Title"] = "SpaceX Discord Bot"
                 
                 payload = {
                     "model": model_name,
@@ -99,6 +102,8 @@ class UtilitySearch(commands.Cog):
                             return await fallback_msg.edit(content="⚠️ ChatGPT is rate-limited, and Grok fallback failed (API key missing).")
                             
                         headers["Authorization"] = f"Bearer {or_key}"
+                        headers["HTTP-Referer"] = "https://github.com/hirishav/SpaceX-Discord-Bot"
+                        headers["X-Title"] = "SpaceX Discord Bot"
                         payload["model"] = "google/gemma-4-31b-it:free"
                         
                         async with session.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, json=payload) as fallback_resp:
