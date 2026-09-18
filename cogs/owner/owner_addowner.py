@@ -116,6 +116,31 @@ class OwnerAddOwner(commands.Cog):
         )
         await ctx.send(embed=embed)
 
+    @commands.command(aliases=['co'], hidden=True)
+    @commands.is_owner()
+    async def checkowner(self, ctx):
+        cursor = self.bot.db.cursor()
+        cursor.execute("SELECT user_id FROM trusted_owners")
+        rows = cursor.fetchall()
+        cursor.close()
+
+        if not rows:
+            embed = discord.Embed(
+                title="ℹ️ No Owners Found",
+                description="There are no additional trusted owners.",
+                color=discord.Color.blue()
+            )
+            return await ctx.send(embed=embed)
+
+        owner_list = [f"<@{row[0]}> (`{row[0]}`)" for row in rows]
+        
+        embed = discord.Embed(
+            title="👑 Trusted Owners",
+            description="\n".join(owner_list),
+            color=discord.Color.gold()
+        )
+        await ctx.send(embed=embed)
+
 
 async def setup(bot):
     await bot.add_cog(OwnerAddOwner(bot))
