@@ -7,14 +7,6 @@ import asyncio
 import time
 import os
 
-CELEBRITY_API_KEY = os.getenv("CELEBRITY_API_KEY")
-FAMOUS_CELEBS = [
-    "elon musk", "taylor swift", "cristiano ronaldo", "tom cruise", 
-    "bill gates", "lionel messi", "dwayne johnson", "kylie jenner", 
-    "kim kardashian", "michael jordan", "lebron james", "selena gomez",
-    "justin bieber", "kanye west", "rihanna", "will smith", "johnny depp"
-]
-
 
 class HintView(discord.ui.View):
     def __init__(self, cog, server_id, answer, hint2_text):
@@ -27,20 +19,19 @@ class HintView(discord.ui.View):
     @discord.ui.button(label="Hint 1 (Letters)", style=discord.ButtonStyle.primary, custom_id="hint1")
     async def hint1(self, interaction: discord.Interaction, button: discord.ui.Button):
         revealed = self.cog.get_letter_hint(self.answer)
-        await interaction.response.send_message(f"🤫 **Hint 1:** The answer looks like this: `{revealed}`", ephemeral=True)
+        await interaction.response.send_message(f"🤫 **Hint 1 (by {interaction.user.display_name}):** The answer looks like this: `{revealed}`")
 
     @discord.ui.button(label="Hint 2 (Details)", style=discord.ButtonStyle.secondary, custom_id="hint2")
     async def hint2(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.send_message(f"🕵️ **Hint 2:** {self.hint2_text}", ephemeral=True)
+        await interaction.response.send_message(f"🕵️ **Hint 2 (by {interaction.user.display_name}):** {self.hint2_text}")
 
     @discord.ui.button(label="Hint 3 (Reveal)", style=discord.ButtonStyle.danger, custom_id="hint3")
     async def hint3(self, interaction: discord.Interaction, button: discord.ui.Button):
         user_id = interaction.user.id
         self.cog.block_user(self.server_id, user_id)
         await interaction.response.send_message(
-            f"🚨 **ANSWER REVEALED:** The answer is **{self.answer}**.\n"
-            f"*Note: You cannot guess for the rest of this round or the next round!*", 
-            ephemeral=True
+            f"🚨 **ANSWER REVEALED by {interaction.user.display_name}:** The answer is **{self.answer}**.\n"
+            f"*Note: They cannot guess for the rest of this round or the next round!*"
         )
 
 class FunGuess(commands.Cog):
@@ -91,41 +82,16 @@ class FunGuess(commands.Cog):
             game['blocked_users'].add(user_id)
             game['next_round_blocked'].add(user_id)
 
-    async def fetch_random_question(self):
-        apis = ['dog', 'pokemon', 'flag', 'celebrity']
-        if not CELEBRITY_API_KEY:
-            apis.remove('celebrity')
+    async def fetch_random_question(self, category=None):
+        apis = ['dog', 'pokemon', 'flag']
             
-        choice = random.choice(apis)
+        if category and category.lower() in apis:
+            choice = category.lower()
+        else:
+            choice = random.choice(apis)
         
         async with aiohttp.ClientSession() as session:
             try:
-                if choice == 'celebrity':
-                    celeb_name = random.choice(FAMOUS_CELEBS)
-                    headers = {'X-Api-Key': CELEBRITY_API_KEY}
-                    async with session.get(f"https://api.api-ninjas.com/v1/celebrity?name={celeb_name}", headers=headers) as resp:
-                        data = await resp.json()
-                        if data and len(data) > 0:
-                            info = data[0]
-                            answer = info['name'].title()
-                            net_worth = info.get('net_worth', 'Unknown')
-                            nationality = info.get('nationality', 'Unknown').upper()
-                            occupation = ", ".join(info.get('occupation', [])).title()
-                            
-                            # Format large numbers for net worth
-                            if isinstance(net_worth, (int, float)) and net_worth > 1000000:
-                                net_worth = f"${net_worth / 1000000000:.2f} Billion" if net_worth >= 1000000000 else f"${net_worth / 1000000:.2f} Million"
-                            
-                            return {
-                                "type": "celebrity",
-                                "answer": answer,
-                                "image_url": None, # No image provided by API Ninjas
-                                "description": f"**Net Worth:** {net_worth}\n**Nationality:** {nationality}\n**Occupation:** {occupation}",
-                                "hint2": f"They are a {info.get('gender', 'unknown')} born in {info.get('birthday', 'unknown')}."
-                            }
-                        else:
-                            choice = 'dog' # Fallback
-                
                 if choice == 'dog':
                     async with session.get("https://dog.ceo/api/breeds/image/random") as resp:
                         data = await resp.json()
@@ -178,14 +144,14 @@ class FunGuess(commands.Cog):
                     "hint2": "An error occurred fetching the image."
                 }
 
-    async def game_loop(self, server_id, channel):
+    async def game_loop(self, server_id, channel, category=None):
         while server_id in self.active_games:
             try:
                 game = self.active_games[server_id]
                 game['blocked_users'] = game.get('next_round_blocked', set())
                 game['next_round_blocked'] = set()
                 
-                question = await self.fetch_random_question()
+                question = await self.fetch_random_question(category)
                 if question['answer'] == "Error":
                     await asyncio.sleep(5)
                     continue
@@ -253,8 +219,13 @@ class FunGuess(commands.Cog):
         await ctx.send(f"✅ Guessing game channel set to {channel.mention}!")
 
     @guess.command()
-    async def start(self, ctx):
+    async def start(self, ctx, category: str = None):
         server_id = str(ctx.guild.id)
+        
+        valid_apis = ['dog', 'pokemon', 'flag']
+
+        if category and category.lower() not in valid_apis:
+            return await ctx.send(f"❌ Invalid category! Available categories: `{', '.join(valid_apis)}`")
         
         db = database.connect()
         cursor = db.cursor()
@@ -279,13 +250,15 @@ class FunGuess(commands.Cog):
             'current_question': None,
             'task': None,
             'blocked_users': set(),
-            'next_round_blocked': set()
+            'next_round_blocked': set(),
+            'category': category
         }
 
-        await ctx.send(f"🚀 Guessing game is starting in {channel.mention}!")
+        category_msg = f" (Category: **{category.title()}**)" if category else ""
+        await ctx.send(f"🚀 Guessing game is starting in {channel.mention}!{category_msg}")
         
         # Start the loop task
-        task = self.bot.loop.create_task(self.game_loop(server_id, channel))
+        task = self.bot.loop.create_task(self.game_loop(server_id, channel, category))
         self.active_games[server_id]['task'] = task
 
     @guess.command()
