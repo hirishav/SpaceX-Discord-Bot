@@ -379,7 +379,7 @@ class Help(commands.Cog):
                     f"> `{prefix}guess stop` - Game rokein.\n"
                     f"> `{prefix}hint` - Current question ka hint dekhein.\n"
                     f"> `{prefix}guess end` - Game end karein aur server ka leaderboard dekhein.\n\n"
-                    f"💡 *Rules: Har round 1 minute ka hota hai. Sahi jawab do aur point pao!*"
+                    f"💡 *Rules: Har round 1 minute ka hota hai. Sahi jawab do aur point pao! Har 10 turns ke baad automatic leaderboard bheja jayega.*"
                 ),
                 color=EMBED_COLOR
             )

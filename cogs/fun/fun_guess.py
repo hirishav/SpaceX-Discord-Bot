@@ -152,6 +152,7 @@ class FunGuess(commands.Cog):
                 }
 
     async def game_loop(self, server_id, channel, category=None):
+        rounds_played = 0
         while server_id in self.active_games:
             try:
                 game = self.active_games[server_id]
@@ -190,6 +191,23 @@ class FunGuess(commands.Cog):
                 
                 # Small pause before next question
                 if server_id in self.active_games:
+                    rounds_played += 1
+                    if rounds_played % 10 == 0:
+                        db = database.connect()
+                        cursor = db.cursor()
+                        cursor.execute('SELECT user_id, score FROM guess_scores WHERE server_id = ? ORDER BY score DESC LIMIT 10', (server_id,))
+                        rows = cursor.fetchall()
+                        db.close()
+
+                        if rows:
+                            lb_embed = discord.Embed(title="🏆 Leaderboard (Current Standings)", color=discord.Color.gold())
+                            leaderboard_text = ""
+                            for i, (uid, score) in enumerate(rows):
+                                leaderboard_text += f"**{i+1}.** <@{uid}> - {score} points\n"
+                            
+                            lb_embed.description = leaderboard_text
+                            await channel.send(f"📊 **Standings after {rounds_played} turns:**", embed=lb_embed)
+
                     await asyncio.sleep(3)
                     
             except asyncio.CancelledError:
