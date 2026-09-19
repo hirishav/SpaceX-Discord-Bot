@@ -29,9 +29,16 @@ class HintView(discord.ui.View):
     async def hint3(self, interaction: discord.Interaction, button: discord.ui.Button):
         user_id = interaction.user.id
         self.cog.block_user(self.server_id, user_id)
+        
+        if self.server_id in self.cog.active_games:
+            game = self.cog.active_games[self.server_id]
+            game['current_question'] = None
+            if 'round_event' in game:
+                game['round_event'].set()
+                
         await interaction.response.send_message(
             f"🚨 **ANSWER REVEALED by {interaction.user.display_name}:** The answer is **{self.answer}**.\n"
-            f"*Note: They cannot guess for the rest of this round or the next round!*"
+            f"*Note: They cannot guess for the next round!*"
         )
 
 class FunGuess(commands.Cog):
@@ -121,18 +128,18 @@ class FunGuess(commands.Cog):
                         }
                 elif choice == 'flag':
                     if not self.flags_cache:
-                        async with session.get("https://restcountries.com/v3.1/all?fields=name,flags,region") as resp:
-                            self.flags_cache = await resp.json()
+                        async with session.get("https://flagcdn.com/en/codes.json") as resp:
+                            codes = await resp.json()
+                            self.flags_cache = [{'code': k, 'name': v} for k, v in codes.items() if '-' not in k]
                     
                     country = random.choice(self.flags_cache)
-                    answer = country['name']['common']
-                    image_url = country['flags']['png']
-                    region = country.get('region', 'Unknown')
+                    answer = country['name']
+                    image_url = f"https://flagcdn.com/w320/{country['code']}.png"
                     return {
                         "type": "country flag",
                         "answer": answer,
                         "image_url": image_url,
-                        "hint2": f"This country is located in the {region} region."
+                        "hint2": f"The country name has {len(answer.replace(' ', ''))} letters."
                     }
             except Exception as e:
                 print(f"[GuessGame] API Fetch Error ({choice}): {e}")
@@ -176,7 +183,7 @@ class FunGuess(commands.Cog):
                     if server_id in self.active_games:
                         timeout_embed = discord.Embed(
                             title="⏰ Time's up!",
-                            description=f"No one guessed it! The correct answer was **{question['answer']}**.",
+                            description="No one guessed it! The answer will remain a secret. 🤫",
                             color=discord.Color.red()
                         )
                         await channel.send(embed=timeout_embed)
@@ -350,6 +357,7 @@ class FunGuess(commands.Cog):
         
         # Exact match or very close
         if guess == answer:
+            game['current_question'] = None
             await message.add_reaction("✅")
             await message.reply(f"🎉 **{message.author.mention} got it right!** The answer is **{question['answer']}**.")
             
