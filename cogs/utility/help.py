@@ -417,7 +417,7 @@ class Help(commands.Cog):
             return await ctx.send("❌ Aapke paas is command ki details dekhne ki permission nahi hai!")
 
         # Raw declarations parameters template
-        description = "Koi description nahi di gayi."
+        description = cmd.help or "Koi description nahi di gayi."
         usage = f"`{prefix}{cmd.name}`"
         aliases = ", ".join([f"`{a}`" for a in cmd.aliases]) if cmd.aliases else "Koi alias nahi hai."
         examples = f"`{prefix}{cmd.name}`"
@@ -630,10 +630,15 @@ class Help(commands.Cog):
             usage = f"`{prefix}modlogs @user/ID`"
             examples = f"`{prefix}modlogs @User`"
 
-        elif cmd.name in ["profile", "userinfo", "pr"]:
+        elif cmd.name in ["profile", "pr"]:
             description = "👤 Kisi user ki puri profile (badges, net worth, warnings aur account age) dekhne ke liye."
             usage = f"`{prefix}profile [@user]`"
             examples = f"`{prefix}profile`\n`{prefix}profile @User`"
+
+        elif cmd.name in ["userinfo", "ui"]:
+            description = "🕵️ Kisi user ke roles, kisne assign kiya, aur dangerous perms ki deep detail nikalne ke liye."
+            usage = f"`{prefix}userinfo [@user]`"
+            examples = f"`{prefix}userinfo @User`"
 
         elif cmd.name in ["balance", "bal"]:
             description = "Aapka wallet aur bank balance check karne ke liye."
@@ -1156,6 +1161,46 @@ class Help(commands.Cog):
                 f"`{prefix}fake slowmode 1h`"
             )
             examples = f"`{prefix}fake ban @Rishav Spamming`\n`{prefix}fake delchannel`"
+
+        elif cmd.name == "roleinfo":
+            description = "🛡️ Kisi bhi role ke baare me detail info, perms, aur channel access jaanein."
+            usage = f"`{prefix}roleinfo <@role/id/name>`"
+            examples = f"`{prefix}roleinfo @Admin`"
+
+        elif cmd.name == "setnick":
+            description = "📝 Kisi member ka nickname change karne ke liye. (Requires Manage Messages)"
+            usage = f"`{prefix}setnick @user <new nickname>`"
+            examples = f"`{prefix}setnick @User VIP Member`"
+
+        elif cmd.name == "snipe":
+            description = "🔫 Current channel ke last 3 deleted messages recover karke dekhne ke liye."
+            usage = f"`{prefix}snipe`"
+            examples = f"`{prefix}snipe`"
+
+        elif cmd.name == "weather":
+            description = "☁️ Kisi bhi city ka live weather aur condition check karne ke liye."
+            usage = f"`{prefix}weather <location>`"
+            examples = f"`{prefix}weather Mumbai`"
+
+        elif cmd.name == "sync":
+            description = "👑 Owner Only: Slash commands ko Discord API ke sath forcefully sync karne ke liye."
+            usage = f"`{prefix}sync [~/*/^/all]`"
+            examples = f"`{prefix}sync`\n`{prefix}sync all`"
+
+        elif cmd.name == "checkowner":
+            description = "👑 Owner Only: Saare trusted bot owners ki list dekhne ke liye."
+            usage = f"`{prefix}checkowner`"
+            examples = f"`{prefix}checkowner`"
+
+        elif cmd.name == "seecounting":
+            description = "🔢 Server me chal rahe counting game ka current number check karne ke liye."
+            usage = f"`{prefix}seecounting`"
+            examples = f"`{prefix}seecounting`"
+
+        elif cmd.name == "addprefixless_server":
+            description = "👑 Owner Only: Kisi server me sabhi members ko prefixless access dene ke liye."
+            usage = f"`{prefix}addprefixless_server <duration> <server_id>`"
+            examples = f"`{prefix}addprefixless_server 1d 1234567890`"
 
         cmd_embed = discord.Embed(
             title=f"✦ Command: {cmd.name.capitalize()} ✦",

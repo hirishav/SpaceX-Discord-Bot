@@ -22,7 +22,7 @@ class UserProfile(commands.Cog):
         conn.close()
         return badges, warn_count
 
-    @commands.hybrid_command(name="profile", aliases=["userinfo", "pr"])
+    @commands.hybrid_command(name="profile", aliases=["pr"])
     async def profile(self, ctx, member: discord.Member = None):
         """User ki puri profile aur badges dekhne ke liye."""
         member = member or ctx.author
