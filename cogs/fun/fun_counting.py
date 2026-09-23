@@ -89,6 +89,37 @@ class FunCounting(commands.Cog):
         else:
             await ctx.send("Counting is not set up in this server.")
 
+    @commands.command()
+    @commands.has_permissions(administrator=True)
+    async def setcounting(self, ctx, number: int):
+        """
+        Set the starting number for the counting game.
+        Usage: `!!setcounting <number>`
+        """
+        if number < 1:
+            return await ctx.send("❌ Number kam se kam 1 hona chahiye.")
+            
+        db = database.connect()
+        cursor = db.cursor()
+        
+        # Check if counting channel exists for this server
+        cursor.execute("SELECT channel_id FROM counting_config WHERE server_id = ?", (str(ctx.guild.id),))
+        row = cursor.fetchone()
+        
+        if not row:
+            db.close()
+            return await ctx.send("❌ Is server mein counting setup nahi hai. Pehle `!!counting <#channel>` run karein.")
+            
+        cursor.execute("""
+        UPDATE counting_config 
+        SET current_number = ?, last_user_id = NULL 
+        WHERE server_id = ?
+        """, (number, str(ctx.guild.id)))
+        db.commit()
+        db.close()
+        
+        await ctx.send(f"✅ Counting game ka number update ho gaya hai! Ab <#{row[0]}> mein agla number **{number}** se shuru hoga.")
+
     @commands.Cog.listener()
     async def on_message(self, message):
         if message.author.bot:

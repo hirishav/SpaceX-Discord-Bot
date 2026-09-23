@@ -8,6 +8,7 @@ import asyncio
 from pathlib import Path
 import sys
 import traceback
+import difflib
 
 try:
     import uvloop # type: ignore
@@ -856,7 +857,23 @@ def get_remaining_time_str(expires_at):
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound):
-        # Ignore CommandNotFound to prevent spam
+        cmd = ctx.invoked_with
+        if not cmd:
+            return
+            
+        all_cmds = []
+        for command in bot.commands:
+            if not command.hidden:
+                all_cmds.append(command.name)
+                all_cmds.extend(command.aliases)
+                
+        matches = difflib.get_close_matches(cmd, all_cmds, n=3, cutoff=0.6)
+        if matches:
+            suggestions = ", ".join([f"`{ctx.prefix}{m}`" for m in matches])
+            try:
+                await ctx.send(f"❌ Command `{ctx.prefix}{cmd}` not found. Shayad aapka matlab yeh tha: {suggestions} ?")
+            except discord.Forbidden:
+                pass
         return
         
     if isinstance(error, commands.MissingPermissions):

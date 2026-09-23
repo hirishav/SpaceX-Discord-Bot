@@ -510,9 +510,9 @@ class Help(commands.Cog):
             examples = f"`{prefix}cleanspace 10`"
 
         elif cmd.name == "blacklistserver":
-            description = "🚫 Kisi toxic/raid server ko blacklist karna ya remove karna (Owner Only)."
-            usage = f"`{prefix}blacklistserver <add/remove> <server_id>`"
-            examples = f"`{prefix}blacklistserver add 1234567890`\n`{prefix}blacklistserver remove 1234567890`"
+            description = "🚫 Kisi toxic/raid server ko blacklist karna, remove karna, ya list dekhna (Owner Only)."
+            usage = f"`{prefix}blacklistserver <add/remove/show> [server_id]`\nAlias: `{prefix}bls`"
+            examples = f"`{prefix}bls add 1234567890`\n`{prefix}bls remove 1234567890`\n`{prefix}bls show`"
 
         elif cmd.name == "sudo":
             description = "👨‍💻 Kisi aur user ke naam se (as them) koi command run karne ke liye (Owner Only)."
@@ -1196,6 +1196,11 @@ class Help(commands.Cog):
             description = "🔢 Server me chal rahe counting game ka current number check karne ke liye."
             usage = f"`{prefix}seecounting`"
             examples = f"`{prefix}seecounting`"
+
+        elif cmd.name == "setcounting":
+            description = "🔢 Server me counting game ka starting number set karne ke liye (Admins Only)."
+            usage = f"`{prefix}setcounting <number>`"
+            examples = f"`{prefix}setcounting 100`"
 
         elif cmd.name == "addprefixless_server":
             description = "👑 Owner Only: Kisi server me sabhi members ko prefixless access dene ke liye."

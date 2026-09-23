@@ -26,7 +26,7 @@ class ModJoinRole(commands.Cog):
             """, (str(ctx.guild.id), str(role.id)))
             db.commit()
             db.close()
-            await ctx.send(f"✅ **Join Role** has been set to {role.mention} and enabled.\n*(Note: This role is now **sticky**! Members who leave and rejoin will get their previous roles back automatically.)*", allowed_mentions=discord.AllowedMentions.none())
+            await ctx.send(f"✅ **Join Role** has been set to {role.mention} and enabled.\n*(Note: This role is now **sticky**! Members who leave and rejoin will get their previous roles back automatically. Don't worry, no one was pinged during the setting up of the role.)*", allowed_mentions=discord.AllowedMentions.none())
         else:
             await ctx.send_help(ctx.command)
 
