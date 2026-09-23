@@ -410,7 +410,27 @@ class Help(commands.Cog):
         cmd = self.bot.get_command(target)
 
         if not cmd:
-            return await ctx.send(f"❌ Mujhe `{query}` naam ka koi command ya category nahi mila!")
+            import difflib
+            suggestions = []
+            
+            # 1. First try substring matching (e.g. "force" in "forceban")
+            for c in self.bot.commands:
+                if target in c.name or any(target in alias for alias in c.aliases):
+                    if not c.hidden or is_owner:
+                        if c.name not in suggestions:
+                            suggestions.append(c.name)
+                            
+            # 2. If no substring matches, try fuzzy matching for typos (e.g. "roloe" -> "role")
+            if not suggestions:
+                all_cmd_names = [c.name for c in self.bot.commands if not c.hidden or is_owner]
+                suggestions = difflib.get_close_matches(target, all_cmd_names, n=5, cutoff=0.5)
+                
+            error_msg = f"❌ Mujhe `{query}` naam ka koi command ya category nahi mila!"
+            if suggestions:
+                suggest_text = ", ".join([f"`{s}`" for s in suggestions[:5]])
+                error_msg += f"\n💡 **Kya aapka matlab inme se kisi se tha?** {suggest_text}"
+                
+            return await ctx.send(error_msg)
 
         cmd_category = resolve_category(cmd)
         if cmd_category == "owner" and not is_owner:
@@ -555,7 +575,14 @@ class Help(commands.Cog):
             examples = f"`{prefix}kick @User Bad Behaviour`"
 
         elif cmd.name == "ban":
-            description = "Kisi member ko server se permanent ban karne ke liye."
+            description = (
+                "Kisi member ko server se permanent ban karne ke liye.\n\n"
+                "**Bans Ke Aur Tareeqe (Related Commands):**\n"
+                "> `tempban` - Temporary ban (Wipes messages, instant unban)\n"
+                "> `hardban` - Strict permanent ban with full wipe (Admins Only)\n"
+                "> `forceban` - ID se ban (Bina server me hue)\n"
+                "> `ipban` - IP address block karne ke liye"
+            )
             usage = f"`{prefix}ban @user [reason]`"
             examples = f"`{prefix}ban @User Raid Attempt`"
 

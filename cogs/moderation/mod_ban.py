@@ -224,37 +224,40 @@ class ModBan(commands.Cog):
 
     @commands.hybrid_command(name="ipban")
     @commands.has_permissions(ban_members=True)
-    async def ipban(self, ctx, member: discord.Member, *, reason: str = "IP Ban requested"):
-        """Kisi member ko IP ban karne ke liye (Discord inherently IP bans users on normal bans)."""
+    async def ipban(self, ctx, user: discord.User, *, reason: str = "IP Ban requested"):
+        """Kisi user ko IP ban karne ke liye (Discord inherently IP bans users on normal bans)."""
         
-        if member.guild_permissions.administrator:
-            return await ctx.send("❌ Aap kisi Admin ko IP ban nahi kar sakte!")
+        member = ctx.guild.get_member(user.id)
+        if member:
+            if member.guild_permissions.administrator:
+                return await ctx.send("❌ Aap kisi Admin ko IP ban nahi kar sakte!")
 
-        if member.top_role >= ctx.author.top_role and ctx.author.id != ctx.guild.owner_id:
-            return await ctx.send("❌ Aap apne se unche ya barabar ke role waale member ko IP ban nahi kar sakte!")
+            if member.top_role >= ctx.author.top_role and ctx.author.id != ctx.guild.owner_id:
+                return await ctx.send("❌ Aap apne se unche ya barabar ke role waale member ko IP ban nahi kar sakte!")
 
-        if member.top_role >= ctx.guild.me.top_role:
-            return await ctx.send("❌ Mera role is member se niche hai, main ise IP ban nahi kar sakta!")
+            if member.top_role >= ctx.guild.me.top_role:
+                return await ctx.send("❌ Mera role is member se niche hai, main ise IP ban nahi kar sakta!")
 
         try:
-            try:
-                dm_embed = discord.Embed(
-                    title=f"🌐 IP BANNED from {ctx.guild.name}!",
-                    description=f"**Reason:** {reason}\n\n*Your IP address and all associated accounts have been banned from this server.*",
-                    color=discord.Color.from_rgb(255, 0, 0)
-                )
-                await member.send(embed=dm_embed)
-            except Exception:
-                pass
+            if member:
+                try:
+                    dm_embed = discord.Embed(
+                        title=f"🌐 IP BANNED from {ctx.guild.name}!",
+                        description=f"**Reason:** {reason}\n\n*Your IP address and all associated accounts have been banned from this server.*",
+                        color=discord.Color.from_rgb(255, 0, 0)
+                    )
+                    await member.send(embed=dm_embed)
+                except Exception:
+                    pass
 
-            await member.ban(reason=f"IP Banned by {ctx.author.name} | Reason: {reason}", delete_message_days=1)
+            await ctx.guild.ban(user, reason=f"IP Banned by {ctx.author.name} | Reason: {reason}", delete_message_days=1)
 
             embed = discord.Embed(
-                title="🌐 Member IP Banned",
-                description=f"**{member.name}** ko IP Ban kar diya gaya hai. Unki is IP se koi bhi alt account ab server join nahi kar payega.",
+                title="🌐 User IP Banned",
+                description=f"**{user.name}** ko IP Ban kar diya gaya hai. Unki is IP se koi bhi alt account ab server join nahi kar payega.",
                 color=discord.Color.from_rgb(255, 0, 0)
             )
-            embed.add_field(name="👤 Target", value=f"{member.mention} ({member.id})", inline=True)
+            embed.add_field(name="👤 Target", value=f"{user.mention} (`{user.id}`)", inline=True)
             embed.add_field(name="🛡️ Staff", value=ctx.author.mention, inline=True)
             embed.add_field(name="📝 Reason", value=reason, inline=False)
             await ctx.send(embed=embed)
@@ -267,16 +270,14 @@ class ModBan(commands.Cog):
                 pass
 
         except discord.Forbidden:
-            await ctx.send("❌ Main is member ko IP ban nahi kar sakta! Kripya permissions check karein.")
+            await ctx.send("❌ Main is user ko IP ban nahi kar sakta! Kripya permissions check karein.")
 
     @ipban.error
     async def ipban_error(self, ctx, error):
         if isinstance(error, commands.MissingPermissions):
             pass
-        elif isinstance(error, commands.MemberNotFound):
-            await ctx.send("❌ Ye member mujhe server me nahi mila! Sahi ID ya mention provide karein.")
-        elif isinstance(error, commands.MissingRequiredArgument):
-            await ctx.send(f"❌ Sahi tarika: `{ctx.prefix}ipban @user <reason>`")
+        elif isinstance(error, (commands.MissingRequiredArgument, commands.UserNotFound)):
+            await ctx.send(f"❌ Sahi tarika: `{ctx.prefix}ipban <user_id> [reason]`")
 
 async def setup(bot):
     await bot.add_cog(ModBan(bot))
