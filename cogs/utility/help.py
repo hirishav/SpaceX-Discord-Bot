@@ -564,6 +564,21 @@ class Help(commands.Cog):
             usage = f"`{prefix}forceban <User_ID> [reason]`"
             examples = f"`{prefix}forceban 727718500663033897 Raid`"
 
+        elif cmd.name == "tempban":
+            description = "Kisi member ko immediately ban aur unban karne ke liye (taaki unke messages delete ho jayein)."
+            usage = f"`{prefix}tempban @user [reason]`"
+            examples = f"`{prefix}tempban @User Spamming`"
+
+        elif cmd.name == "hardban":
+            description = "Kisi member ko severely hardban karne ke liye (Admins Only, strict action)."
+            usage = f"`{prefix}hardban @user [reason]`"
+            examples = f"`{prefix}hardban @User Extreme toxicity`"
+
+        elif cmd.name == "ipban":
+            description = "Kisi member ko IP ban karne ke liye (unki current IP blacklisted)."
+            usage = f"`{prefix}ipban @user [reason]`"
+            examples = f"`{prefix}ipban @User Raid Alt`"
+
         elif cmd.name == "unban":
             description = "Kisi banned user ka ban hatakar use wapas aane dene ke liye."
             usage = f"`{prefix}unban <User_ID>`"
