@@ -9,7 +9,13 @@ class ExclusivePremium(commands.Cog):
         self.bot = bot
 
     def is_premium_server(self, guild_id: int) -> bool:
-        return guild_id in getattr(self.bot, "premium_cache", set())
+        cache = getattr(self.bot, "premium_cache", {})
+        if guild_id in cache:
+            exp = cache[guild_id]
+            import time
+            if exp is None or int(time.time()) < exp:
+                return True
+        return False
 
     @commands.group(name="premium", aliases=["p"], invoke_without_command=True)
     async def premium(self, ctx):
@@ -18,6 +24,14 @@ class ExclusivePremium(commands.Cog):
         
         status_text = "✅ **PREMIUM ACTIVE**" if is_prem else "❌ **NOT PREMIUM**"
         color = 0xffd700 if is_prem else 0x2b2d31
+        
+        if is_prem:
+            cache = getattr(self.bot, "premium_cache", {})
+            exp = cache.get(ctx.guild.id)
+            if exp is None:
+                status_text += "\n⏳ **Ends in:** Permanent ∞"
+            else:
+                status_text += f"\n⏳ **Ends in:** <t:{exp}:R> (<t:{exp}:d>)"
         
         embed = discord.Embed(
             title="💎 SpaceX Premium Dashboard",

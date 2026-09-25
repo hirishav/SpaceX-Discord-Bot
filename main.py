@@ -116,7 +116,7 @@ class SpaceXBot(commands.Bot):
         self.temp_prefixless_users_cache = {}
         self.prefixless_servers_cache = {}
         self.blacklist_cache = {}
-        self.premium_cache = set()
+        self.premium_cache = {}
         
         # Disable configs cache
         self.disabled_commands_cache = {} # server_id -> set of commands
@@ -498,9 +498,14 @@ class SpaceXBot(commands.Bot):
         # PREMIUM SERVERS TABLE
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS premium_servers (
-            server_id TEXT PRIMARY KEY
+            server_id TEXT PRIMARY KEY,
+            expires_at INTEGER
         )
         """)
+        try:
+            cursor.execute("ALTER TABLE premium_servers ADD COLUMN expires_at INTEGER")
+        except:
+            pass
         
         # DISABLED COMMANDS TABLE
         cursor.execute("""
@@ -692,9 +697,9 @@ class SpaceXBot(commands.Bot):
         for u_id, exp_at, reason in cursor.fetchall():
             self.blacklist_cache[int(u_id)] = (exp_at, reason)
 
-        cursor.execute("SELECT server_id FROM premium_servers")
-        for (s_id,) in cursor.fetchall():
-            self.premium_cache.add(int(s_id))
+        cursor.execute("SELECT server_id, expires_at FROM premium_servers")
+        for s_id, exp_at in cursor.fetchall():
+            self.premium_cache[int(s_id)] = exp_at
             
         cursor.execute("SELECT server_id, command_name FROM disabled_commands")
         for s_id, cmd_name in cursor.fetchall():

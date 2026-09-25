@@ -63,22 +63,45 @@ class OwnerServers(commands.Cog):
             # Alternate pathway if DM configurations are sealed shut
             await ctx.send("⚠️ Aapka DM locked hai bhai, validation details yahin override kar raha hoon:", embed=embed)
 
-    @commands.command(name="addpremium", aliases=["apremium", "apm"], hidden=True)
+    @commands.command(name="addpremium", aliases=["apremium", "apms"], hidden=True)
     @commands.is_owner()
-    async def add_premium(self, ctx, server_id: int):
+    async def add_premium(self, ctx, server_id: int, duration: str = "permanent"):
         """👑 Sirf Bot Owner ke liye - Kisi server ko premium status dene ke liye."""
-        if server_id in self.bot.premium_cache:
-            return await ctx.send(f"❌ Server `{server_id}` pehle se hi premium hai!")
+        import time
+        import re
+        
+        is_update = server_id in self.bot.premium_cache
+        
+        expires_at = None
+        if duration.lower() != "permanent":
+            match = re.match(r"(\d+)(s|m|h|d|w|month)", duration.lower())
+            if match:
+                amount, unit = match.groups()
+                amount = int(amount)
+                multipliers = {
+                    "s": 1,
+                    "m": 60,
+                    "h": 3600,
+                    "d": 86400,
+                    "w": 604800,
+                    "month": 2592000
+                }
+                expires_at = int(time.time()) + amount * multipliers[unit]
+            else:
+                return await ctx.send("❌ Invalid duration format! Use `7d`, `1month`, `1m`, `1s`, `permanent`.")
         
         try:
             cursor = self.bot.db.cursor()
-            cursor.execute("INSERT INTO premium_servers (server_id) VALUES (?)", (str(server_id),))
+            cursor.execute("INSERT OR REPLACE INTO premium_servers (server_id, expires_at) VALUES (?, ?)", (str(server_id), expires_at))
             self.bot.db.commit()
-            self.bot.premium_cache.add(server_id)
+            self.bot.premium_cache[server_id] = expires_at
             
+            time_text = "Permanent ∞" if expires_at is None else f"<t:{expires_at}:R>"
+            
+            action_text = "upgraded to" if not is_update else "updated with"
             embed = discord.Embed(
-                title="✨ SpaceX Premium Unlocked! ✨",
-                description=f"**Congratulations!** Server `{server_id}` has been successfully upgraded to **SpaceX Premium**.\n\nAll exclusive perks, aesthetic UIs, and higher limits are now instantly available.",
+                title="✨ SpaceX Premium Unlocked! ✨" if not is_update else "✨ SpaceX Premium Updated! ✨",
+                description=f"**Congratulations!** Server `{server_id}` has been successfully {action_text} **SpaceX Premium**.\n\n⏳ **Duration:** {time_text}\n\nAll exclusive perks, aesthetic UIs, and higher limits are now instantly available.",
                 color=0xffd700
             )
             embed.set_thumbnail(url=self.bot.user.display_avatar.url)
@@ -88,7 +111,7 @@ class OwnerServers(commands.Cog):
         except Exception as e:
             await ctx.send(f"❌ Error while adding premium: {e}")
 
-    @commands.command(name="removepremium", aliases=["rpremium", "rpm"], hidden=True)
+    @commands.command(name="removepremium", aliases=["rpremium", "rpms"], hidden=True)
     @commands.is_owner()
     async def remove_premium(self, ctx, server_id: int):
         """👑 Sirf Bot Owner ke liye - Kisi server ka premium status hatane ke liye."""
@@ -99,7 +122,7 @@ class OwnerServers(commands.Cog):
             cursor = self.bot.db.cursor()
             cursor.execute("DELETE FROM premium_servers WHERE server_id = ?", (str(server_id),))
             self.bot.db.commit()
-            self.bot.premium_cache.remove(server_id)
+            self.bot.premium_cache.pop(server_id, None)
             
             embed = discord.Embed(
                 title="🛑 Premium Revoked",
@@ -111,6 +134,46 @@ class OwnerServers(commands.Cog):
             await ctx.send(embed=embed)
         except Exception as e:
             await ctx.send(f"❌ Error while removing premium: {e}")
+
+    @commands.command(name="listpremium", aliases=["lpremium", "lpms"], hidden=True)
+    @commands.is_owner()
+    async def list_premium(self, ctx):
+        """👑 Sirf Bot Owner ke liye - Saare premium servers ki list nikalne ke liye."""
+        if not self.bot.premium_cache:
+            return await ctx.send("❌ Koi bhi premium server active nahi hai!")
+            
+        import time
+        current_time = int(time.time())
+        
+        desc = []
+        for idx, (s_id, exp_at) in enumerate(self.bot.premium_cache.items(), start=1):
+            server = self.bot.get_guild(s_id)
+            s_name = server.name if server else "Unknown Server"
+            
+            if exp_at is None:
+                time_left = "Permanent ∞"
+            elif current_time > exp_at:
+                time_left = "Expired 🔴"
+            else:
+                time_left = f"<t:{exp_at}:R> (<t:{exp_at}:d>)"
+                
+            desc.append(f"**{idx}.** {s_name} (`{s_id}`)\n⏳ **Ends:** {time_left}")
+            
+        full_desc = "\n\n".join(desc)
+        
+        if len(full_desc) > 4000:
+            import io
+            with io.StringIO(full_desc.replace("**", "")) as f:
+                file_payload = discord.File(f, "premium_servers.txt")
+                try:
+                    await ctx.author.send("📥 List bohot badi hai:", file=file_payload)
+                    return await ctx.send("📥 DM check karo, list waha bhej di hai!")
+                except discord.Forbidden:
+                    return await ctx.send("❌ DM closed hai, cannot send file!")
+                
+        embed = discord.Embed(title="💎 Premium Servers List", description=full_desc, color=0xffd700)
+        embed.set_footer(text=f"Total: {len(self.bot.premium_cache)} Servers")
+        await ctx.send(embed=embed)
 
 async def setup(bot):
     await bot.add_cog(OwnerServers(bot))
