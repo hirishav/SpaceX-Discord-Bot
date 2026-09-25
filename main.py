@@ -357,12 +357,12 @@ class SpaceXBot(commands.Bot):
                                             if file_resp.status == 200:
                                                 with open("warnings.db", "wb") as f:
                                                     f.write(await file_resp.read())
-                                                print("-> ✅ Successfully restored warnings.db from the cloud!")
+                                                print("-> [Success] Successfully restored warnings.db from the cloud!")
                                                 return
                     else:
-                        print(f"⚠️ Failed to fetch backups. Status: {resp.status}")
+                        print(f"[Warning] Failed to fetch backups. Status: {resp.status}")
         except Exception as e:
-            print(f"⚠️ Error downloading DB backup: {e}")
+            print(f"[Error] Error downloading DB backup: {e}")
 
     async def setup_hook(self):
         # 🚀 START WEB SERVER
