@@ -181,39 +181,36 @@ class Welcome(commands.Cog):
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member):
         try:
+            # --- MAIN WELCOME ---
             cfg = self.get_config(member.guild.id)
-            if not cfg or not cfg["enabled"] or not cfg["channel_id"]:
-                return
+            if cfg and cfg["enabled"] and cfg["channel_id"]:
+                channel = member.guild.get_channel(cfg["channel_id"])
+                if channel:
+                    # Increment persistent join position counter per server
+                    counter = (cfg.get("member_counter") or 0) + 1
+                    self.update_config(member.guild.id, member_counter=counter)
+                    cfg["member_counter"] = counter
 
-            channel = member.guild.get_channel(cfg["channel_id"])
-            if not channel:
-                return
+                    msg_text = self.format_welcome_text(cfg["message"], member, cfg)
+                    mention_on = cfg.get("mention", True)
+                    allowed = discord.AllowedMentions(users=True) if mention_on else discord.AllowedMentions(users=False)
 
-            # Increment persistent join position counter per server
-            counter = (cfg.get("member_counter") or 0) + 1
-            self.update_config(member.guild.id, member_counter=counter)
-            cfg["member_counter"] = counter
+                    embed = discord.Embed(
+                        title=f"👋 Welcome to {member.guild.name}!",
+                        description=msg_text,
+                        color=discord.Color.from_rgb(24, 26, 40),
+                        timestamp=datetime.now(timezone.utc)
+                    )
+                    embed.set_thumbnail(url=member.display_avatar.url)
+                    embed.add_field(name="👤 Member", value=f"`{member.name}`", inline=True)
+                    embed.add_field(name="📆 Account Age", value=self.format_account_age(member.created_at), inline=True)
+                    embed.add_field(name="📊 Member Count", value=f"#{member.guild.member_count}", inline=True)
+                    if member.guild.icon:
+                        embed.set_footer(text=f"SpaceX Welcome System • Member #{counter}", icon_url=member.guild.icon.url)
+                    else:
+                        embed.set_footer(text=f"SpaceX Welcome System • Member #{counter}")
 
-            msg_text = self.format_welcome_text(cfg["message"], member, cfg)
-            mention_on = cfg.get("mention", True)
-            allowed = discord.AllowedMentions(users=True) if mention_on else discord.AllowedMentions(users=False)
-
-            embed = discord.Embed(
-                title=f"👋 Welcome to {member.guild.name}!",
-                description=msg_text,
-                color=discord.Color.from_rgb(24, 26, 40),
-                timestamp=datetime.now(timezone.utc)
-            )
-            embed.set_thumbnail(url=member.display_avatar.url)
-            embed.add_field(name="👤 Member", value=f"`{member.name}`", inline=True)
-            embed.add_field(name="📆 Account Age", value=self.format_account_age(member.created_at), inline=True)
-            embed.add_field(name="📊 Member Count", value=f"#{member.guild.member_count}", inline=True)
-            if member.guild.icon:
-                embed.set_footer(text=f"SpaceX Welcome System • Member #{counter}", icon_url=member.guild.icon.url)
-            else:
-                embed.set_footer(text=f"SpaceX Welcome System • Member #{counter}")
-
-            await channel.send(content=member.mention if mention_on else None, embed=embed, allowed_mentions=allowed)
+                    await channel.send(content=member.mention if mention_on else None, embed=embed, allowed_mentions=allowed)
             
             # --- TEMP WELCOME ---
             temp_cfg = self.get_temp_config(member.guild.id)
