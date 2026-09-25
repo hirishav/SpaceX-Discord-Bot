@@ -32,6 +32,15 @@ class Welcome(commands.Cog):
             member_counter INTEGER DEFAULT 0
         )
         """)
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS temp_welcome_config (
+            guild_id TEXT PRIMARY KEY,
+            channel_id TEXT,
+            message TEXT,
+            duration INTEGER,
+            enabled INTEGER DEFAULT 1
+        )
+        """)
         conn.commit()
 
     def get_config(self, guild_id: int):
@@ -77,6 +86,51 @@ class Welcome(commands.Cog):
             1 if current["mention"] else 0,
             1 if current["enabled"] else 0,
             current["member_counter"],
+            str(guild_id)
+        ))
+        conn.commit()
+        cursor.close()
+
+    def get_temp_config(self, guild_id: int):
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT channel_id, message, duration, enabled FROM temp_welcome_config WHERE guild_id = ?", (str(guild_id),))
+        row = cursor.fetchone()
+        cursor.close()
+        if not row:
+            return None
+        return {
+            "channel_id": int(row[0]) if row[0] else None,
+            "message": row[1],
+            "duration": row[2],
+            "enabled": bool(row[3])
+        }
+
+    def update_temp_config(self, guild_id: int, **kwargs):
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        current = self.get_temp_config(guild_id)
+        if not current:
+            cursor.execute("INSERT OR IGNORE INTO temp_welcome_config (guild_id) VALUES (?)", (str(guild_id),))
+            current = {
+                "channel_id": None,
+                "message": "",
+                "duration": 60,
+                "enabled": True
+            }
+
+        for k, v in kwargs.items():
+            current[k] = v
+
+        cursor.execute("""
+            UPDATE temp_welcome_config
+            SET channel_id = ?, message = ?, duration = ?, enabled = ?
+            WHERE guild_id = ?
+        """, (
+            str(current["channel_id"]) if current["channel_id"] else None,
+            current["message"],
+            current["duration"],
+            1 if current["enabled"] else 0,
             str(guild_id)
         ))
         conn.commit()
@@ -160,6 +214,23 @@ class Welcome(commands.Cog):
                 embed.set_footer(text=f"SpaceX Welcome System • Member #{counter}")
 
             await channel.send(content=member.mention if mention_on else None, embed=embed, allowed_mentions=allowed)
+            
+            # --- TEMP WELCOME ---
+            temp_cfg = self.get_temp_config(member.guild.id)
+            if temp_cfg and temp_cfg["enabled"] and temp_cfg["channel_id"]:
+                temp_channel = member.guild.get_channel(temp_cfg["channel_id"])
+                if temp_channel:
+                    temp_msg_text = self.format_welcome_text(temp_cfg["message"], member, cfg)
+                    temp_embed = discord.Embed(
+                        title=f"👋 Welcome to {member.guild.name}!",
+                        description=temp_msg_text,
+                        color=discord.Color.from_rgb(24, 26, 40),
+                        timestamp=datetime.now(timezone.utc)
+                    )
+                    temp_embed.set_thumbnail(url=member.display_avatar.url)
+                    temp_embed.set_footer(text=f"SpaceX Welcome System (Auto-delete)", icon_url=member.guild.icon.url if member.guild.icon else None)
+                    await temp_channel.send(content=member.mention, embed=temp_embed, allowed_mentions=allowed, delete_after=temp_cfg["duration"])
+
         except Exception as e:
             import traceback
             print(f"⚠️ Welcome error in {member.guild.name}: {e}")
@@ -312,6 +383,45 @@ class Welcome(commands.Cog):
         conn.commit()
         cursor.close()
         await ctx.send("♻️ Welcome configuration successfully reset ho gaya hai!")
+
+    @commands.command(name="tempwelcome", aliases=["tw"])
+    @commands.has_permissions(manage_guild=True)
+    async def tempwelcome(self, ctx, channel: discord.TextChannel = None, *, args: str = None):
+        """Temporary welcome message configure karein."""
+        if not channel or not args:
+            return await ctx.send(f"❌ Sahi tarika: `{ctx.prefix}tempwelcome #channel <Message with placeholders> <Duration>`\nExample: `{ctx.prefix}tw #general Welcome {{user}} to {{server}}! 10s`")
+
+        import re
+        match = re.search(r'\s+(\d+)([smhd])$', args.lower())
+        if not match:
+            return await ctx.send("❌ Duration galat hai ya message ke last me nahi hai. Duration `3s`, `1m`, `1h`, `1d` ke format me hona chahiye. Example: `!!tw #channel Welcome! 10s`")
+        
+        amount = int(match.group(1))
+        unit = match.group(2)
+        
+        duration = 0
+        if unit == 's': duration = amount
+        elif unit == 'm': duration = amount * 60
+        elif unit == 'h': duration = amount * 3600
+        elif unit == 'd': duration = amount * 86400
+        
+        message = args[:match.start()].strip()
+        if not message:
+            return await ctx.send("❌ Welcome message khali nahi ho sakta!")
+        
+        self.update_temp_config(ctx.guild.id, channel_id=channel.id, message=message, duration=duration, enabled=True)
+        
+        cfg = self.get_config(ctx.guild.id)
+        if not cfg: 
+            cfg = {"member_counter": 0, "mention": True}
+        preview = self.format_welcome_text(message, ctx.author, cfg)
+        
+        embed = discord.Embed(
+            title="✅ Temp-Welcome Set!",
+            description=f"Naye members ko **{channel.mention}** me ye message bhej kar `{duration}s` me delete kar diya jayega.\n\n**📝 Template:**\n`{message}`\n\n**🔍 Preview:**\n{preview}",
+            color=discord.Color.green()
+        )
+        await ctx.send(embed=embed)
 
     @setchannel.error
     @setmessage.error

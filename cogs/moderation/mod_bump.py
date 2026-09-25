@@ -157,6 +157,9 @@ class ModBump(commands.Cog):
         # Prefix-less Shortcuts
         # ----------------------------------------------------
         if restricted_channel_id and message.channel.id == restricted_channel_id:
+            if ctx.valid:
+                return # Avoid double processing if user has global prefix-less access
+                
             content_lower = message.content.lower().strip()
             
             if content_lower in ["bs", "bumpstatus"]:
@@ -249,11 +252,13 @@ class ModBump(commands.Cog):
         else:
             hours = remaining // 3600
             minutes = (remaining % 3600) // 60
+            seconds = remaining % 60
             
             time_str = ""
             if hours > 0: time_str += f"{hours}h "
-            if minutes > 0: time_str += f"{minutes}m"
-            if not time_str.strip(): time_str = "less than a minute"
+            if minutes > 0: time_str += f"{minutes}m "
+            if seconds > 0: time_str += f"{seconds}s"
+            if not time_str.strip(): time_str = "0s"
             
             await channel.send(f"⏰ Next bump is available in **{time_str.strip()}**.")
 

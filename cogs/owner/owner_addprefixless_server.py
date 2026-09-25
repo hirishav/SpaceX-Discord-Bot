@@ -71,5 +71,38 @@ class OwnerAddPrefixlessServer(commands.Cog):
         
         await ctx.send(embed=embed)
 
+    @commands.command(name="listprefixless_server", aliases=["listprefixlessserver", "lps"])
+    @commands.is_owner()
+    async def list_prefixless_server(self, ctx):
+        """👑 Owner Only: Un sabhi servers ki list dekhne ke liye jinko prefixless access diya gaya hai."""
+        cursor = self.bot.db.cursor()
+        cursor.execute("SELECT server_id, expires_at FROM prefixless_servers")
+        servers = cursor.fetchall()
+        
+        embed = discord.Embed(title="🌌 SpaceX Whitelisted Servers Matrix", color=discord.Color.blue())
+        if not servers:
+            embed.description = "❌ Abhi tak koi bhi server whitelist nahi kiya gaya hai."
+            return await ctx.send(embed=embed)
+
+        servers_text = ""
+        idx = 1
+        current_time = int(time.time())
+        for (server_id, exp) in servers:
+            if exp == -1:
+                servers_text += f"▪️ **#{idx}** Server ID: `{server_id}` (Permanent)\n"
+                idx += 1
+            elif exp > current_time:
+                servers_text += f"▪️ **#{idx}** Server ID: `{server_id}` (Temp, <t:{exp}:R>)\n"
+                idx += 1
+                
+        if not servers_text:
+            servers_text = "❌ Abhi tak koi bhi active whitelist server nahi hai."
+            
+        if len(servers_text) > 4096:
+            servers_text = servers_text[:4000] + "\n...and more."
+            
+        embed.description = servers_text
+        await ctx.send(embed=embed)
+
 async def setup(bot):
     await bot.add_cog(OwnerAddPrefixlessServer(bot))

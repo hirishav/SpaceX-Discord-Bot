@@ -22,6 +22,10 @@ class ModAutoMode(commands.Cog):
                 PRIMARY KEY (guild_id, category)
             )
         ''')
+        try:
+            cursor.execute('ALTER TABLE automod_config ADD COLUMN limit_amount INTEGER DEFAULT 5')
+        except:
+            pass
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS automod_bypass (
                 guild_id TEXT,
@@ -110,96 +114,105 @@ class ModAutoMode(commands.Cog):
         self.bot.db.commit()
         await ctx.send("✅ AutoMod is now **DISABLED** globally.")
 
-    @am.command(name="toggle")
-    @commands.has_permissions(manage_guild=True)
-    async def am_toggle(self, ctx, category: str):
-        """Toggle a specific category (links, invites, nsfw, spoilers, spam, mentions)"""
-        valid_cats = ["links", "invites", "nsfw", "spoilers", "spam", "mentions"]
-        category = category.lower()
-        if category not in valid_cats:
-            return await ctx.send(f"❌ Invalid category. Valid categories: {', '.join(valid_cats)}")
+    async def smart_config(self, ctx, category, *args):
+        valid_punishments = ["delete", "warn", "mute", "kick", "ban"]
+        
+        # Determine intent based on args
+        if not args:
+            # Simple toggle
+            current = self.is_category_enabled(ctx.guild.id, category)
+            new_state = 0 if current else 1
             
-        current = self.is_category_enabled(ctx.guild.id, category)
-        new_state = 0 if current else 1
+            cursor = self.bot.db.cursor()
+            cursor.execute("UPDATE automod_config SET enabled = ? WHERE guild_id = ? AND category = ?", (new_state, str(ctx.guild.id), category))
+            self.bot.db.commit()
+            
+            status = "ENABLED" if new_state else "DISABLED"
+            return await ctx.send(f"✅ AutoMod `{category}` is now **{status}**.")
+            
+        args_lower = [arg.lower() for arg in args]
         
+        # Explicit disable
+        if args_lower[0] in ["disable", "off", "false"]:
+            cursor = self.bot.db.cursor()
+            cursor.execute("UPDATE automod_config SET enabled = 0 WHERE guild_id = ? AND category = ?", (str(ctx.guild.id), category))
+            self.bot.db.commit()
+            return await ctx.send(f"✅ AutoMod `{category}` is now **DISABLED**.")
+            
+        # Parse punishment, duration, limit
+        punishment = None
+        duration = None
+        limit = None
+        
+        for arg in args_lower:
+            if arg in ["enable", "on", "true"]:
+                continue
+            elif arg in valid_punishments:
+                punishment = arg
+            elif arg.isdigit():
+                limit = int(arg)
+            else:
+                # Assume duration
+                duration = arg
+                
+        # Fetch existing config
         cursor = self.bot.db.cursor()
-        # Ensure we keep the punishment settings if they exist
-        cursor.execute("SELECT punishment, duration FROM automod_config WHERE guild_id = ? AND category = ?", (str(ctx.guild.id), category))
+        cursor.execute("SELECT punishment, duration, limit_amount FROM automod_config WHERE guild_id = ? AND category = ?", (str(ctx.guild.id), category))
         row = cursor.fetchone()
-        punishment = row[0] if row else 'delete'
-        duration = row[1] if row else None
         
-        cursor.execute("INSERT OR REPLACE INTO automod_config (guild_id, category, enabled, punishment, duration) VALUES (?, ?, ?, ?, ?)", 
-                       (str(ctx.guild.id), category, new_state, punishment, duration))
+        curr_pun = row[0] if row else "delete"
+        curr_dur = row[1] if row else None
+        curr_lim = row[2] if row else 5
+        
+        punishment = punishment or curr_pun
+        duration = duration or curr_dur
+        limit = limit or curr_lim
+        
+        if punishment == "mute" and not duration:
+            return await ctx.send("❌ Mute set karne ke liye duration zaruri hai (jaise: `1h`, `10m`)!")
+            
+        cursor.execute("INSERT OR REPLACE INTO automod_config (guild_id, category, enabled, punishment, duration, limit_amount) VALUES (?, ?, 1, ?, ?, ?)", 
+                       (str(ctx.guild.id), category, punishment, duration, limit))
         self.bot.db.commit()
         
-        status = "ENABLED" if new_state else "DISABLED"
-        await ctx.send(f"✅ AutoMod category `{category}` is now **{status}**.")
+        msg = f"✅ AutoMod `{category}` is now **ENABLED**.\n> 🛡️ Punishment: **{punishment.title()}**"
+        if duration and punishment == "mute": 
+            msg += f" for **{duration}**"
+        if category == "mentions": 
+            msg += f"\n> 🔢 Mention Limit: **{limit} mentions**"
+            
+        await ctx.send(msg)
 
     # Shortcut commands as requested by user
     @am.command(name="links")
     @commands.has_permissions(manage_guild=True)
-    async def am_links(self, ctx):
-        await self.am_toggle(ctx, "links")
+    async def am_links(self, ctx, *args):
+        await self.smart_config(ctx, "links", *args)
         
     @am.command(name="invites")
     @commands.has_permissions(manage_guild=True)
-    async def am_invites(self, ctx):
-        await self.am_toggle(ctx, "invites")
+    async def am_invites(self, ctx, *args):
+        await self.smart_config(ctx, "invites", *args)
 
     @am.command(name="nsfw")
     @commands.has_permissions(manage_guild=True)
-    async def am_nsfw(self, ctx):
-        await self.am_toggle(ctx, "nsfw")
+    async def am_nsfw(self, ctx, *args):
+        await self.smart_config(ctx, "nsfw", *args)
 
     @am.command(name="spoilers")
     @commands.has_permissions(manage_guild=True)
-    async def am_spoilers(self, ctx):
-        await self.am_toggle(ctx, "spoilers")
+    async def am_spoilers(self, ctx, *args):
+        await self.smart_config(ctx, "spoilers", *args)
 
     @am.command(name="spam")
     @commands.has_permissions(manage_guild=True)
-    async def am_spam(self, ctx):
-        await self.am_toggle(ctx, "spam")
+    async def am_spam(self, ctx, *args):
+        await self.smart_config(ctx, "spam", *args)
 
     @am.command(name="mentions")
     @commands.has_permissions(manage_guild=True)
-    async def am_mentions(self, ctx):
-        await self.am_toggle(ctx, "mentions")
-
-    @am.group(name="set", invoke_without_command=True)  # type: ignore
-    @commands.has_permissions(manage_guild=True)
-    async def am_set(self, ctx):
-        """Set configuration"""
-        await ctx.send_help(ctx.command)
-
-    @am_set.command(name="punishment")
-    @commands.has_permissions(manage_guild=True)
-    async def am_set_punishment(self, ctx, category: str, punishment: str, duration: str = None):
-        """Set punishment for a category: delete, warn, mute, kick, ban"""
-        valid_cats = ["links", "invites", "nsfw", "spoilers", "spam", "mentions"]
-        valid_punishments = ["delete", "warn", "mute", "kick", "ban"]
-        
-        category = category.lower()
-        if category not in valid_cats:
-            return await ctx.send(f"❌ Invalid category. Valid categories: {', '.join(valid_cats)}")
-            
-        punishment = punishment.lower()
-        if punishment not in valid_punishments:
-            return await ctx.send(f"❌ Invalid punishment. Valid punishments: {', '.join(valid_punishments)}")
-            
-        if punishment == "mute" and not duration:
-            return await ctx.send("❌ You must provide a duration for mute (e.g. 1h, 10m)")
-            
-        enabled = 1 if self.is_category_enabled(ctx.guild.id, category) else 0
-        
-        cursor = self.bot.db.cursor()
-        cursor.execute("INSERT OR REPLACE INTO automod_config (guild_id, category, enabled, punishment, duration) VALUES (?, ?, ?, ?, ?)", 
-                       (str(ctx.guild.id), category, enabled, punishment, duration))
-        self.bot.db.commit()
-        
-        dur_text = f" for {duration}" if duration else ""
-        await ctx.send(f"✅ Punishment for `{category}` set to **{punishment}**{dur_text}.")
+    async def am_mentions(self, ctx, *args):
+        await self.smart_config(ctx, "mentions", *args)
 
     @am.command(name="bypass")
     @commands.has_permissions(manage_guild=True)
@@ -280,7 +293,12 @@ class ModAutoMode(commands.Cog):
 
         # Check Mentions
         if self.is_category_enabled(message.guild.id, "mentions") and not self.is_bypassed(message.guild.id, message.author, "mentions"):
-            if len(message.mentions) > 5:
+            cursor = self.bot.db.cursor()
+            cursor.execute("SELECT limit_amount FROM automod_config WHERE guild_id = ? AND category = 'mentions'", (str(message.guild.id),))
+            row = cursor.fetchone()
+            mention_limit = row[0] if (row and row[0] is not None) else 5
+            
+            if len(message.mentions) > mention_limit:
                 violations.append("mentions")
 
         if not violations:

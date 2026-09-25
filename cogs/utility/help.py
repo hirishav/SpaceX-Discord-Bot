@@ -995,10 +995,10 @@ class Help(commands.Cog):
                 "• `nsfw` (Block NSFW content & links)\n"
                 "• `spoilers` (Block spoiler tags `||text||`)\n"
                 "• `spam` (Block repetitive messages/spam)\n"
-                "• `mentions` (Block mass mentions > 5)"
+                "• `mentions` (Block mass mentions)\n"
             )
-            usage = f"`{prefix}am <enable/disable>`\n`{prefix}am <category>`\n`{prefix}am set punishment <category> <punishment>`\n`{prefix}am bypass @user <category>`"
-            examples = f"`{prefix}am enable`\n`{prefix}am links`\n`{prefix}am set punishment links mute 1h`\n`{prefix}am bypass @user links`"
+            usage = f"`{prefix}am <category>` (Toggle)\n`{prefix}am <category> <punishment> [duration]`\n`{prefix}am mentions <limit> <punishment>`\n`{prefix}am bypass @user <category>`"
+            examples = f"`{prefix}am links`\n`{prefix}am links mute 1h`\n`{prefix}am mentions 10 kick`\n`{prefix}am spam disable`"
 
         elif cmd.name == "lookup":
             description = "🕵️ User Profile Forensics Matrix. Kisi bhi member ka deep timeline creation aur safety check permissions report dekhne ke liye."
@@ -1329,6 +1329,46 @@ class Help(commands.Cog):
             description = "👑 Owner Only: Kisi server me sabhi members ko prefixless access dene ke liye."
             usage = f"`{prefix}addprefixless_server <duration> <server_id>`"
             examples = f"`{prefix}addprefixless_server 1d 1234567890`"
+
+        elif cmd.name == "listprefixless_server":
+            description = "👑 Owner Only: Un sabhi servers ki list dekhne ke liye jinko prefixless access diya gaya hai."
+            usage = f"`{prefix}listprefixless_server`"
+            examples = f"`{prefix}listprefixless_server`"
+
+        elif cmd.name == "welcome":
+            description = (
+                "👋 SpaceX Welcome System.\n"
+                "Naye members ka custom swagat configure karne ke liye saare commands yaha hain.\n\n"
+                "**Commands:**\n"
+                "• `setchannel #channel` (Welcome message bhejne ka channel)\n"
+                "• `setmessage <msg>` (Custom welcome message set karein)\n"
+                "• `mention <on/off>` (Member ko ping/mention karna hai ya nahi)\n"
+                "• `enable` (System chalne ke liye)\n"
+                "• `disable` (Band karne ke liye)\n"
+                "• `test` (Preview dekhne ke liye)\n"
+                "• `reset` (Sab delete karne ke liye)"
+            )
+            usage = f"`{prefix}welcome <command>`"
+            examples = f"`{prefix}welcome setchannel #general`\n`{prefix}welcome setmessage Welcome {{user}} to {{server}}!`\n`{prefix}welcome test`"
+
+        elif cmd.name == "tempwelcome":
+            description = (
+                "⏳ SpaceX Temporary Welcome System.\n"
+                "Naye members ko welcome karke kuch time baad wo message automatic delete karne ke liye.\n\n"
+                "**Placeholders aap use kar sakte ho:**\n"
+                "`{user}` — Member ping/name\n"
+                "`{username}` — User ka username\n"
+                "`{displayname}` — User ka display name\n"
+                "`{server}` — Server ka naam\n"
+                "`{member_count}` — Total members\n"
+                "`{account_age}` — Account kitna purana hai\n"
+                "`{position}` — Join position\n\n"
+                "**Duration options:**\n"
+                "`s` (Seconds), `m` (Minutes), `h` (Hours), `d` (Days)\n"
+                "Max 14 days tak de sakte ho."
+            )
+            usage = f"`{prefix}tempwelcome #channel <Message text> <Duration>`"
+            examples = f"`{prefix}tw #general Welcome {{user}} to {{server}}! 10s`\n`{prefix}tempwelcome #welcome Hello {{username}}! 1m`\n`{prefix}tw #chat Welcome! 1d`"
 
         is_premium = ctx.guild and ctx.guild.id in getattr(self.bot, "premium_cache", set())
         
