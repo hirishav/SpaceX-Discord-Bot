@@ -63,7 +63,7 @@ class OwnerServers(commands.Cog):
             # Alternate pathway if DM configurations are sealed shut
             await ctx.send("⚠️ Aapka DM locked hai bhai, validation details yahin override kar raha hoon:", embed=embed)
 
-    @commands.command(name="addpremium", aliases=["apremium"], hidden=True)
+    @commands.command(name="addpremium", aliases=["apremium", "apm"], hidden=True)
     @commands.is_owner()
     async def add_premium(self, ctx, server_id: int):
         """👑 Sirf Bot Owner ke liye - Kisi server ko premium status dene ke liye."""
@@ -75,11 +75,20 @@ class OwnerServers(commands.Cog):
             cursor.execute("INSERT INTO premium_servers (server_id) VALUES (?)", (str(server_id),))
             self.bot.db.commit()
             self.bot.premium_cache.add(server_id)
-            await ctx.send(f"✅ Server `{server_id}` ko successfully **Premium** access de diya gaya hai!")
+            
+            embed = discord.Embed(
+                title="✨ SpaceX Premium Unlocked! ✨",
+                description=f"**Congratulations!** Server `{server_id}` has been successfully upgraded to **SpaceX Premium**.\n\nAll exclusive perks, aesthetic UIs, and higher limits are now instantly available.",
+                color=0xffd700
+            )
+            embed.set_thumbnail(url=self.bot.user.display_avatar.url)
+            embed.set_footer(text="SpaceX Premium Administration", icon_url=ctx.author.display_avatar.url)
+            
+            await ctx.send(embed=embed)
         except Exception as e:
             await ctx.send(f"❌ Error while adding premium: {e}")
 
-    @commands.command(name="removepremium", aliases=["rpremium"], hidden=True)
+    @commands.command(name="removepremium", aliases=["rpremium", "rpm"], hidden=True)
     @commands.is_owner()
     async def remove_premium(self, ctx, server_id: int):
         """👑 Sirf Bot Owner ke liye - Kisi server ka premium status hatane ke liye."""
@@ -91,7 +100,15 @@ class OwnerServers(commands.Cog):
             cursor.execute("DELETE FROM premium_servers WHERE server_id = ?", (str(server_id),))
             self.bot.db.commit()
             self.bot.premium_cache.remove(server_id)
-            await ctx.send(f"✅ Server `{server_id}` ka **Premium** access remove kar diya gaya hai!")
+            
+            embed = discord.Embed(
+                title="🛑 Premium Revoked",
+                description=f"Server `{server_id}` has been downgraded.\nPremium perks and aesthetic UIs have been disabled.",
+                color=0xff5555
+            )
+            embed.set_footer(text="SpaceX Premium Administration", icon_url=ctx.author.display_avatar.url)
+            
+            await ctx.send(embed=embed)
         except Exception as e:
             await ctx.send(f"❌ Error while removing premium: {e}")
 

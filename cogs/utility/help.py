@@ -25,7 +25,7 @@ def _cfg(name: str, default: str = "") -> str:
 # isliye naya cog add karne par bas iski file "Mod_/Eco_/Fun_/Gen_/Owner_"
 # naming convention follow kare toh help menu apne aap update ho jaata hai.
 # ─────────────────────────────────────────────────────────────
-CATEGORY_ORDER = ["chat", "voice", "fun", "gif", "utility", "general", "owner"]
+CATEGORY_ORDER = ["chat", "voice", "fun", "gif", "utility", "general", "exclusive", "owner"]
 
 CATEGORY_META = {
     "chat": {
@@ -65,6 +65,12 @@ CATEGORY_META = {
         "aliases": ["gen", "general", "core", "misc"],
         "blurb": "Roz kaam aane wale general-purpose commands.",
     },
+    "exclusive": {
+        "emoji": "💎",
+        "label": "Exclusive",
+        "aliases": ["exclusive", "premium", "vip"],
+        "blurb": "Premium servers aur VIP members ke liye exclusive perks aur features.",
+    },
     "owner": {
         "emoji": "👑",
         "label": "Owner Only",
@@ -98,6 +104,8 @@ def resolve_category(cmd: commands.Command) -> str:
         return "gif"
     if cog_name.startswith("Gen"):
         return "general"
+    if cog_name.startswith("Exclusive") or cog_name.startswith("Premium"):
+        return "exclusive"
     return "utility"  # BotInfo, Invite, ServerInfo, OwnerInfo (public), UtilAvatar, etc.
 
 
@@ -380,6 +388,26 @@ class Help(commands.Cog):
                     f"> `{prefix}hint` - Current question ka hint dekhein.\n"
                     f"> `{prefix}guess end` - Game end karein aur server ka leaderboard dekhein.\n\n"
                     f"💡 *Rules: Har round 1 minute ka hota hai. Sahi jawab do aur point pao! Har 10 turns ke baad automatic leaderboard bheja jayega.*"
+                ),
+                color=EMBED_COLOR
+            )
+            embed.set_thumbnail(url=ctx.bot.user.display_avatar.url)
+            embed.set_footer(text=f"Requested by {ctx.author.display_name}", icon_url=ctx.author.display_avatar.url)
+            return await ctx.send(embed=embed)
+
+        if target in ["bump", "bumpsystem", "bumps"]:
+            embed = discord.Embed(
+                title="⏰ Bump System Help",
+                description=(
+                    f"Track `/bump` from Disboard and automatically remind your members when it's time to bump again!\n\n"
+                    f"**Bump Commands:**\n"
+                    f"> `{prefix}bumpstatus` (or `bs`) - Shows time left until the next bump.\n"
+                    f"> `{prefix}setbumprole [@role]` - Sets the role to ping when it's time to bump (Admin).\n"
+                    f"> `{prefix}setbump <#channel>` (or `sb`) - Restrict tracking to a specific channel (Admin).\n"
+                    f"> `{prefix}setbump remove` - Remove channel restriction (Admin).\n"
+                    f"> `{prefix}setbump 1h 30m` - Manually set the bump timer (Admin).\n"
+                    f"> `{prefix}bumptest` - Triggers a test reminder (Admin).\n\n"
+                    f"💡 *Shortcuts: If a restricted channel is set, you can just type `bs` to check status, or `1h 30m` (Admin) to manually sync!*"
                 ),
                 color=EMBED_COLOR
             )
@@ -792,6 +820,21 @@ class Help(commands.Cog):
             usage = f"`{prefix}lb server`\n`{prefix}lb global`"
             examples = f"`{prefix}lb server`"
 
+        elif cmd.name in ["bumpstatus", "bs"]:
+            description = "⏰ Server ke disboard bump timer ka current status dekhne ke liye."
+            usage = f"`{prefix}bumpstatus`"
+            examples = f"`{prefix}bs`"
+
+        elif cmd.name in ["setbumprole", "sbr"]:
+            description = "🔔 Jab bump ka time ho toh kis role ko ping karna hai, usko set karne ke liye (Admin Only)."
+            usage = f"`{prefix}setbumprole [@role]`"
+            examples = f"`{prefix}setbumprole @Bumpers`"
+
+        elif cmd.name in ["setbump", "sb"]:
+            description = "⚙️ Bump settings manage karne ke liye: Kisi specific channel me lock karna, ya timer ko manually sync/set karna (Admin Only)."
+            usage = f"`{prefix}setbump <#channel/time/remove>`"
+            examples = f"`{prefix}setbump #bump-channel`\n`{prefix}setbump 1h 30m`\n`{prefix}setbump remove`"
+
         elif cmd.name in ["giveaway", "gstart"]:
             description = "✅ Advance Interactive Button wala automatic giveaway engine framework toggle karne ke liye."
             usage = f'`{prefix}gstart <time> "<requirements_text>" <@role/none> <prize>`'
@@ -963,12 +1006,12 @@ class Help(commands.Cog):
             usage = f"`{prefix}listcmds`"
             examples = f"`{prefix}listcmds`"
 
-        elif cmd.name in ["addpremium", "apremium"]:
+        elif cmd.name in ["addpremium", "apremium", "apm"]:
             description = "👑 Owner-Only: Kisi server/user ko premium perks grant karne ke liye."
             usage = f"`{prefix}addpremium <ID>`"
             examples = f"`{prefix}addpremium 727718500663033897`"
 
-        elif cmd.name in ["removepremium", "rpremium"]:
+        elif cmd.name in ["removepremium", "rpremium", "rpm"]:
             description = "👑 Owner-Only: Kisi server/user ka premium access revoke karne ke liye."
             usage = f"`{prefix}removepremium <ID>`"
             examples = f"`{prefix}removepremium 727718500663033897`"

@@ -144,6 +144,7 @@ class SpaceXBot(commands.Bot):
         if cog_name.startswith("Fun"): return "fun"
         if cog_name.startswith("Gif"): return "gif"
         if cog_name.startswith("Gen"): return "general"
+        if cog_name.startswith("Exclusive") or cog_name.startswith("Premium"): return "exclusive"
         return "utility"
 
     async def tree_interaction_check(self, interaction: discord.Interaction):
