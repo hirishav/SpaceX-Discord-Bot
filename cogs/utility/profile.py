@@ -26,10 +26,13 @@ class UserProfile(commands.Cog):
     async def profile(self, ctx, member: discord.Member = None):
         """User ki puri profile aur badges dekhne ke liye."""
         member = member or ctx.author
-        
         badges, warn_count = self.get_user_data(str(member.id))
         
-        embed = discord.Embed(title=f"👤 {member.name}'s Profile", color=member.color if member.color != discord.Color.default() else discord.Color.blue())
+        is_premium_user = "💎 Exclusive" in badges
+            
+        title = f"💎 Exclusive | {member.name}'s Profile" if is_premium_user else f"👤 {member.name}'s Profile"
+        
+        embed = discord.Embed(title=title, color=0xffd700 if is_premium_user else (member.color if member.color != discord.Color.default() else discord.Color.blue()))
         embed.set_thumbnail(url=member.display_avatar.url)
         
         # Badges Description

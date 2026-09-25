@@ -28,25 +28,35 @@ class ExclusivePremium(commands.Cog):
             name="✨ Premium Perks",
             value=(
                 "**1.** **Prefixless Commands**\n"
-                "└ Use `!!p ap @role` to allow roles to use prefixless commands.\n"
+                "└ Use `!!p/premium ap/addprefixless @admin_role/roleid` to allow roles to use prefixless commands.\n"
+                "└ Use `!!premium/p rp/removeprefixless @everyone/<role_id>` to remove them.\n"
                 "**2.** **Aesthetic UI**\n"
                 "└ Enjoy beautiful, premium-themed command responses.\n"
                 "**3.** **More Limits & Features**\n"
-                "└ Unlock higher limits for automod, giveaways, and more."
+                "└ Unlock higher limits for automod, giveaways, and more.\n"
+                "**4.** **Exclusive Profile Badge**\n"
+                "└ Get a 💎 Exclusive title in your `!!profile`."
             ),
             inline=False
         )
         embed.add_field(
             name="💳 Payment Methods",
             value=(
-                "**UPI ID:** `your_upi_id@ybl`\n"
-                "**PayPal:** [paypal.me/yourlink](https://paypal.me/)\n"
-                "**Stripe:** [Click Here to Pay](https://stripe.com/)"
+                "**UPI ID:** `hirishav@nyes`\n"
+                "**PayPal:** [Coming Soon](#)\n"
+                "**Stripe:** [Coming Soon](#)\n\n"
+                "⚠️ **Note:** After payment is done, you can directly contact the Owner in his Support server to activate your premium server perks."
             ),
             inline=False
         )
         embed.set_footer(text="Scan the QR below to pay via UPI!", icon_url=ctx.author.display_avatar.url)
-        embed.set_image(url="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=your_upi_id@ybl")
+        
+        file = None
+        try:
+            file = discord.File("assets/qr.png", filename="qr.png")
+            embed.set_image(url="attachment://qr.png")
+        except Exception:
+            embed.set_image(url="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=hirishav@nyes")
         
         view = discord.ui.View()
         
@@ -54,21 +64,29 @@ class ExclusivePremium(commands.Cog):
         qr_btn = discord.ui.Button(label="Show QR Code", style=discord.ButtonStyle.secondary, emoji="📷")
         async def qr_callback(interaction):
             qr_embed = discord.Embed(title="UPI QR Code", color=0xffd700)
-            qr_embed.set_image(url="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=your_upi_id@ybl")
-            await interaction.response.send_message(embed=qr_embed, ephemeral=True)
+            try:
+                qr_file = discord.File("assets/qr.png", filename="qr.png")
+                qr_embed.set_image(url="attachment://qr.png")
+                await interaction.response.send_message(file=qr_file, embed=qr_embed, ephemeral=True)
+            except Exception:
+                qr_embed.set_image(url="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=hirishav@nyes")
+                await interaction.response.send_message(embed=qr_embed, ephemeral=True)
         qr_btn.callback = qr_callback
         view.add_item(qr_btn)
         
         # External links
         view.add_item(discord.ui.Button(label="UPI ID", style=discord.ButtonStyle.secondary, emoji="🏦", custom_id="upi_id_show"))
-        view.add_item(discord.ui.Button(label="PayPal", url="https://paypal.me/", emoji="💳"))
-        view.add_item(discord.ui.Button(label="Stripe", url="https://stripe.com/", emoji="🔗"))
+        view.add_item(discord.ui.Button(label="PayPal", url="https://paypal.me/", emoji="💳", disabled=True))
+        view.add_item(discord.ui.Button(label="Stripe", url="https://stripe.com/", emoji="🔗", disabled=True))
         
-        msg = await ctx.send(embed=embed, view=view)
+        if file:
+            msg = await ctx.send(file=file, embed=embed, view=view)
+        else:
+            msg = await ctx.send(embed=embed, view=view)
         
         # Intercept the UPI ID button
         async def upi_callback(interaction):
-            await interaction.response.send_message("UPI ID: `your_upi_id@ybl`", ephemeral=True)
+            await interaction.response.send_message("UPI ID: `hirishav@nyes`", ephemeral=True)
             
         for child in view.children:
             if getattr(child, "custom_id", None) == "upi_id_show":

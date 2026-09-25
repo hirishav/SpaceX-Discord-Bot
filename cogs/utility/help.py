@@ -254,20 +254,33 @@ class Help(commands.Cog):
 
         is_premium = ctx.guild and ctx.guild.id in getattr(bot, "premium_cache", set())
         
-        embed = discord.Embed(
-            title=f"👑 {bot.user.name} Premium Command Center" if is_premium else f"✦ {bot.user.name} Command Center ✦",
-            description=(
-                f"Swagat hai **{ctx.author.display_name}** bhai! Main hoon **{bot.user.name}**, tera all-in-one assistant.\n\n"
-                f"**Kaise use karein:**\n"
-                f"> 📂 Niche diye gaye menu se ek module select karo.\n"
-                f"> 🔍 Ya fir kisi command ke baare me janne ke liye `{prefix}help <command>` likho.\n"
-                f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-            ),
-            color=0xffd700 if is_premium else EMBED_COLOR,
-        )
         if is_premium:
-            embed.set_author(name="✨ Premium Server Activated ✨")
-        embed.set_thumbnail(url=bot.user.display_avatar.url)
+            embed = discord.Embed(
+                title=f"🌌 The Ultimate Command Center",
+                description=(
+                    f"Welcome to the elite side, **{ctx.author.display_name}**. You are experiencing the full power of **{bot.user.name} Premium**.\n\n"
+                    f"**Navigation Guide:**\n"
+                    f"✧ *Select a module from the dropdown below.*\n"
+                    f"✧ *Type `{prefix}help <command>` for deep insights.*\n"
+                    f"▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+                ),
+                color=0xffd700,
+            )
+            embed.set_author(name=f"✦ S P A C E X   P R E M I U M ✦", icon_url=bot.user.display_avatar.url)
+            embed.set_thumbnail(url=bot.user.display_avatar.url)
+        else:
+            embed = discord.Embed(
+                title=f"✦ {bot.user.name} Command Center ✦",
+                description=(
+                    f"Swagat hai **{ctx.author.display_name}** bhai! Main hoon **{bot.user.name}**, tera all-in-one assistant.\n\n"
+                    f"**Kaise use karein:**\n"
+                    f"> 📂 Niche diye gaye menu se ek module select karo.\n"
+                    f"> 🔍 Ya fir kisi command ke baare me janne ke liye `{prefix}help <command>` likho.\n"
+                    f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+                ),
+                color=EMBED_COLOR,
+            )
+            embed.set_thumbnail(url=bot.user.display_avatar.url)
 
         for key in CATEGORY_ORDER:
             if key == "owner" and not is_owner:
@@ -281,11 +294,18 @@ class Help(commands.Cog):
             if len(cmds) > 5:
                 preview += f" *(+{len(cmds) - 5} more)*"
                 
-            embed.add_field(
-                name=f"{meta['emoji']} **{meta['label']}**",
-                value=f"> {preview}\n",
-                inline=False,
-            )
+            if is_premium:
+                embed.add_field(
+                    name=f"{meta['emoji']} ⸻ {meta['label'].upper()}",
+                    value=f"╰ {preview}\n",
+                    inline=False,
+                )
+            else:
+                embed.add_field(
+                    name=f"{meta['emoji']} **{meta['label']}**",
+                    value=f"> {preview}\n",
+                    inline=False,
+                )
 
         embed.set_footer(
             text=f"Modules Loaded: {len(CATEGORY_ORDER)}  |  Total Commands: {total_cmds}",
@@ -298,17 +318,28 @@ class Help(commands.Cog):
         cmds = get_commands_by_category(self.bot, key)
         is_premium = ctx.guild and ctx.guild.id in getattr(self.bot, "premium_cache", set())
 
-        embed = discord.Embed(
-            title=f"{meta['emoji']} {meta['label']} Module",
-            description=(
-                f"> {meta['blurb']}\n\n"
-                f"💡 *Tip: Use `{ctx.prefix}help <command>` for detailed usage.*\n"
-                f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-            ),
-            color=0xffd700 if is_premium else EMBED_COLOR,
-        )
         if is_premium:
-            embed.set_author(name="✨ Premium Server Activated ✨")
+            embed = discord.Embed(
+                title=f"{meta['emoji']} ⸻ {meta['label'].upper()} MODULE",
+                description=(
+                    f"✧ *{meta['blurb']}*\n\n"
+                    f"💡 *Tip: Execute `{ctx.prefix}help <command>` for an in-depth breakdown.*\n"
+                    f"▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+                ),
+                color=0xffd700,
+            )
+            embed.set_author(name=f"✦ S P A C E X   P R E M I U M ✦", icon_url=self.bot.user.display_avatar.url)
+        else:
+            embed = discord.Embed(
+                title=f"{meta['emoji']} {meta['label']} Module",
+                description=(
+                    f"> {meta['blurb']}\n\n"
+                    f"💡 *Tip: Use `{ctx.prefix}help <command>` for detailed usage.*\n"
+                    f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+                ),
+                color=EMBED_COLOR,
+            )
+            
         for i, chunk in enumerate(chunk_command_lines(cmds, ctx.prefix)):
             embed.add_field(name=" " if i == 0 else "\u200b", value=chunk, inline=False)
 
@@ -1301,17 +1332,27 @@ class Help(commands.Cog):
 
         is_premium = ctx.guild and ctx.guild.id in getattr(self.bot, "premium_cache", set())
         
-        cmd_embed = discord.Embed(
-            title=f"👑 Command: {cmd.name.capitalize()}" if is_premium else f"✦ Command: {cmd.name.capitalize()} ✦",
-            description=f"> {description}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
-            color=0xffd700 if is_premium else EMBED_COLOR,
-        )
         if is_premium:
-            cmd_embed.set_author(name="✨ Premium Server Activated ✨")
-        cmd_embed.add_field(name="⌨️ Usage", value=f"{usage}", inline=False)
-        cmd_embed.add_field(name="💡 Example", value=f"{examples}", inline=False)
-        cmd_embed.add_field(name="🔀 Aliases", value=aliases, inline=True)
-        cmd_embed.add_field(name="📂 Category", value=category, inline=True)
+            cmd_embed = discord.Embed(
+                title=f"✦ {cmd.name.upper()} ✦",
+                description=f"✧ *{description}*\n▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬",
+                color=0xffd700,
+            )
+            cmd_embed.set_author(name=f"✦ S P A C E X   P R E M I U M ✦", icon_url=self.bot.user.display_avatar.url)
+            cmd_embed.add_field(name="⌨️  USAGE", value=f"{usage}", inline=False)
+            cmd_embed.add_field(name="💡  EXAMPLE", value=f"{examples}", inline=False)
+            cmd_embed.add_field(name="🔀  ALIASES", value=aliases, inline=True)
+            cmd_embed.add_field(name="📂  CATEGORY", value=category, inline=True)
+        else:
+            cmd_embed = discord.Embed(
+                title=f"✦ Command: {cmd.name.capitalize()} ✦",
+                description=f"> {description}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+                color=EMBED_COLOR,
+            )
+            cmd_embed.add_field(name="⌨️ Usage", value=f"{usage}", inline=False)
+            cmd_embed.add_field(name="💡 Example", value=f"{examples}", inline=False)
+            cmd_embed.add_field(name="🔀 Aliases", value=aliases, inline=True)
+            cmd_embed.add_field(name="📂 Category", value=category, inline=True)
         cmd_embed.set_footer(
             text=f"Requested by {ctx.author.display_name}", icon_url=ctx.author.display_avatar.url
         )
