@@ -88,8 +88,8 @@ async def topgg_webhook():
                 except Exception as e:
                     print(f"Failed to send DM for vote: {e}")
 
-            if bot_instance and bot_instance.loop and bot_instance.is_ready():
-                bot_instance.loop.create_task(send_dm())
+            if bot_instance and bot_instance.is_ready():
+                await send_dm()
         except Exception as e:
             print(f"Error preparing DM for vote: {e}")
         
