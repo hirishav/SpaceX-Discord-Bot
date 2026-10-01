@@ -103,7 +103,7 @@ class ModAllow(commands.Cog):
                 return await ctx.send("❌ You cannot allow owner-only commands! Only normal commands are permitted.")
                 
             # Protect management commands
-            if target_name in ["allow", "disallow", "unallow", "undisallow", "allowlist", "disallowlist", "listallows", "listdisallows"]:
+            if target_name in ["allow", "disallow", "unallow", "undisallow", "allowlist", "disallowlist", "listallows", "listdisallows", "resetallow", "resetallows", "resetperm", "resetperms"]:
                 return await ctx.send("❌ You cannot allow or override permission management commands!")
         else:
             # Maybe it's a module
@@ -228,7 +228,7 @@ class ModAllow(commands.Cog):
             target_name = cmd.qualified_name.split()[0].lower()
             if is_owner_or_protected_command(self.bot, cmd):
                 return await ctx.send("❌ You cannot disallow owner-only commands! Only normal commands can be disallowed.")
-            if target_name in ["allow", "disallow", "unallow", "undisallow", "allowlist", "disallowlist", "listallows", "listdisallows", "help"]:
+            if target_name in ["allow", "disallow", "unallow", "undisallow", "allowlist", "disallowlist", "listallows", "listdisallows", "resetallow", "resetallows", "resetperm", "resetperms", "help"]:
                 return await ctx.send("❌ You cannot disallow core management commands!")
         else:
             if command_or_module.lower() == "owner":

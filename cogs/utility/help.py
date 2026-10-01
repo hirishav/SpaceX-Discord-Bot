@@ -1300,6 +1300,17 @@ class Help(commands.Cog):
             usage = f"`{prefix}disallowlist`\nAliases: `{prefix}listdisallows`, `{prefix}disallows`, `{prefix}disallowedlist`"
             examples = f"`{prefix}disallowlist`"
 
+        elif cmd.name == "resetallow":
+            description = (
+                "♻️ Server ke sabhi ya kisi target ke command permissions (allows & disallows) ko reset karne ke liye (Managers & Admins).\n\n"
+                "📌 **Notes:**\n"
+                "• Target: `@user`, `@role`, ya `everyone` (Optional)\n"
+                "• Agar target nahi diya toh poore server ke sabhi allows aur disallows reset ho jayenge!\n"
+                "• Reset hone ke baad na koi command allow rahega aur na hi disallow — default server behavior restore hoga."
+            )
+            usage = f"`{prefix}resetallow [target] [command/module]`\nAliases: `{prefix}resetallows`, `{prefix}resetperms`, `{prefix}resetperm`"
+            examples = f"`{prefix}resetallow`\n`{prefix}resetallow @Member`\n`{prefix}resetallow @Role`\n`{prefix}resetallow everyone`\n`{prefix}resetallow @Member fake`"
+
         elif cmd.name == "roleinfo":
             description = "🛡️ Kisi bhi role ke baare me detail info, perms, aur channel access jaanein."
             usage = f"`{prefix}roleinfo <@role/id/name>`"

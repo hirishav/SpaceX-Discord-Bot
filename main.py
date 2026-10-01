@@ -156,7 +156,7 @@ class SpaceXBot(commands.Bot):
             
         command_name = interaction.command.qualified_name.split()[0]
         
-        if command_name in {"disable", "enable", "help", "seecounting", "counting", "allow", "disallow", "unallow", "undisallow", "allowlist", "disallowlist", "listallows", "listdisallows"}: 
+        if command_name in {"disable", "enable", "help", "seecounting", "counting", "allow", "disallow", "unallow", "undisallow", "allowlist", "disallowlist", "listallows", "listdisallows", "resetallow", "resetallows", "resetperm", "resetperms"}: 
             return True
             
         guild_id = interaction.guild.id
@@ -254,7 +254,7 @@ class SpaceXBot(commands.Bot):
             
         command_name = ctx.command.qualified_name.split()[0]
             
-        if command_name in {"disable", "enable", "help", "seecounting", "counting", "allow", "disallow", "unallow", "undisallow", "allowlist", "disallowlist", "listallows", "listdisallows"}:
+        if command_name in {"disable", "enable", "help", "seecounting", "counting", "allow", "disallow", "unallow", "undisallow", "allowlist", "disallowlist", "listallows", "listdisallows", "resetallow", "resetallows", "resetperm", "resetperms"}:
             return True
             
         guild_id = ctx.guild.id
