@@ -130,6 +130,7 @@ class SpaceXBot(commands.Bot):
         self.ignored_modules_cache = {} # server_id -> set of (target_id, module_name)
         
         self.allowed_commands_cache = {} # server_id -> { target_id: { command_or_module: expires_at } }
+        self.disallowed_commands_cache = {} # server_id -> { target_id: { command_or_module: expires_at } }
         
         self.topgg_client = None
         self.add_check(self.check_disabled_commands)
@@ -155,13 +156,48 @@ class SpaceXBot(commands.Bot):
             
         command_name = interaction.command.qualified_name.split()[0]
         
-        if command_name in {"disable", "enable", "help", "seecounting", "counting"}: 
+        if command_name in {"disable", "enable", "help", "seecounting", "counting", "allow", "disallow", "unallow", "undisallow", "allowlist", "disallowlist", "listallows", "listdisallows"}: 
             return True
             
         guild_id = interaction.guild.id
         channel_id = interaction.channel_id
         module_name = self._resolve_module(interaction.command)
         
+        # Disallow check
+        if hasattr(self, 'disallowed_commands_cache') and guild_id in self.disallowed_commands_cache:
+            current_time = int(time.time())
+            targets = [interaction.user.id] + [r.id for r in getattr(interaction.user, 'roles', [])] + [guild_id]
+            for t_id in targets:
+                if t_id in self.disallowed_commands_cache[guild_id]:
+                    disallowed_items = self.disallowed_commands_cache[guild_id][t_id]
+                    for check_name in (command_name, module_name):
+                        if check_name and check_name in disallowed_items:
+                            exp = disallowed_items[check_name]
+                            if exp == -1 or current_time < exp:
+                                return False
+
+        # Allow check
+        if hasattr(self, 'allowed_commands_cache') and guild_id in self.allowed_commands_cache:
+            current_time = int(time.time())
+            targets = [interaction.user.id] + [r.id for r in getattr(interaction.user, 'roles', [])] + [guild_id]
+            for t_id in targets:
+                if t_id in self.allowed_commands_cache[guild_id]:
+                    allowed_items = self.allowed_commands_cache[guild_id][t_id]
+                    for check_name in (command_name, module_name):
+                        if check_name and check_name in allowed_items:
+                            exp = allowed_items[check_name]
+                            if exp == -1 or current_time < exp:
+                                return True
+
+        # Fake command: Managers and Admins can always use it
+        if command_name == "fake":
+            if interaction.user.id == interaction.guild.owner_id:
+                return True
+            if hasattr(interaction.user, 'guild_permissions'):
+                perms = interaction.user.guild_permissions
+                if perms.administrator or perms.manage_guild or perms.manage_messages or perms.manage_roles:
+                    return True
+
         disabled_reason = None
         
         is_cmd_enabled_channel = channel_id in self.enabled_commands_channel_cache and command_name in self.enabled_commands_channel_cache[channel_id]
@@ -218,12 +254,68 @@ class SpaceXBot(commands.Bot):
             
         command_name = ctx.command.qualified_name.split()[0]
             
-        if command_name in {"disable", "enable", "help", "seecounting", "counting"}:
+        if command_name in {"disable", "enable", "help", "seecounting", "counting", "allow", "disallow", "unallow", "undisallow", "allowlist", "disallowlist", "listallows", "listdisallows"}:
             return True
             
         guild_id = ctx.guild.id
         channel_id = ctx.channel.id
         module_name = self._resolve_module(ctx.command)
+        cog_name = getattr(ctx.command.cog, 'qualified_name', '') if ctx.command.cog else ''
+
+        # 1. Disallow check
+        if hasattr(self, 'disallowed_commands_cache') and guild_id in self.disallowed_commands_cache:
+            current_time = int(time.time())
+            targets = [ctx.author.id] + [r.id for r in getattr(ctx.author, 'roles', [])] + [guild_id]
+            for t_id in targets:
+                if t_id in self.disallowed_commands_cache[guild_id]:
+                    disallowed_items = self.disallowed_commands_cache[guild_id][t_id]
+                    for check_name in (command_name, cog_name, module_name):
+                        if check_name and check_name in disallowed_items:
+                            exp = disallowed_items[check_name]
+                            if exp != -1 and current_time >= exp:
+                                del disallowed_items[check_name]
+                                cursor = self.db.cursor()
+                                cursor.execute("DELETE FROM command_disallows WHERE guild_id = ? AND target_id = ? AND command_or_module = ?",
+                                               (str(guild_id), str(t_id), check_name))
+                                self.db.commit()
+                            else:
+                                time_left = "permanently" if exp == -1 else f"until <t:{exp}:f>"
+                                raise commands.CheckFailure(f"Aapko is server me `{command_name}` command use karne se disallow kiya gaya hai ({time_left}).")
+
+        # 2. Allow check (explicit allow overrides server/channel disable)
+        is_explicitly_allowed = False
+        if hasattr(self, 'allowed_commands_cache') and guild_id in self.allowed_commands_cache:
+            current_time = int(time.time())
+            targets = [ctx.author.id] + [r.id for r in getattr(ctx.author, 'roles', [])] + [guild_id]
+            for t_id in targets:
+                if t_id in self.allowed_commands_cache[guild_id]:
+                    allowed_items = self.allowed_commands_cache[guild_id][t_id]
+                    for check_name in (command_name, cog_name, module_name):
+                        if check_name and check_name in allowed_items:
+                            exp = allowed_items[check_name]
+                            if exp == -1 or current_time < exp:
+                                is_explicitly_allowed = True
+                                break
+                            else:
+                                del allowed_items[check_name]
+                                cursor = self.db.cursor()
+                                cursor.execute("DELETE FROM command_allows WHERE guild_id = ? AND target_id = ? AND command_or_module = ?",
+                                               (str(guild_id), str(t_id), check_name))
+                                self.db.commit()
+                if is_explicitly_allowed:
+                    break
+
+        if is_explicitly_allowed:
+            return True
+
+        # 3. Fake command: Managers and Admins can always use it even if 'fun' module is disabled
+        if command_name == "fake":
+            if ctx.author.id == ctx.guild.owner_id:
+                return True
+            if hasattr(ctx.author, 'guild_permissions'):
+                perms = ctx.author.guild_permissions
+                if perms.administrator or perms.manage_guild or perms.manage_messages or perms.manage_roles:
+                    return True
         
         disabled_reason = None
         
@@ -495,6 +587,18 @@ class SpaceXBot(commands.Bot):
         )
         """)
 
+        # COMMAND DISALLOWS TABLE
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS command_disallows (
+            guild_id TEXT,
+            target_id TEXT,
+            command_or_module TEXT,
+            expires_at INTEGER,
+            reason TEXT,
+            disallowed_by TEXT
+        )
+        """)
+
         # PREMIUM SERVERS TABLE
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS premium_servers (
@@ -759,6 +863,16 @@ class SpaceXBot(commands.Bot):
             if t_id_int not in self.allowed_commands_cache[g_id_int]:
                 self.allowed_commands_cache[g_id_int][t_id_int] = {}
             self.allowed_commands_cache[g_id_int][t_id_int][cmd_mod] = exp
+
+        cursor.execute("SELECT guild_id, target_id, command_or_module, expires_at FROM command_disallows")
+        for g_id, t_id, cmd_mod, exp in cursor.fetchall():
+            g_id_int = int(g_id)
+            t_id_int = int(t_id)
+            if g_id_int not in self.disallowed_commands_cache:
+                self.disallowed_commands_cache[g_id_int] = {}
+            if t_id_int not in self.disallowed_commands_cache[g_id_int]:
+                self.disallowed_commands_cache[g_id_int][t_id_int] = {}
+            self.disallowed_commands_cache[g_id_int][t_id_int][cmd_mod] = exp
             
         cursor.execute("SELECT server_id, target_id, module_name FROM ignored_modules_target")
         for s_id, t_id, mod_name in cursor.fetchall():
@@ -1053,21 +1167,33 @@ async def on_message(message):
 original_can_run = commands.Command.can_run
 
 async def patched_can_run(self, ctx):
-    if ctx.guild and hasattr(ctx.bot, 'allowed_commands_cache'):
+    if ctx.guild:
         guild_id = ctx.guild.id
-        if guild_id in ctx.bot.allowed_commands_cache:
+        cmd_name = self.name
+        cog_name = getattr(self.cog, 'qualified_name', '') if self.cog else ''
+        module_name = ctx.bot._resolve_module(self) if hasattr(ctx.bot, '_resolve_module') else ''
+        targets = [ctx.author.id] + [r.id for r in getattr(ctx.author, 'roles', [])] + [guild_id]
+        current_time = int(time.time())
+
+        # Check disallows
+        if hasattr(ctx.bot, 'disallowed_commands_cache') and guild_id in ctx.bot.disallowed_commands_cache:
+            for t_id in targets:
+                disallowed_items = ctx.bot.disallowed_commands_cache[guild_id].get(t_id, {})
+                for check_name in (cmd_name, cog_name, module_name):
+                    if check_name and check_name in disallowed_items:
+                        exp = disallowed_items[check_name]
+                        if exp == -1 or current_time < exp:
+                            return False
+
+        # Check allows
+        if hasattr(ctx.bot, 'allowed_commands_cache') and guild_id in ctx.bot.allowed_commands_cache:
             is_allowed = False
-            targets = [ctx.author.id] + [r.id for r in getattr(ctx.author, 'roles', [])]
             for t_id in targets:
                 allowed_items = ctx.bot.allowed_commands_cache[guild_id].get(t_id, {})
-                cmd_name = self.name
-                cog_name = getattr(self.cog, 'qualified_name', '') if self.cog else ''
-                module_name = ctx.bot._resolve_module(self) if hasattr(ctx.bot, '_resolve_module') else ''
-
                 for check_name in (cmd_name, cog_name, module_name):
                     if check_name and check_name in allowed_items:
                         exp = allowed_items[check_name]
-                        if exp == -1 or int(time.time()) < exp:
+                        if exp == -1 or current_time < exp:
                             is_allowed = True
                             break
                 if is_allowed:

@@ -1227,63 +1227,78 @@ class Help(commands.Cog):
             usage = f"`{prefix}unignore command <name> <@user/@role>`\n`{prefix}unignore module <name> <@user/@role>`"
             examples = f"`{prefix}unignore command afk @everyone`"
 
-        elif cmd.name == "allow":
-            description = "✅ Kisi user/role ko permission bypass (allow) karne ke liye. (Owner commands allow nahi ho sakte)"
-            usage = f"`{prefix}allow <@user/@role> <command/module> <duration> [reason]`"
-            examples = f"`{prefix}allow @user ban 1h For Testing`\n`{prefix}allow @role moderation 1week New Mod`"
-
-        elif cmd.name in ["disallow", "unallow"]:
-            description = "🚫 Kisi pehle se allow (bypassed) command/module ko wapas hatane ke liye."
-            usage = f"`{prefix}disallow <@user/@role> <command/module>`"
-            examples = f"`{prefix}disallow @user ban`"
-
-        elif cmd.name == "listallows":
-            description = "📋 Server me active command allows/bypasses ki list dekhne ke liye."
-            usage = f"`{prefix}listallows`"
-            examples = f"`{prefix}listallows`"
-
         elif cmd.name == "seesay":
             description = "🛡️ Server Managers: Server mein members dwara use kiye gaye 'say' command ki history dekhne ke liye."
             usage = f"`{prefix}seesay [limit]`"
             examples = f"`{prefix}seesay 15`"
-
-        elif cmd.name == "logset":
-            description = "⚙️ Server me specific log events ke liye log channel set karne ke liye.\nValid types: `mod`, `msg_delete`, `msg_edit`, `vcjoin`, `vcleft`, `vcdrag`, `role_changes`, `channel_changes`, `perm_changes`"
-            usage = f"`{prefix}logset <log_type> <#channel>`"
-            examples = f"`{prefix}logset mod #mod-logs`"
-
-        elif cmd.name == "logremove":
-            description = "⚙️ Server se specific log event ka configuration hatane ke liye."
-            usage = f"`{prefix}logremove <log_type>`"
-            examples = f"`{prefix}logremove msg_delete`"
-
-        elif cmd.name == "logconfig":
-            description = "📊 Server me set kiye gaye saare active log channels ki configuration dekhne ke liye."
-            usage = f"`{prefix}logconfig`"
-            examples = f"`{prefix}logconfig`"
 
         elif cmd.name == "delchannel":
             description = "🗑️ Current channel ya specific channel ko delete karne ke liye (confirmation ke sath)."
             usage = f"`{prefix}delchannel [#channel]`"
             examples = f"`{prefix}delchannel`\n`{prefix}delchannel #spam`"
 
-        elif cmd.name == "fake":
-            description = "🤡 Fun category ke fake moderation aur utility commands. Dosto ke sath prank karne ke liye!"
+        elif cmd.name == "fake" or (hasattr(cmd, "root_parent") and cmd.root_parent and cmd.root_parent.name == "fake"):
+            description = (
+                "🤡 Server Managers aur Admins ke liye fake moderation prank commands!\n"
+                "Members aur dosto ke sath prank karne ke liye realistic moderation embeds bhejta hai."
+            )
             usage = (
-                f"`{prefix}fake ban @user reason`\n"
-                f"`{prefix}fake mute @user reason`\n"
-                f"`{prefix}fake kick @user reason`\n"
-                f"`{prefix}fake warn @user reason`\n"
-                f"`{prefix}fake delchannel`\n"
+                f"`{prefix}fake ban @user [reason]`\n"
+                f"`{prefix}fake mute @user [reason]`\n"
+                f"`{prefix}fake kick @user [reason]`\n"
+                f"`{prefix}fake warn @user [reason]`\n"
+                f"`{prefix}fake delchannel [#channel]`\n"
                 f"`{prefix}fake tic create`\n"
-                f"`{prefix}fake afk`\n"
-                f"`{prefix}fake role add @user reason`\n"
-                f"`{prefix}fake temprole @user 1h Role`\n"
+                f"`{prefix}fake afk [reason]`\n"
+                f"`{prefix}fake role add @user [role]`\n"
+                f"`{prefix}fake temprole @user <duration> [role]`\n"
                 f"`{prefix}fake hide all`\n"
                 f"`{prefix}fake unhide all`\n"
-                f"`{prefix}fake slowmode 1h`"
+                f"`{prefix}fake slowmode <duration>`"
             )
-            examples = f"`{prefix}fake ban @Rishav Spamming`\n`{prefix}fake delchannel`"
+            examples = f"`{prefix}fake ban @User Spamming`\n`{prefix}fake mute @User 10m`\n`{prefix}fake delchannel`"
+
+        elif cmd.name == "allow":
+            description = (
+                "🛡️ Kisi user ya role ko normal command ya module use karne ki permission dene ke liye (Managers & Admins).\n\n"
+                "📌 **Notes:**\n"
+                "• Target: `@user`, `@role`, ya `everyone`\n"
+                "• Durations: `10m`, `1h`, `1d`, `7d`, `1month`, ya `permanent`\n"
+                "• ⚠️ **Strictly Forbidden:** Owner commands (`eval`, `sql`, `blacklist`, etc.) allow nahi ho sakte!"
+            )
+            usage = f"`{prefix}allow <@user/@role/everyone> <command/module> <duration> [reason]`"
+            examples = f"`{prefix}allow @Helper mute 1d Temp trial`\n`{prefix}allow @VIP weather permanent`"
+
+        elif cmd.name == "unallow":
+            description = "🛡️ Kisi user, role ya everyone se allow override hatane ke liye (Managers & Admins)."
+            usage = f"`{prefix}unallow <@user/@role/everyone> <command/module>`\nAlias: `{prefix}removeallow`"
+            examples = f"`{prefix}unallow @Helper mute`\n`{prefix}unallow everyone fun`"
+
+        elif cmd.name == "disallow":
+            description = (
+                "🚫 Kisi user ya role ko normal command ya module chalane se restrict (block) karne ke liye (Managers & Admins).\n\n"
+                "📌 **Notes:**\n"
+                "• Target: `@user`, `@role`, ya `everyone`\n"
+                "• Durations: `10m`, `1h`, `1d`, `7d`, `1month`, ya `permanent` (Default: `permanent`)\n"
+                "• ⚠️ **Protected:** Server Owner, Bot Owners aur Owner commands disallow nahi ho sakte!"
+            )
+            usage = f"`{prefix}disallow <@user/@role/everyone> <command/module> [duration] [reason]`"
+            examples = f"`{prefix}disallow @Spammer say 1d Misuse`\n`{prefix}disallow @Troll fun 7d`\n`{prefix}disallow everyone confess permanent`"
+
+        elif cmd.name == "undisallow":
+            description = "🚫 Kisi user, role ya everyone se disallow restriction hatane ke liye (Managers & Admins)."
+            usage = f"`{prefix}undisallow <@user/@role/everyone> <command/module>`\nAlias: `{prefix}removedisallow`"
+            examples = f"`{prefix}undisallow @Spammer say`\n`{prefix}undisallow everyone confess`"
+
+        elif cmd.name == "allowlist":
+            description = "📋 Server me active allowed commands aur modules ki poori list dekhne ke liye (Managers & Admins)."
+            usage = f"`{prefix}allowlist`\nAliases: `{prefix}listallows`, `{prefix}allows`, `{prefix}allowedlist`"
+            examples = f"`{prefix}allowlist`"
+
+        elif cmd.name == "disallowlist":
+            description = "🚫 Server me active disallowed commands aur modules ki poori list dekhne ke liye (Managers & Admins)."
+            usage = f"`{prefix}disallowlist`\nAliases: `{prefix}listdisallows`, `{prefix}disallows`, `{prefix}disallowedlist`"
+            examples = f"`{prefix}disallowlist`"
 
         elif cmd.name == "roleinfo":
             description = "🛡️ Kisi bhi role ke baare me detail info, perms, aur channel access jaanein."
