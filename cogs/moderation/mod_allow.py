@@ -3,28 +3,7 @@ from discord.ext import commands
 import typing
 import time
 import re
-
-def parse_duration(duration_str: str):
-    if not duration_str:
-        return -1
-    d_lower = duration_str.lower().strip()
-    if d_lower in ["permanent", "perm", "-1", "forever", "always"]:
-        return -1
-    match = re.match(r'^(\d+)(s|m|h|d|w|week|month|y|year)$', d_lower)
-    if not match:
-        return None
-    amount = int(match.group(1))
-    unit = match.group(2)
-    multiplier = 1
-    if unit == 's': multiplier = 1
-    elif unit == 'm': multiplier = 60
-    elif unit == 'h': multiplier = 3600
-    elif unit == 'd': multiplier = 86400
-    elif unit in ['w', 'week']: multiplier = 604800
-    elif unit == 'month': multiplier = 2592000
-    elif unit in ['y', 'year']: multiplier = 31536000
-    
-    return int(time.time()) + (amount * multiplier)
+from utils import parse_duration_to_timestamp, parse_time_to_seconds, resolve_target
 
 def is_manager_or_admin_check():
     async def predicate(ctx):
@@ -69,24 +48,63 @@ def is_owner_or_protected_command(bot, cmd_or_name):
         return True
     return False
 
+def extract_allow_args(args):
+    """
+    Extracts (target_str, cmd_or_mod, duration, reason) from args tuple.
+    """
+    if len(args) < 3:
+        return None, None, None, None
+
+    # Scan from end for duration token
+    for i in range(len(args) - 1, 1, -1):
+        if parse_time_to_seconds(args[i]) is not None:
+            duration = args[i]
+            cmd_or_mod = args[i - 1]
+            target_str = " ".join(args[:i - 1])
+            reason = " ".join(args[i + 1:]) if i + 1 < len(args) else "No reason provided"
+            return target_str, cmd_or_mod, duration, reason
+
+    target_str = args[0]
+    cmd_or_mod = args[1]
+    duration = args[2]
+    reason = " ".join(args[3:]) if len(args) > 3 else "No reason provided"
+    return target_str, cmd_or_mod, duration, reason
+
+def extract_unallow_args(args):
+    if len(args) < 2:
+        return None, None
+    cmd_or_mod = args[-1]
+    target_str = " ".join(args[:-1])
+    return target_str, cmd_or_mod
+
 class ModAllow(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
     @commands.command(name="allow")
     @is_manager_or_admin_check()
-    async def allow_command(self, ctx, target: typing.Union[discord.Member, discord.Role, str], command_or_module: str, duration: str, *, reason: str = "No reason provided"):
-        """Kisi user ya role ko normal command allow karne ke liye (Managers & Admins)."""
-        # Clean target string if it's passed as everyone
-        if isinstance(target, str):
-            if target.lower() in ["everyone", "@everyone"]:
-                target_id = ctx.guild.id
-                target_mention = "@everyone"
-            else:
-                return await ctx.send("❌ Invalid target. Please mention a user, a role, or type `everyone`.")
-        else:
-            target_id = target.id
-            target_mention = getattr(target, 'mention', str(target))
+    async def allow_command(self, ctx, *args):
+        """
+        Kisi user ya role ko normal command allow karne ke liye (Managers & Admins).
+        Usage:
+        !!allow @user/role_name command_name 10m/1d/permanent [reason]
+        """
+        if len(args) < 3:
+            return await ctx.send(
+                f"❌ Sahi tarika: `{ctx.prefix}allow <@user/@role/everyone/role_name> <command_or_module> <duration> [reason]`\n"
+                f"Example: `{ctx.prefix}allow creator fake permanent enjoy!`"
+            )
+
+        target_str, command_or_module, duration, reason = extract_allow_args(args)
+        if not target_str or not command_or_module or not duration:
+            return await ctx.send(
+                f"❌ Sahi tarika: `{ctx.prefix}allow <@user/@role/everyone/role_name> <command_or_module> <duration> [reason]`"
+            )
+
+        try:
+            target_obj, target_id, target_mention, is_everyone, is_role = await resolve_target(ctx, target_str, allow_everyone=True)
+        except commands.BadArgument as e:
+            return await ctx.send(str(e))
 
         # STRICTLY PROTECT OWNER COMMANDS
         if is_owner_or_protected_command(self.bot, command_or_module):
@@ -96,7 +114,7 @@ class ModAllow(commands.Cog):
         cmd = self.bot.get_command(command_or_module)
         is_module = False
         target_name = command_or_module.lower()
-        
+
         if cmd:
             target_name = cmd.qualified_name.split()[0].lower()
             if is_owner_or_protected_command(self.bot, cmd):
@@ -106,7 +124,6 @@ class ModAllow(commands.Cog):
             if target_name in ["allow", "disallow", "unallow", "undisallow", "allowlist", "disallowlist", "listallows", "listdisallows", "resetallow", "resetallows", "resetperm", "resetperms"]:
                 return await ctx.send("❌ You cannot allow or override permission management commands!")
         else:
-            # Maybe it's a module
             if command_or_module.lower() == "owner":
                 return await ctx.send("❌ You cannot allow owner-only module! Only normal modules are permitted.")
             valid_modules = ["moderation", "utility", "economy", "fun", "gif", "general"]
@@ -116,7 +133,7 @@ class ModAllow(commands.Cog):
             else:
                 return await ctx.send(f"❌ Invalid command or module name `{command_or_module}`. Valid modules: {', '.join(valid_modules)}.")
 
-        expires_at = parse_duration(duration)
+        expires_at = parse_duration_to_timestamp(duration)
         if expires_at is None:
             return await ctx.send("❌ Invalid duration format! Use e.g. `10m`, `1h`, `1d`, `7d`, `1month`, or `permanent`.")
 
@@ -159,17 +176,16 @@ class ModAllow(commands.Cog):
 
     @commands.command(name="unallow", aliases=["removeallow"])
     @is_manager_or_admin_check()
-    async def unallow_command(self, ctx, target: typing.Union[discord.Member, discord.Role, str], command_or_module: str):
+    async def unallow_command(self, ctx, *args):
         """Allowed command/module override hatane ke liye (Managers & Admins)."""
-        if isinstance(target, str):
-            if target.lower() in ["everyone", "@everyone"]:
-                target_id = ctx.guild.id
-                target_mention = "@everyone"
-            else:
-                return await ctx.send("❌ Invalid target. Please mention a user, a role, or type `everyone`.")
-        else:
-            target_id = target.id
-            target_mention = getattr(target, 'mention', str(target))
+        if len(args) < 2:
+            return await ctx.send(f"❌ Sahi tarika: `{ctx.prefix}unallow <@user/@role/everyone/role_name> <command_or_module>`")
+
+        target_str, command_or_module = extract_unallow_args(args)
+        try:
+            target_obj, target_id, target_mention, is_everyone, is_role = await resolve_target(ctx, target_str, allow_everyone=True)
+        except commands.BadArgument as e:
+            return await ctx.send(str(e))
 
         cmd = self.bot.get_command(command_or_module)
         if cmd:
@@ -197,24 +213,32 @@ class ModAllow(commands.Cog):
 
     @commands.command(name="disallow")
     @is_manager_or_admin_check()
-    async def disallow_command(self, ctx, target: typing.Union[discord.Member, discord.Role, str], command_or_module: str, duration: str = "permanent", *, reason: str = "No reason provided"):
+    async def disallow_command(self, ctx, *args):
         """Kisi user ya role ke liye normal command restrict karne ke liye (Managers & Admins)."""
-        # Clean target string if it's passed as everyone
-        if isinstance(target, str):
-            if target.lower() in ["everyone", "@everyone"]:
-                target_id = ctx.guild.id
-                target_mention = "@everyone"
-            else:
-                return await ctx.send("❌ Invalid target. Please mention a user, a role, or type `everyone`.")
+        if len(args) < 2:
+            return await ctx.send(
+                f"❌ Sahi tarika: `{ctx.prefix}disallow <@user/@role/everyone/role_name> <command_or_module> [duration] [reason]`"
+            )
+
+        if len(args) >= 3:
+            target_str, command_or_module, duration, reason = extract_allow_args(args)
         else:
-            target_id = target.id
-            target_mention = getattr(target, 'mention', str(target))
-            # Protect server owner and bot owners from being disallowed
-            if isinstance(target, (discord.Member, discord.User)):
-                if target.id == ctx.guild.owner_id:
-                    return await ctx.send("❌ You cannot disallow commands for the server owner!")
-                if target.id in self.bot.owner_ids:
-                    return await ctx.send("❌ You cannot disallow commands for bot owners!")
+            target_str = args[0]
+            command_or_module = args[1]
+            duration = "permanent"
+            reason = "No reason provided"
+
+        try:
+            target_obj, target_id, target_mention, is_everyone, is_role = await resolve_target(ctx, target_str, allow_everyone=True)
+        except commands.BadArgument as e:
+            return await ctx.send(str(e))
+
+        # Protect server owner and bot owners from being disallowed
+        if isinstance(target_obj, (discord.Member, discord.User)):
+            if target_obj.id == ctx.guild.owner_id:
+                return await ctx.send("❌ You cannot disallow commands for the server owner!")
+            if target_obj.id in self.bot.owner_ids:
+                return await ctx.send("❌ You cannot disallow commands for bot owners!")
 
         # STRICTLY PROTECT OWNER COMMANDS
         if is_owner_or_protected_command(self.bot, command_or_module):
@@ -240,7 +264,7 @@ class ModAllow(commands.Cog):
             else:
                 return await ctx.send(f"❌ Invalid command or module name `{command_or_module}`. Valid modules: {', '.join(valid_modules)}.")
 
-        expires_at = parse_duration(duration)
+        expires_at = parse_duration_to_timestamp(duration)
         if expires_at is None:
             return await ctx.send("❌ Invalid duration format! Use e.g. `10m`, `1h`, `1d`, `7d`, `1month`, or `permanent`.")
 
@@ -282,17 +306,16 @@ class ModAllow(commands.Cog):
 
     @commands.command(name="undisallow", aliases=["removedisallow"])
     @is_manager_or_admin_check()
-    async def undisallow_command(self, ctx, target: typing.Union[discord.Member, discord.Role, str], command_or_module: str):
+    async def undisallow_command(self, ctx, *args):
         """Disallow restriction hatane ke liye (Managers & Admins)."""
-        if isinstance(target, str):
-            if target.lower() in ["everyone", "@everyone"]:
-                target_id = ctx.guild.id
-                target_mention = "@everyone"
-            else:
-                return await ctx.send("❌ Invalid target. Please mention a user, a role, or type `everyone`.")
-        else:
-            target_id = target.id
-            target_mention = getattr(target, 'mention', str(target))
+        if len(args) < 2:
+            return await ctx.send(f"❌ Sahi tarika: `{ctx.prefix}undisallow <@user/@role/everyone/role_name> <command_or_module>`")
+
+        target_str, command_or_module = extract_unallow_args(args)
+        try:
+            target_obj, target_id, target_mention, is_everyone, is_role = await resolve_target(ctx, target_str, allow_everyone=True)
+        except commands.BadArgument as e:
+            return await ctx.send(str(e))
 
         cmd = self.bot.get_command(command_or_module)
         if cmd:

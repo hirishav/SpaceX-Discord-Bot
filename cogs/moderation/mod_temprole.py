@@ -6,7 +6,7 @@ import re
 import asyncio
 import time
 from discord.ext.commands import Converter, BadArgument
-from utils import SmartRoleConverter
+from utils import SmartRoleConverter, parse_duration_to_timedelta
 
 class ModTemprole(commands.Cog):
     def __init__(self, bot):
@@ -16,24 +16,8 @@ class ModTemprole(commands.Cog):
     def cog_unload(self):
         self.check_temproles.cancel()
 
-    # Helper function to parse duration strings like 10m, 1h
     def parse_duration(self, time_str: str):
-        time_match = re.match(r"(\d+)([smhd])", time_str.lower())
-        if not time_match:
-            return None
-        
-        amount = int(time_match.group(1))
-        unit = time_match.group(2)
-        
-        if unit == 's':
-            return datetime.timedelta(seconds=amount)
-        elif unit == 'm':
-            return datetime.timedelta(minutes=amount)
-        elif unit == 'h':
-            return datetime.timedelta(hours=amount)
-        elif unit == 'd':
-            return datetime.timedelta(days=amount)
-        return None
+        return parse_duration_to_timedelta(time_str)
 
     @commands.hybrid_command(name="temprole")
     @commands.has_guild_permissions(manage_roles=True)
@@ -63,7 +47,7 @@ class ModTemprole(commands.Cog):
 
         duration = self.parse_duration(duration_str)
         if not duration:
-            return await ctx.send("❌ Galat time format! Use karein: `s`, `m`, `h`, ya `d`. (Example: `10m`, `1d`)")
+            return await ctx.send("❌ Galat time format! Use karein: `s/sec`, `m/min`, `h/hr`, `d/day`, `month`, `y/year`. (Example: `10m`, `1d`)")
 
         expires_at = int(time.time() + duration.total_seconds())
 

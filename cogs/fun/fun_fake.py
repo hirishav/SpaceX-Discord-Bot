@@ -4,6 +4,61 @@ import asyncio
 import time
 import typing
 
+class FakeConfirmDeleteView(discord.ui.View):
+    def __init__(self, ctx, channel, timeout=60):
+        super().__init__(timeout=timeout)
+        self.ctx = ctx
+        self.channel = channel
+        self.value = None
+
+    @discord.ui.button(label="Yes", style=discord.ButtonStyle.danger, custom_id="fake_confirm_delete_yes")
+    async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if interaction.user.id != self.ctx.author.id:
+            return await interaction.response.send_message("❌ You cannot use this button.", ephemeral=True)
+
+        for child in self.children:
+            child.disabled = True
+
+        await interaction.response.edit_message(
+            content=f"⚠️ **CONFIRMED:** {self.channel.mention} is scheduled for permanent deletion in **10 seconds**!",
+            embed=None,
+            view=None
+        )
+        self.value = True
+        self.stop()
+
+        # 10 seconds dramatic back-counting
+        for i in range(10, 0, -1):
+            await asyncio.sleep(1)
+            try:
+                await self.channel.send(f"⚠️ **{i}...**")
+            except Exception:
+                pass
+
+        await asyncio.sleep(1)
+        try:
+            await self.channel.send("💥 **0...**")
+            await asyncio.sleep(0.5)
+            await self.channel.send(f"✅ {self.channel.mention} has been **deleted**.")
+            await asyncio.sleep(1.5)
+            embed_prank = discord.Embed(
+                title="🤡 PRANKED!",
+                description=f"Chill karo sab log! {self.channel.mention} safe hai, koi channel delete nahi hua! 😂",
+                color=discord.Color.green()
+            )
+            await self.channel.send(embed=embed_prank)
+        except Exception:
+            pass
+
+    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.secondary, custom_id="fake_confirm_delete_cancel")
+    async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if interaction.user.id != self.ctx.author.id:
+            return await interaction.response.send_message("❌ You cannot use this button.", ephemeral=True)
+
+        await interaction.response.edit_message(content="❌ Channel deletion cancelled.", embed=None, view=None)
+        self.value = False
+        self.stop()
+
 class FunFake(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -138,15 +193,31 @@ class FunFake(commands.Cog):
         except: pass
 
     @fake.command(name="delchannel")
-    async def fake_delchannel(self, ctx, channel: discord.TextChannel = None):
+    async def fake_delchannel(self, ctx, channel: discord.abc.GuildChannel = None):
+        """Delete channel prank with realistic confirmation and dramatic 10s countdown."""
         channel = channel or ctx.channel
+
+        try:
+            await ctx.message.delete()
+        except Exception:
+            pass
+
         embed = discord.Embed(
-            description=f"✅ {channel.mention} has been **deleted**.",
-            color=discord.Color.green()
+            title="⚠️ Delete Channel Confirmation",
+            description=f"Are you sure you want to delete {channel.mention}?",
+            color=discord.Color.red()
         )
-        await ctx.send(embed=embed)
-        try: await ctx.message.delete()
-        except: pass
+        embed.set_footer(text="This action cannot be undone.")
+
+        view = FakeConfirmDeleteView(ctx, channel)
+        msg = await ctx.send(embed=embed, view=view)
+
+        await view.wait()
+        if view.value is None:
+            try:
+                await msg.edit(content="⏳ Command timed out.", embed=None, view=None)
+            except discord.NotFound:
+                pass
 
     # 'fake tic' and 'fake tic create'
     @fake.group(name="tic", invoke_without_command=True)  # type: ignore

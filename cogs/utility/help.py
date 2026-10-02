@@ -1240,7 +1240,8 @@ class Help(commands.Cog):
         elif cmd.name == "fake" or (hasattr(cmd, "root_parent") and cmd.root_parent and cmd.root_parent.name == "fake"):
             description = (
                 "🤡 Server Managers aur Admins ke liye fake moderation prank commands!\n"
-                "Members aur dosto ke sath prank karne ke liye realistic moderation embeds bhejta hai."
+                "Members aur dosto ke sath prank karne ke liye realistic moderation embeds bhejta hai.\n\n"
+                "💡 **`fake delchannel`:** Asli `delchannel` jaisa delete confirmation embed bhejta hai aur 'Yes' click karne par 10 seconds ka dramatic back-counting countdown (10...9...8...) start karta hai!"
             )
             usage = (
                 f"`{prefix}fake ban @user [reason]`\n"
@@ -1256,38 +1257,67 @@ class Help(commands.Cog):
                 f"`{prefix}fake unhide all`\n"
                 f"`{prefix}fake slowmode <duration>`"
             )
-            examples = f"`{prefix}fake ban @User Spamming`\n`{prefix}fake mute @User 10m`\n`{prefix}fake delchannel`"
+            examples = f"`{prefix}fake delchannel`\n`{prefix}fake ban @User Spamming`\n`{prefix}fake mute @User 10m`"
+
+        elif cmd.name == "hide":
+            description = (
+                "👻 Channel ko members se hide karne ke liye flexible timers ke sath.\n\n"
+                "📌 **Timing Units:**\n"
+                "• `s` / `sec` (Seconds)\n"
+                "• `m` / `min` (Minutes)\n"
+                "• `h` / `hr` (Hours)\n"
+                "• `d` / `day` (Days)\n"
+                "• `month` / `mo` (Months)\n"
+                "• `y` / `year` (Years)\n"
+                "• `permanent` / `perm`\n\n"
+                "💡 *Timer khatam hone par channel automatic unhide ho jata hai aur purani permissions restore ho jaati hain!*"
+            )
+            usage = (
+                f"`{prefix}hide` (current channel permanent)\n"
+                f"`{prefix}hide <duration>` (current channel timer ke sath)\n"
+                f"`{prefix}hide [#channel/id] <duration>`\n"
+                f"`{prefix}hide <duration> [#channel/id]`\n"
+                f"`{prefix}hide all [duration]`\n"
+                f"`{prefix}hide off` ya `{prefix}hide off all`"
+            )
+            examples = f"`{prefix}hide 10m`\n`{prefix}hide #general 1d`\n`{prefix}hide 1month`\n`{prefix}hide all 1h`\n`{prefix}hide off`"
+
+        elif cmd.name == "unhide":
+            description = "👁️ Kisi hidden channel ko wapas sabke liye visible karne aur purani permissions restore karne ke liye."
+            usage = f"`{prefix}unhide [#channel/id]`\n`{prefix}unhide all`"
+            examples = f"`{prefix}unhide`\n`{prefix}unhide #general`\n`{prefix}unhide all`"
 
         elif cmd.name == "allow":
             description = (
                 "🛡️ Kisi user ya role ko normal command ya module use karne ki permission dene ke liye (Managers & Admins).\n\n"
                 "📌 **Notes:**\n"
-                "• Target: `@user`, `@role`, ya `everyone`\n"
-                "• Durations: `10m`, `1h`, `1d`, `7d`, `1month`, ya `permanent`\n"
+                "• Target: `@user`, `@role`, `role_name` (automatic detection), ya `everyone`\n"
+                "• Agar role ke naam me decorative symbols hon (e.g. `[✦Creator✦]`), toh sirf `creator` likhne par bhi bot auto-detect kar lega! Multiple matches hone par dropdown menu se select karne ko bolega.\n"
+                "• Durations: `10m`, `1h`, `1d`, `7d`, `1month`, `1y`, ya `permanent`\n"
                 "• ⚠️ **Strictly Forbidden:** Owner commands (`eval`, `sql`, `blacklist`, etc.) allow nahi ho sakte!"
             )
-            usage = f"`{prefix}allow <@user/@role/everyone> <command/module> <duration> [reason]`"
-            examples = f"`{prefix}allow @Helper mute 1d Temp trial`\n`{prefix}allow @VIP weather permanent`"
+            usage = f"`{prefix}allow <@user/@role/everyone/role_name> <command/module> <duration> [reason]`"
+            examples = f"`{prefix}allow creator fake permanent enjoy!`\n`{prefix}allow @Helper mute 1d Temp trial`\n`{prefix}allow @VIP weather permanent`"
 
         elif cmd.name == "unallow":
             description = "🛡️ Kisi user, role ya everyone se allow override hatane ke liye (Managers & Admins)."
-            usage = f"`{prefix}unallow <@user/@role/everyone> <command/module>`\nAlias: `{prefix}removeallow`"
-            examples = f"`{prefix}unallow @Helper mute`\n`{prefix}unallow everyone fun`"
+            usage = f"`{prefix}unallow <@user/@role/everyone/role_name> <command/module>`\nAlias: `{prefix}removeallow`"
+            examples = f"`{prefix}unallow creator fake`\n`{prefix}unallow @Helper mute`\n`{prefix}unallow everyone fun`"
 
         elif cmd.name == "disallow":
             description = (
                 "🚫 Kisi user ya role ko normal command ya module chalane se restrict (block) karne ke liye (Managers & Admins).\n\n"
                 "📌 **Notes:**\n"
-                "• Target: `@user`, `@role`, ya `everyone`\n"
-                "• Durations: `10m`, `1h`, `1d`, `7d`, `1month`, ya `permanent` (Default: `permanent`)\n"
+                "• Target: `@user`, `@role`, `role_name` (auto-detected), ya `everyone`\n"
+                "• Durations: `10m`, `1h`, `1d`, `7d`, `1month`, `1y`, ya `permanent` (Default: `permanent`)\n"
                 "• ⚠️ **Protected:** Server Owner, Bot Owners aur Owner commands disallow nahi ho sakte!"
             )
-            usage = f"`{prefix}disallow <@user/@role/everyone> <command/module> [duration] [reason]`"
+            usage = f"`{prefix}disallow <@user/@role/everyone/role_name> <command/module> [duration] [reason]`"
             examples = f"`{prefix}disallow @Spammer say 1d Misuse`\n`{prefix}disallow @Troll fun 7d`\n`{prefix}disallow everyone confess permanent`"
 
         elif cmd.name == "undisallow":
             description = "🚫 Kisi user, role ya everyone se disallow restriction hatane ke liye (Managers & Admins)."
-            usage = f"`{prefix}undisallow <@user/@role/everyone> <command/module>`\nAlias: `{prefix}removedisallow`"
+            usage = f"`{prefix}undisallow <@user/@role/everyone/role_name> <command/module>`\nAlias: `{prefix}removedisallow`"
             examples = f"`{prefix}undisallow @Spammer say`\n`{prefix}undisallow everyone confess`"
 
         elif cmd.name == "allowlist":
@@ -1304,12 +1334,12 @@ class Help(commands.Cog):
             description = (
                 "♻️ Server ke sabhi ya kisi target ke command permissions (allows & disallows) ko reset karne ke liye (Managers & Admins).\n\n"
                 "📌 **Notes:**\n"
-                "• Target: `@user`, `@role`, ya `everyone` (Optional)\n"
+                "• Target: `@user`, `@role`, `role_name` (auto-detected), ya `everyone` (Optional)\n"
                 "• Agar target nahi diya toh poore server ke sabhi allows aur disallows reset ho jayenge!\n"
                 "• Reset hone ke baad na koi command allow rahega aur na hi disallow — default server behavior restore hoga."
             )
             usage = f"`{prefix}resetallow [target] [command/module]`\nAliases: `{prefix}resetallows`, `{prefix}resetperms`, `{prefix}resetperm`"
-            examples = f"`{prefix}resetallow`\n`{prefix}resetallow @Member`\n`{prefix}resetallow @Role`\n`{prefix}resetallow everyone`\n`{prefix}resetallow @Member fake`"
+            examples = f"`{prefix}resetallow`\n`{prefix}resetallow creator`\n`{prefix}resetallow @Member fake`\n`{prefix}resetallow everyone`"
 
         elif cmd.name == "roleinfo":
             description = "🛡️ Kisi bhi role ke baare me detail info, perms, aur channel access jaanein."

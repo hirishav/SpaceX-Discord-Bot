@@ -2,6 +2,8 @@
 import discord
 from discord.ext import commands
 
+from utils import parse_time_to_seconds
+
 class ModSlowmode(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -14,23 +16,12 @@ class ModSlowmode(commands.Cog):
             current_sm = ctx.channel.slowmode_delay
             return await ctx.send(f"⏱️ Is channel ka current slowmode delay **{current_sm} seconds** hai.")
 
-        seconds = 0
-        seconds_input = seconds_input.lower()
-        if seconds_input.endswith('s'):
-            try: seconds = int(seconds_input[:-1])
-            except ValueError: return await ctx.send("❌ Sahi format: `10s`, `1m`, `1h`, `1d` ya sirf number `10`")
-        elif seconds_input.endswith('m'):
-            try: seconds = int(seconds_input[:-1]) * 60
-            except ValueError: return await ctx.send("❌ Sahi format: `10s`, `1m`, `1h`, `1d` ya sirf number `10`")
-        elif seconds_input.endswith('h'):
-            try: seconds = int(seconds_input[:-1]) * 3600
-            except ValueError: return await ctx.send("❌ Sahi format: `10s`, `1m`, `1h`, `1d` ya sirf number `10`")
-        elif seconds_input.endswith('d'):
-            try: seconds = int(seconds_input[:-1]) * 86400
-            except ValueError: return await ctx.send("❌ Sahi format: `10s`, `1m`, `1h`, `1d` ya sirf number `10`")
+        if seconds_input.lower().strip() in ["off", "0", "disable"]:
+            seconds = 0
         else:
-            try: seconds = int(seconds_input)
-            except ValueError: return await ctx.send("❌ Sahi format: `10s`, `1m`, `1h`, `1d` ya sirf number `10`")
+            seconds = parse_time_to_seconds(seconds_input)
+            if seconds is None:
+                return await ctx.send("❌ Sahi format: `10s`/`10sec`, `1m`/`1min`, `1h`/`1hour`, ya sirf number `10` (ya `0`/`off` to disable)")
 
         if seconds < 0 or seconds > 21600:
             return await ctx.send("❌ Limit galat hai bhai! 0 se lekar 21600 seconds (6 hours) tak set karein.")

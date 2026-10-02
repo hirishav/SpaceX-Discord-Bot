@@ -5,6 +5,7 @@ import asyncio
 import random
 import re
 import datetime
+from utils import parse_time_to_seconds
 
 ACTIVE_GIVEAWAYS = {}  
 GIVEAWAY_COUNTER = 0
@@ -66,15 +67,10 @@ class ModGiveaway(commands.Cog):
         self.check_giveaways.cancel()
 
     def parse_time(self, time_str: str):
-        match = re.match(r"(\d+)([smhd])", time_str.lower())
-        if not match: return None
-        amount = int(match.group(1))
-        unit = match.group(2)
-        if unit == 's': return amount
-        if unit == 'm': return amount * 60
-        if unit == 'h': return amount * 3600
-        if unit == 'd': return amount * 86400
-        return None
+        secs = parse_time_to_seconds(time_str)
+        if secs is None or secs <= 0:
+            return None
+        return secs
 
     # 🔥 ACCURATE CONTINUOUS SCHEDULER: Har 10 second me active memory trace karta hai
     @tasks.loop(seconds=10.0)

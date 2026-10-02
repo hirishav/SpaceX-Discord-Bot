@@ -4,30 +4,14 @@ from discord.ext import commands
 import time
 import re
 
+from utils import parse_time_to_seconds
+
 class OwnerAddPrefixlessServer(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
     def parse_duration(self, duration_str: str):
-        if duration_str.lower() == "unlimited":
-            return -1
-        
-        match = re.match(r"^(\d+)([smhd])$", duration_str.lower())
-        if not match:
-            return None
-        
-        amount = int(match.group(1))
-        unit = match.group(2)
-        
-        if unit == "s":
-            return amount
-        elif unit == "m":
-            return amount * 60
-        elif unit == "h":
-            return amount * 3600
-        elif unit == "d":
-            return amount * 86400
-        return None
+        return parse_time_to_seconds(duration_str)
 
     @commands.command(name="addprefixless_server", aliases=["addprefixlessserver", "aps"])
     @commands.is_owner()

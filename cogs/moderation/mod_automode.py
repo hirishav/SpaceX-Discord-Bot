@@ -4,6 +4,7 @@ from discord.ext import commands
 import re
 import datetime
 import time
+from utils import parse_duration_to_timedelta
 
 class ModAutoMode(commands.Cog):
     def __init__(self, bot):
@@ -77,18 +78,7 @@ class ModAutoMode(commands.Cog):
         return False
 
     def parse_duration(self, time_str: str):
-        if not time_str:
-            return None
-        time_match = re.match(r"(\d+)([smhd])", time_str.lower())
-        if not time_match:
-            return None
-        amount = int(time_match.group(1))
-        unit = time_match.group(2)
-        if unit == 's': return datetime.timedelta(seconds=amount)
-        elif unit == 'm': return datetime.timedelta(minutes=amount)
-        elif unit == 'h': return datetime.timedelta(hours=amount)
-        elif unit == 'd': return datetime.timedelta(days=amount)
-        return None
+        return parse_duration_to_timedelta(time_str)
 
     @commands.group(name="automod", aliases=["am", "automode"], invoke_without_command=True)  # type: ignore
     @commands.has_permissions(manage_guild=True)

@@ -82,23 +82,34 @@ class ResetAllConfirmationView(discord.ui.View):
             except Exception:
                 pass
 
+from utils import resolve_target
+
 class ModResetAllow(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
     @commands.command(name="resetallow", aliases=["resetallows", "resetperm", "resetperms"])
     @is_manager_or_admin_check()
-    async def resetallow_command(self, ctx, target: typing.Optional[typing.Union[discord.Member, discord.Role, str]] = None, command_or_module: typing.Optional[str] = None):
+    async def resetallow_command(self, ctx, *args):
         """Server ya kisi specific target ke allows aur disallows reset karne ke liye (Managers & Admins)."""
         guild_id_int = ctx.guild.id
         cursor = self.bot.db.cursor()
 
         # Case 1: Server-wide reset (No target provided, or target is "all" / "server" / "everything")
         is_server_wide = False
-        if target is None:
+        target_raw = None
+        command_or_module = None
+
+        if len(args) == 0:
             is_server_wide = True
-        elif isinstance(target, str) and target.lower() in ["all", "server", "everything", "guild"]:
-            is_server_wide = True
+        elif len(args) == 1:
+            if args[0].lower() in ["all", "server", "everything", "guild"]:
+                is_server_wide = True
+            else:
+                target_raw = args[0]
+        else:
+            command_or_module = args[-1]
+            target_raw = " ".join(args[:-1])
 
         if is_server_wide:
             cursor.execute("SELECT COUNT(*) FROM command_allows WHERE guild_id = ?", (str(guild_id_int),))
@@ -136,15 +147,10 @@ class ModResetAllow(commands.Cog):
             return
 
         # Case 2: Target-specific reset
-        if isinstance(target, str):
-            if target.lower() in ["everyone", "@everyone"]:
-                target_id = ctx.guild.id
-                target_mention = "@everyone"
-            else:
-                return await ctx.send("❌ Invalid target. Please mention a user, a role, type `everyone`, or leave blank to reset all.")
-        else:
-            target_id = target.id
-            target_mention = getattr(target, 'mention', str(target))
+        try:
+            target_obj, target_id, target_mention, is_everyone, is_role = await resolve_target(ctx, target_raw, allow_everyone=True)
+        except commands.BadArgument as e:
+            return await ctx.send(str(e))
 
         # Sub-case 2A: Specific command or module for this target
         if command_or_module:

@@ -3,22 +3,17 @@ import discord
 from discord.ext import commands
 import asyncio
 
+from utils import parse_time_to_seconds
+
 class ModLock(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
     def parse_time(self, time_str: str):
-        """Time string (30m, 1h, 10s) ko seconds me convert karne ke liye."""
-        if not time_str: return None
-        try:
-            unit = time_str[-1].lower()
-            amount = int(time_str[:-1])
-            if unit == 's': return amount
-            elif unit == 'm': return amount * 60
-            elif unit == 'h': return amount * 3600
-        except Exception:
+        secs = parse_time_to_seconds(time_str)
+        if secs is None or secs <= 0:
             return None
-        return None
+        return secs
 
     @commands.hybrid_command(name="lock", aliases=["freeze"])
     @commands.has_permissions(manage_channels=True)

@@ -5,24 +5,12 @@ import typing
 import time
 import re
 
+from utils import parse_duration_to_timestamp
+
 def parse_duration(duration_str: str):
     if not duration_str:
         return -1
-    match = re.match(r'^(\d+)(s|m|h|d|w|week|month|y|year)$', duration_str.lower())
-    if not match:
-        return None
-    amount = int(match.group(1))
-    unit = match.group(2)
-    multiplier = 1
-    if unit == 's': multiplier = 1
-    elif unit == 'm': multiplier = 60
-    elif unit == 'h': multiplier = 3600
-    elif unit == 'd': multiplier = 86400
-    elif unit in ['w', 'week']: multiplier = 604800
-    elif unit == 'month': multiplier = 2592000
-    elif unit in ['y', 'year']: multiplier = 31536000
-    
-    return int(time.time()) + (amount * multiplier)
+    return parse_duration_to_timestamp(duration_str)
 
 class OwnerNoPrefix(commands.Cog):
     def __init__(self, bot):
