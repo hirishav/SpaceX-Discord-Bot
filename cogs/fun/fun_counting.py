@@ -19,9 +19,21 @@ ROASTS = [
     "Back to kindergarten for you! 🏫"
 ]
 
+
 class FunCounting(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+
+    async def cog_load(self):
+        """Add the last_message_id column if it doesn't exist yet."""
+        db = database.connect()
+        cursor = db.cursor()
+        try:
+            cursor.execute("ALTER TABLE counting_config ADD COLUMN last_message_id TEXT")
+            db.commit()
+        except Exception:
+            pass  # column already exists
+        db.close()
 
     @commands.command()
     @commands.has_permissions(administrator=True)
@@ -31,18 +43,18 @@ class FunCounting(commands.Cog):
         Usage: `!!counting #channel`
         """
         channel = channel or ctx.channel
-        
+
         db = database.connect()
         cursor = db.cursor()
         # Ensure it's tracked in DB (reset to 1)
         cursor.execute("""
-        INSERT INTO counting_config (server_id, channel_id, current_number, last_user_id)
-        VALUES (?, ?, 1, NULL)
-        ON CONFLICT(channel_id) DO UPDATE SET current_number=1, last_user_id=NULL
+        INSERT INTO counting_config (server_id, channel_id, current_number, last_user_id, last_message_id)
+        VALUES (?, ?, 1, NULL, NULL)
+        ON CONFLICT(channel_id) DO UPDATE SET current_number=1, last_user_id=NULL, last_message_id=NULL
         """, (str(ctx.guild.id), str(channel.id)))
         db.commit()
         db.close()
-        
+
         embed = discord.Embed(
             title="Counting Game Started!",
             description="Start counting from **1** here! 🚀\n\n**Rules:**\n- No skipping numbers.\n- You can't count twice in a row.\n- Any wrong message will ruin the streak!",
@@ -62,7 +74,7 @@ class FunCounting(commands.Cog):
         cursor = db.cursor()
         cursor.execute("SELECT current_number, channel_id FROM counting_config WHERE server_id = ?", (str(ctx.guild.id),))
         row = cursor.fetchone()
-        
+
         # Fallback if server_id is missing or incorrect due to legacy data
         if not row:
             cursor.execute("SELECT current_number, channel_id FROM counting_config WHERE channel_id = ?", (str(ctx.channel.id),))
@@ -70,7 +82,7 @@ class FunCounting(commands.Cog):
             if row:
                 cursor.execute("UPDATE counting_config SET server_id = ? WHERE channel_id = ?", (str(ctx.guild.id), str(ctx.channel.id)))
                 db.commit()
-                
+
         # Second fallback: check all text channels in guild
         if not row:
             channel_ids = [str(c.id) for c in ctx.guild.text_channels]
@@ -83,7 +95,7 @@ class FunCounting(commands.Cog):
                     break
 
         db.close()
-        
+
         if row:
             await ctx.send(f"The next number to count in <#{row[1]}> is **{row[0]}**")
         else:
@@ -98,26 +110,26 @@ class FunCounting(commands.Cog):
         """
         if number < 1:
             return await ctx.send("❌ Number kam se kam 1 hona chahiye.")
-            
+
         db = database.connect()
         cursor = db.cursor()
-        
+
         # Check if counting channel exists for this server
         cursor.execute("SELECT channel_id FROM counting_config WHERE server_id = ?", (str(ctx.guild.id),))
         row = cursor.fetchone()
-        
+
         if not row:
             db.close()
             return await ctx.send("❌ Is server mein counting setup nahi hai. Pehle `!!counting <#channel>` run karein.")
-            
+
         cursor.execute("""
-        UPDATE counting_config 
-        SET current_number = ?, last_user_id = NULL 
+        UPDATE counting_config
+        SET current_number = ?, last_user_id = NULL, last_message_id = NULL
         WHERE server_id = ?
         """, (number, str(ctx.guild.id)))
         db.commit()
         db.close()
-        
+
         await ctx.send(f"✅ Counting game ka number update ho gaya hai! Ab <#{row[0]}> mein agla number **{number}** se shuru hoga.")
 
     @commands.Cog.listener()
@@ -127,21 +139,21 @@ class FunCounting(commands.Cog):
 
         db = database.connect()
         cursor = db.cursor()
-        
+
         # Check if channel is counting channel
         cursor.execute("SELECT current_number, last_user_id FROM counting_config WHERE channel_id = ?", (str(message.channel.id),))
         row = cursor.fetchone()
-        
+
         if not row:
             db.close()
             return
-            
+
         current_number = row[0]
         last_user_id = row[1]
-        
+
         # Validate message
         content = message.content.strip()
-        
+
         # Try to parse number
         is_valid = False
         is_double_count = False
@@ -159,10 +171,10 @@ class FunCounting(commands.Cog):
             # Success
             await message.add_reaction("✅")
             cursor.execute("""
-            UPDATE counting_config 
-            SET current_number = current_number + 1, last_user_id = ? 
+            UPDATE counting_config
+            SET current_number = current_number + 1, last_user_id = ?, last_message_id = ?
             WHERE channel_id = ?
-            """, (str(message.author.id), str(message.channel.id)))
+            """, (str(message.author.id), str(message.id), str(message.channel.id)))
             db.commit()
         else:
             # Failure
@@ -171,26 +183,26 @@ class FunCounting(commands.Cog):
                 roast = "You cannot count one after another! 🚫"
             else:
                 roast = random.choice(ROASTS)
-            
+
             # Reset counter
             cursor.execute("""
-            UPDATE counting_config 
-            SET current_number = 1, last_user_id = NULL 
+            UPDATE counting_config
+            SET current_number = 1, last_user_id = NULL, last_message_id = NULL
             WHERE channel_id = ?
             """, (str(message.channel.id),))
-            
+
             # Track faults
             cursor.execute("SELECT faults FROM counting_faults WHERE user_id = ?", (str(message.author.id),))
             f_row = cursor.fetchone()
             faults = (f_row[0] + 1) if f_row else 1
-            
+
             cursor.execute("""
             INSERT INTO counting_faults (user_id, faults)
             VALUES (?, ?)
             ON CONFLICT(user_id) DO UPDATE SET faults=excluded.faults
             """, (str(message.author.id), faults))
             db.commit()
-            
+
             if faults == 1:
                 punishment_str = "*Warning: First warn! No timeout this time. Count has been reset to **1**.*"
             elif faults == 2:
@@ -203,15 +215,71 @@ class FunCounting(commands.Cog):
                     punishment_str = f"*You are timed out for {timeout_seconds} seconds. The count has been reset to **1**.*"
                 except discord.Forbidden:
                     punishment_str = "*(Failed to mute: Missing Permissions). The count has been reset to **1**.*"
-                
+
             fail_embed = discord.Embed(
                 title="❌ Streak Ruined!",
                 description=f"{message.author.mention} messed up! The next number was supposed to be **{current_number}**.\n\n**{roast}**\n\n{punishment_str}",
                 color=discord.Color.red()
             )
             await message.channel.send(embed=fail_embed)
-            
+
         db.close()
+
+    @commands.Cog.listener()
+    async def on_raw_message_delete(self, payload):
+        """Announce when the last counted number is deleted."""
+        db = database.connect()
+        cursor = db.cursor()
+        cursor.execute(
+            "SELECT current_number, last_user_id, last_message_id FROM counting_config WHERE channel_id = ?",
+            (str(payload.channel_id),)
+        )
+        row = cursor.fetchone()
+        db.close()
+
+        if not row or not row[2] or row[2] != str(payload.message_id):
+            return  # not the last counted message
+
+        current_number, last_user_id, _ = row
+        channel = self.bot.get_channel(payload.channel_id)
+        if channel:
+            await channel.send(
+                f"⚠️ <@{last_user_id}> has deleted their number:\n"
+                f"```\n{current_number - 1}\n```\n"
+                f"The next number is **{current_number}**."
+            )
+
+    @commands.Cog.listener()
+    async def on_raw_message_edit(self, payload):
+        """Announce when the last counted number is edited."""
+        new_content = payload.data.get("content")
+        if new_content is None:
+            return
+
+        db = database.connect()
+        cursor = db.cursor()
+        cursor.execute(
+            "SELECT current_number, last_user_id, last_message_id FROM counting_config WHERE channel_id = ?",
+            (str(payload.channel_id),)
+        )
+        row = cursor.fetchone()
+        db.close()
+
+        if not row or not row[2] or row[2] != str(payload.message_id):
+            return
+
+        current_number, last_user_id, _ = row
+        if new_content.strip() == str(current_number - 1):
+            return  # edited but still the same number
+
+        channel = self.bot.get_channel(payload.channel_id)
+        if channel:
+            await channel.send(
+                f"⚠️ <@{last_user_id}> has edited their number. "
+                f"The original number was:\n```\n{current_number - 1}\n```\n"
+                f"The next number is **{current_number}**."
+            )
+
 
 async def setup(bot):
     await bot.add_cog(FunCounting(bot))
