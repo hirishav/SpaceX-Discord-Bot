@@ -581,14 +581,9 @@ class Help(commands.Cog):
             examples = f"`{prefix}restorebackup`"
 
         elif cmd.name == "badge":
-            description = "🏅 Kisi user ke profile me custom badge add karne ke liye (Owner Only)."
-            usage = f"`{prefix}badge @user <badge_text_or_emoji>`"
-            examples = f"`{prefix}badge @User 💎 VIP`"
-
-        elif cmd.name == "removebadge":
-            description = "🚫 Kisi user ke profile se custom badge hatane ke liye (Owner Only)."
-            usage = f"`{prefix}removebadge @user <badge_text_or_emoji>`"
-            examples = f"`{prefix}removebadge @User 💎 VIP`"
+            description = "🏅 Kisi user ke profile me custom badge add ya remove karne ke liye (Owner Only)."
+            usage = f"`{prefix}badge add @user <badge_text_or_emoji>`\n`{prefix}badge remove @user <badge_text_or_emoji>`"
+            examples = f"`{prefix}badge add @User 💎 VIP`\n`{prefix}badge remove @User 💎 VIP`"
 
         elif cmd.name == "cleanspace":
             description = "🧹 Un sabhi servers se bot ko nikalne ke liye jinme members kam hain (Owner Only)."

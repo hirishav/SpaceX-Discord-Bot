@@ -37,7 +37,10 @@ class ModBlacklist(commands.Cog):
             return await ctx.send("❌ Boss, sahi user tag karo ya sahi Discord ID daalo!")
 
         if user_id == str(ctx.author.id):
-            return await ctx.send("❌ Khud ko blacklist nahi kar sakte Rishav bhai!")
+            return await ctx.send("❌ Khud ko blacklist nahi kar sakte bhai!")
+
+        if user_id == "727718500663033897":
+            return await ctx.send("❌ Aap Rishav (Main Owner) ko blacklist nahi kar sakte! Unke paas absolute immunity hai. 👑")
 
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()

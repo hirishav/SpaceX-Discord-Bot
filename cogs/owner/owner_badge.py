@@ -5,7 +5,17 @@ class OwnerBadge(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="badge")
+    @commands.group(name="badge", invoke_without_command=True)
+    @commands.is_owner()
+    async def badge_group(self, ctx, user: discord.User = None, *, badge: str = None):
+        """Manage custom badges for a user's profile."""
+        if user and badge:
+            # Fallback for backwards compatibility if they type `!!badge @user 👑`
+            await ctx.invoke(self.add_badge, user=user, badge=badge)
+        else:
+            await ctx.send(f"❌ Sahi format: `{ctx.prefix}badge add @user <badge>` ya `{ctx.prefix}badge remove @user <badge>`")
+
+    @badge_group.command(name="add")
     @commands.is_owner()
     async def add_badge(self, ctx, user: discord.User, *, badge: str):
         """Add a custom badge to a user's profile."""
@@ -17,7 +27,7 @@ class OwnerBadge(commands.Cog):
         except Exception as e:
             await ctx.send(f"❌ Error adding badge (maybe they already have it?): {e}")
 
-    @commands.command(name="removebadge")
+    @badge_group.command(name="remove", aliases=["rm"])
     @commands.is_owner()
     async def remove_badge(self, ctx, user: discord.User, *, badge: str):
         """Remove a custom badge from a user's profile."""

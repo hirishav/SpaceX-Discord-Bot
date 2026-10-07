@@ -39,8 +39,9 @@ class ModConfig(commands.Cog):
             if channel_id in getattr(self.bot, 'enabled_modules_channel_cache', {}) and module_name in self.bot.enabled_modules_channel_cache.get(channel_id, set()):
                 self.bot.enabled_modules_channel_cache[channel_id].remove(module_name)
                 
-            if channel_id not in self.bot.disabled_modules_channel_cache:
-                self.bot.disabled_modules_channel_cache[channel_id] = set()
+            if channel_id in self.bot.disabled_modules_channel_cache and module_name in self.bot.disabled_modules_channel_cache[channel_id]:
+                return await ctx.send(f"⚠️ `{module_name.capitalize()}` module is already disabled in {channel.mention}.")
+                
             self.bot.disabled_modules_channel_cache[channel_id].add(module_name)
             
             cursor = self.bot.db.cursor()
@@ -53,11 +54,20 @@ class ModConfig(commands.Cog):
             
             await ctx.send(f"🚫 `{module_name.capitalize()}` module is now disabled in {channel.mention}.")
         else:
+            channel_ids = [str(c.id) for c in ctx.guild.channels]
+            has_enabled_overrides = any(
+                int(c_id) in getattr(self.bot, 'enabled_modules_channel_cache', {}) and module_name in self.bot.enabled_modules_channel_cache[int(c_id)]
+                for c_id in channel_ids
+            )
+            
+            if guild_id in getattr(self.bot, 'disabled_modules_server_cache', {}) and module_name in self.bot.disabled_modules_server_cache[guild_id]:
+                if not has_enabled_overrides:
+                    return await ctx.send(f"⚠️ `{module_name.capitalize()}` module is already disabled globally in this server.")
+            
             if guild_id not in self.bot.disabled_modules_server_cache:
                 self.bot.disabled_modules_server_cache[guild_id] = set()
             self.bot.disabled_modules_server_cache[guild_id].add(module_name)
             
-            channel_ids = [str(c.id) for c in ctx.guild.channels]
             for c_id in channel_ids:
                 c_id_int = int(c_id)
                 if c_id_int in getattr(self.bot, 'enabled_modules_channel_cache', {}) and module_name in self.bot.enabled_modules_channel_cache[c_id_int]:
@@ -95,8 +105,9 @@ class ModConfig(commands.Cog):
             if channel_id in getattr(self.bot, 'enabled_commands_channel_cache', {}) and command_name in self.bot.enabled_commands_channel_cache.get(channel_id, set()):
                 self.bot.enabled_commands_channel_cache[channel_id].remove(command_name)
                 
-            if channel_id not in self.bot.disabled_commands_channel_cache:
-                self.bot.disabled_commands_channel_cache[channel_id] = set()
+            if channel_id in self.bot.disabled_commands_channel_cache and command_name in self.bot.disabled_commands_channel_cache[channel_id]:
+                return await ctx.send(f"⚠️ Command `{command_name}` is already disabled in {channel.mention}.")
+                
             self.bot.disabled_commands_channel_cache[channel_id].add(command_name)
             
             cursor = self.bot.db.cursor()
@@ -109,11 +120,20 @@ class ModConfig(commands.Cog):
                 
             await ctx.send(f"🚫 Command `{command_name}` is now disabled in {channel.mention}.")
         else:
+            channel_ids = [str(c.id) for c in ctx.guild.channels]
+            has_enabled_overrides = any(
+                int(c_id) in getattr(self.bot, 'enabled_commands_channel_cache', {}) and command_name in self.bot.enabled_commands_channel_cache[int(c_id)]
+                for c_id in channel_ids
+            )
+            
+            if guild_id in getattr(self.bot, 'disabled_commands_cache', {}) and command_name in self.bot.disabled_commands_cache[guild_id]:
+                if not has_enabled_overrides:
+                    return await ctx.send(f"⚠️ Command `{command_name}` is already disabled globally in this server.")
+            
             if guild_id not in self.bot.disabled_commands_cache:
                 self.bot.disabled_commands_cache[guild_id] = set()
             self.bot.disabled_commands_cache[guild_id].add(command_name)
             
-            channel_ids = [str(c.id) for c in ctx.guild.channels]
             for c_id in channel_ids:
                 c_id_int = int(c_id)
                 if c_id_int in getattr(self.bot, 'enabled_commands_channel_cache', {}) and command_name in self.bot.enabled_commands_channel_cache[c_id_int]:
@@ -154,6 +174,9 @@ class ModConfig(commands.Cog):
                 if channel_id in self.bot.disabled_modules_channel_cache and module_name in self.bot.disabled_modules_channel_cache[channel_id]:
                     self.bot.disabled_modules_channel_cache[channel_id].remove(module_name)
                 
+                if channel_id in getattr(self.bot, 'enabled_modules_channel_cache', {}) and module_name in self.bot.enabled_modules_channel_cache[channel_id]:
+                    return await ctx.send(f"⚠️ `{module_name.capitalize()}` module is already enabled in {channel.mention}.")
+                
                 if channel_id not in self.bot.enabled_modules_channel_cache:
                     self.bot.enabled_modules_channel_cache[channel_id] = set()
                 self.bot.enabled_modules_channel_cache[channel_id].add(module_name)
@@ -163,10 +186,19 @@ class ModConfig(commands.Cog):
                 self.bot.db.commit()
                 await ctx.send(f"✅ `{module_name.capitalize()}` module enabled in {channel.mention}.")
             else:
+                channel_ids = [str(c.id) for c in ctx.guild.channels]
+                has_disabled_overrides = any(
+                    int(c_id) in getattr(self.bot, 'disabled_modules_channel_cache', {}) and module_name in self.bot.disabled_modules_channel_cache[int(c_id)]
+                    for c_id in channel_ids
+                )
+                
+                if guild_id not in getattr(self.bot, 'disabled_modules_server_cache', {}) or module_name not in self.bot.disabled_modules_server_cache[guild_id]:
+                    if not has_disabled_overrides:
+                        return await ctx.send(f"⚠️ `{module_name.capitalize()}` module is already enabled globally in this server.")
+                
                 if guild_id in self.bot.disabled_modules_server_cache and module_name in self.bot.disabled_modules_server_cache[guild_id]:
                     self.bot.disabled_modules_server_cache[guild_id].remove(module_name)
                 
-                channel_ids = [str(c.id) for c in ctx.guild.channels]
                 for c_id in channel_ids:
                     c_id_int = int(c_id)
                     if c_id_int in getattr(self.bot, 'disabled_modules_channel_cache', {}) and module_name in self.bot.disabled_modules_channel_cache[c_id_int]:
@@ -201,6 +233,9 @@ class ModConfig(commands.Cog):
                 if channel_id in self.bot.disabled_commands_channel_cache and command_name in self.bot.disabled_commands_channel_cache[channel_id]:
                     self.bot.disabled_commands_channel_cache[channel_id].remove(command_name)
                 
+                if channel_id in getattr(self.bot, 'enabled_commands_channel_cache', {}) and command_name in self.bot.enabled_commands_channel_cache[channel_id]:
+                    return await ctx.send(f"⚠️ Command `{command_name}` is already enabled in {channel.mention}.")
+                
                 if channel_id not in self.bot.enabled_commands_channel_cache:
                     self.bot.enabled_commands_channel_cache[channel_id] = set()
                 self.bot.enabled_commands_channel_cache[channel_id].add(command_name)
@@ -210,10 +245,19 @@ class ModConfig(commands.Cog):
                 self.bot.db.commit()
                 await ctx.send(f"✅ Command `{command_name}` enabled in {channel.mention}.")
             else:
+                channel_ids = [str(c.id) for c in ctx.guild.channels]
+                has_disabled_overrides = any(
+                    int(c_id) in getattr(self.bot, 'disabled_commands_channel_cache', {}) and command_name in self.bot.disabled_commands_channel_cache[int(c_id)]
+                    for c_id in channel_ids
+                )
+                
+                if guild_id not in getattr(self.bot, 'disabled_commands_cache', {}) or command_name not in self.bot.disabled_commands_cache[guild_id]:
+                    if not has_disabled_overrides:
+                        return await ctx.send(f"⚠️ Command `{command_name}` is already enabled globally in this server.")
+                
                 if guild_id in self.bot.disabled_commands_cache and command_name in self.bot.disabled_commands_cache[guild_id]:
                     self.bot.disabled_commands_cache[guild_id].remove(command_name)
                 
-                channel_ids = [str(c.id) for c in ctx.guild.channels]
                 for c_id in channel_ids:
                     c_id_int = int(c_id)
                     if c_id_int in getattr(self.bot, 'disabled_commands_channel_cache', {}) and command_name in self.bot.disabled_commands_channel_cache[c_id_int]:
