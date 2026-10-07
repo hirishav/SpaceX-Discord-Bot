@@ -26,4 +26,4 @@ jobs:
             git pull origin main || git pull origin master
             
             # Rebuild and start the bot using docker-compose
-            docker compose up --build -d
+            sudo docker compose up --build -d
