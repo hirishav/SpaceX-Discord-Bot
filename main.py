@@ -421,38 +421,50 @@ class SpaceXBot(commands.Bot):
         except Exception as e:
             print(f"⚠️ Failed to upload DB backup: {e}")
 
-    async def download_db_backup(self):
+    async def download_db_backup(self, force=False, message_id=None):
         if not BACKUP_CHANNEL_ID:
             print("⚠️ BACKUP_CHANNEL_ID not set. Skipping DB backup download.")
             return
             
-        if os.path.exists("warnings.db") and os.path.getsize("warnings.db") > 0:
+        if not force and os.path.exists("warnings.db") and os.path.getsize("warnings.db") > 0:
             print("-> Local warnings.db already exists and is not empty. Skipping cloud backup download to prevent data loss.")
             print("-> Note: Use !!restorebackup command if you really want to force load the cloud backup.")
             return
             
         print("-> Checking for DB backups in the cloud channel...")
         try:
-            url = f"https://discord.com/api/v10/channels/{BACKUP_CHANNEL_ID}/messages?limit=10"
             headers = {"Authorization": f"Bot {BOT_TOKEN}"}
-            
             async with aiohttp.ClientSession() as session:
-                async with session.get(url, headers=headers) as resp:
-                    if resp.status == 200:
-                        messages = await resp.json()
-                        for msg in messages:
-                            if msg.get("attachments"):
-                                for att in msg["attachments"]:
-                                    if att["filename"] == "warnings.db":
-                                        print(f"-> Found warnings.db backup! Downloading...")
-                                        async with session.get(att["url"]) as file_resp:
-                                            if file_resp.status == 200:
-                                                with open("warnings.db", "wb") as f:
-                                                    f.write(await file_resp.read())
-                                                print("-> [Success] Successfully restored warnings.db from the cloud!")
-                                                return
-                    else:
-                        print(f"[Warning] Failed to fetch backups. Status: {resp.status}")
+                if message_id:
+                    url = f"https://discord.com/api/v10/channels/{BACKUP_CHANNEL_ID}/messages/{message_id}"
+                    async with session.get(url, headers=headers) as resp:
+                        if resp.status == 200:
+                            msg = await resp.json()
+                            messages = [msg]
+                        else:
+                            print(f"[Warning] Failed to fetch specific backup message. Status: {resp.status}")
+                            messages = []
+                else:
+                    url = f"https://discord.com/api/v10/channels/{BACKUP_CHANNEL_ID}/messages?limit=10"
+                    async with session.get(url, headers=headers) as resp:
+                        if resp.status == 200:
+                            messages = await resp.json()
+                        else:
+                            print(f"[Warning] Failed to fetch backups. Status: {resp.status}")
+                            messages = []
+
+                for msg in messages:
+                    if msg.get("attachments"):
+                        for att in msg["attachments"]:
+                            if att["filename"] == "warnings.db":
+                                print(f"-> Found warnings.db backup! Downloading...")
+                                async with session.get(att["url"]) as file_resp:
+                                    if file_resp.status == 200:
+                                        with open("warnings.db", "wb") as f:
+                                            f.write(await file_resp.read())
+                                        print("-> [Success] Successfully restored warnings.db from the cloud!")
+                                        return
+                print("-> [Info] No warnings.db backup found in the fetched messages.")
         except Exception as e:
             print(f"[Error] Error downloading DB backup: {e}")
 

@@ -113,9 +113,12 @@ class OwnerMaintenance(commands.Cog):
 
     @commands.command(name="restorebackup", aliases=["loadbackup"])
     @commands.is_owner()
-    async def restore_backup(self, ctx):
+    async def restore_backup(self, ctx, message_id: str = None):
         """Force load the latest database backup from the cloud channel."""
-        await ctx.send("🔄 Loading database backup from the cloud... DB will be temporarily closed.")
+        msg = f"🔄 Loading database backup from the cloud... DB will be temporarily closed."
+        if message_id:
+            msg = f"🔄 Loading database backup from message ID `{message_id}`... DB will be temporarily closed."
+        await ctx.send(msg)
         
         try:
             # 1. Close current DB
@@ -123,19 +126,17 @@ class OwnerMaintenance(commands.Cog):
                 self.bot.db.close()
             
             # 2. Download the backup
-            await self.bot.download_db_backup()
+            await self.bot.download_db_backup(force=True, message_id=message_id)
             
             # 3. Reconnect DB
             import sqlite3
-            self.bot.db = sqlite3.connect("warnings.db", check_same_thread=False)
+            self.bot.db = sqlite3.connect("warnings.db", check_same_thread=False, isolation_level=None)
             
             # Reapply PRAGMAs just like setup_hook
             cursor = self.bot.db.cursor()
             cursor.execute("PRAGMA journal_mode=WAL;")
             cursor.execute("PRAGMA synchronous=NORMAL;")
-            cursor.execute("PRAGMA cache_size=-64000;")
-            cursor.execute("PRAGMA temp_store=MEMORY;")
-            cursor.execute("PRAGMA mmap_size=30000000000;")
+            cursor.execute("PRAGMA cache_size=-8000;")
             
             await ctx.send("✅ Backup successfully restored and database reconnected!")
         except Exception as e:
