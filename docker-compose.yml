@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  bot:
+    build: .
+    container_name: spacex_bot
+    restart: always
+    network_mode: "host"
+    env_file:
+      - .env
+    volumes:
+      - ./database.db:/app/database.db
+      - ./warnings.db:/app/warnings.db
