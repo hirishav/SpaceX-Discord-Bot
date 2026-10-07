@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - master # Triggers when you push to main or master branch
+  workflow_dispatch: # Allows manual triggering from GitHub UI
 
 jobs:
   deploy:
