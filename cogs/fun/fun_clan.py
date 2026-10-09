@@ -2,8 +2,67 @@
 import discord
 from discord.ext import commands
 import database as sqlite3
+import discord
+from discord.ext import commands
+import database as sqlite3
 import datetime
 import random
+
+class ClanInviteView(discord.ui.View):
+    def __init__(self, inviter_id, invited_user, clan_id, clan_name):
+        super().__init__(timeout=60.0)
+        self.inviter_id = inviter_id
+        self.invited_user = invited_user
+        self.clan_id = clan_id
+        self.clan_name = clan_name
+        self.message = None
+
+    @discord.ui.button(label="Yes", style=discord.ButtonStyle.green, custom_id="clan_yes")
+    async def join_btn(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if interaction.user.id != self.invited_user.id:
+            return await interaction.response.send_message("❌ Ye invite aapke liye nahi hai!", ephemeral=True)
+            
+        conn = sqlite3.connect("warnings.db")
+        cursor = conn.cursor()
+        
+        cursor.execute("SELECT count(*) FROM clan_members WHERE clan_id = ?", (self.clan_id,))
+        if cursor.fetchone()[0] >= 50:
+            conn.close()
+            return await interaction.response.send_message("❌ Ye clan ab full ho chuka hai!", ephemeral=True)
+            
+        cursor.execute("SELECT clan_id FROM clan_members WHERE user_id = ?", (str(interaction.user.id),))
+        if cursor.fetchone():
+            conn.close()
+            return await interaction.response.send_message("❌ Aap pehle se hi ek clan me hain. Pehle use leave karein.", ephemeral=True)
+            
+        cursor.execute(
+            "INSERT INTO clan_members (user_id, clan_id, role) VALUES (?, ?, ?)",
+            (str(interaction.user.id), self.clan_id, "Member")
+        )
+        conn.commit()
+        conn.close()
+        
+        for child in self.children:
+            child.disabled = True
+        await interaction.response.edit_message(content=f"✅ {interaction.user.mention} ne **{self.clan_name}** join kar liya hai!", embed=None, view=self)
+
+    @discord.ui.button(label="No", style=discord.ButtonStyle.red, custom_id="clan_no")
+    async def deny_btn(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if interaction.user.id != self.invited_user.id:
+            return await interaction.response.send_message("❌ Ye invite aapke liye nahi hai!", ephemeral=True)
+            
+        for child in self.children:
+            child.disabled = True
+        await interaction.response.edit_message(content=f"❌ {interaction.user.mention} ne **{self.clan_name}** ka invite thukra diya.", embed=None, view=self)
+
+    async def on_timeout(self):
+        for child in self.children:
+            child.disabled = True
+        if self.message:
+            try:
+                await self.message.edit(content="⏳ Invitation expire ho gaya hai.", view=self)
+            except:
+                pass
 
 class FunClan(commands.Cog):
     def __init__(self, bot):
@@ -12,7 +71,7 @@ class FunClan(commands.Cog):
     @commands.group(invoke_without_command=True, name="clan", aliases=["clans"])
     async def clan_cmd(self, ctx):
         """Clan module commands. Use help clan for details."""
-        await ctx.send(f"❌ Valid subcommands: `create`, `info`, `join`, `leave`, `disband`, `edit`, `leaderboard`, `war`, `transfer`, `admin`, `invite`, `raid`\nExample: `{ctx.prefix}clan info`")
+        await ctx.send(f"❌ Valid subcommands: `create`, `info`, `join`, `leave`, `disband`, `edit`, `leaderboard`, `list`, `war`, `transfer`, `admin`, `invite`, `raid`\nExample: `{ctx.prefix}clan info`")
 
     @clan_cmd.command(name="create")
     async def clan_create(self, ctx, *, name: str = None):
@@ -351,8 +410,10 @@ class FunClan(commands.Cog):
             conn.close()
             return await ctx.send("❌ Sirf Leader ya Admin hi invite kar sakte hain.")
             
-        cursor.execute("SELECT name FROM clans WHERE clan_id = ?", (caller[0],))
-        clan_name = cursor.fetchone()[0]
+        cursor.execute("SELECT name, clan_id FROM clans WHERE clan_id = ?", (caller[0],))
+        clan_data = cursor.fetchone()
+        clan_name = clan_data[0]
+        clan_id = clan_data[1]
             
         cursor.execute("SELECT clan_id FROM clan_members WHERE user_id = ?", (str(member.id),))
         if cursor.fetchone():
@@ -363,10 +424,36 @@ class FunClan(commands.Cog):
         
         embed = discord.Embed(
             title="💌 Clan Invitation",
-            description=f"{ctx.author.mention} ne aapko **{clan_name}** clan me invite kiya hai!\n\nJoin karne ke liye type karein:\n`{ctx.prefix}clan join {clan_name}`",
+            description=f"{ctx.author.mention} ne aapko **{clan_name}** clan me invite kiya hai!\n\nJoin karne ke liye niche `Yes` par click karein.",
             color=discord.Color.blue()
         )
-        await ctx.send(content=member.mention, embed=embed)
+        
+        view = ClanInviteView(ctx.author.id, member, clan_id, clan_name)
+        msg = await ctx.send(content=member.mention, embed=embed, view=view)
+        view.message = msg
+
+    @clan_cmd.command(name="list")
+    async def clan_list(self, ctx):
+        """List all clans globally."""
+        conn = sqlite3.connect("warnings.db")
+        cursor = conn.cursor()
+        cursor.execute("SELECT name, points FROM clans ORDER BY created_at ASC")
+        clans = cursor.fetchall()
+        conn.close()
+        
+        if not clans:
+            return await ctx.send("❌ Abhi tak koi clans nahi bane hain.")
+            
+        embed = discord.Embed(title="🌍 Global Clan List", color=discord.Color.blurple())
+        desc = ""
+        for i, (name, points) in enumerate(clans[:25]): # Cap at 25 for embed limits
+            desc += f"**{i+1}.** {name} *(Points: {points:,})*\n"
+            
+        if len(clans) > 25:
+            desc += f"\n*...aur {len(clans) - 25} clans.*"
+            
+        embed.description = desc
+        await ctx.send(embed=embed)
 
     @clan_cmd.command(name="raid")
     @commands.cooldown(1, 7200, commands.BucketType.guild)

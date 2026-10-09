@@ -800,7 +800,7 @@ class Help(commands.Cog):
 
         elif cmd.name == "clan":
             description = "⚔️ Global Clan System! Apne dosto ke sath clan banayein aur points ikattha karein."
-            usage = f"`{prefix}clan create <name>`\n`{prefix}clan info [name]`\n`{prefix}clan join <name>`\n`{prefix}clan invite @user`\n`{prefix}clan leave`\n`{prefix}clan transfer @user`\n`{prefix}clan admin @user`\n`{prefix}clan raid <target_clan>`"
+            usage = f"`{prefix}clan create <name>`\n`{prefix}clan info [name]`\n`{prefix}clan list`\n`{prefix}clan join <name>`\n`{prefix}clan invite @user`\n`{prefix}clan leave`\n`{prefix}clan transfer @user`\n`{prefix}clan admin @user`\n`{prefix}clan raid <target_clan>`"
             examples = f"`{prefix}clan create SpaceX Warriors`\n`{prefix}clan raid ToxicClan`"
             
         elif cmd.name == "clan_force_delete":
