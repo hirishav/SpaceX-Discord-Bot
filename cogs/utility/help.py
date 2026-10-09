@@ -798,6 +798,26 @@ class Help(commands.Cog):
             usage = f"`{prefix}withdraw <amount/all/half>`"
             examples = f"`{prefix}withdraw 5000`"
 
+        elif cmd.name == "clan":
+            description = "⚔️ Global Clan System! Apne dosto ke sath clan banayein aur points ikattha karein."
+            usage = f"`{prefix}clan create <name>`\n`{prefix}clan info [name]`\n`{prefix}clan join <name>`\n`{prefix}clan leave`\n`{prefix}clan disband`\n`{prefix}clan leaderboard`"
+            examples = f"`{prefix}clan create SpaceX Warriors`\n`{prefix}clan info`"
+            
+        elif cmd.name == "clan_force_delete":
+            description = "👑 Bot Owner Only: Kisi bhi clan ko permanently force delete karne ke liye."
+            usage = f"`{prefix}clan_force_delete <clan_name>`"
+            examples = f"`{prefix}clan_force_delete ToxicClan`"
+
+        elif cmd.name == "clan_add_points":
+            description = "👑 Bot Owner Only: Kisi bhi clan me custom points add karne ke liye."
+            usage = f"`{prefix}clan_add_points <points> <clan_name>`"
+            examples = f"`{prefix}clan_add_points 10000 SpaceX Warriors`"
+            
+        elif cmd.name == "clan_force_join":
+            description = "👑 Bot Owner Only: Kisi user ko forcibly kisi clan me join karwane ke liye."
+            usage = f"`{prefix}clan_force_join @user <clan_name>`"
+            examples = f"`{prefix}clan_force_join @Rishav SpaceX Warriors`"
+
         elif cmd.name == "invite":
             description = "Bot ko doosre server me add karne ke liye official invite link nikalne ke liye."
             usage = f"`{prefix}invite`"

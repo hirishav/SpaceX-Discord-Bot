@@ -788,6 +788,44 @@ class SpaceXBot(commands.Bot):
         )
         """)
         
+        # CLAN SYSTEM TABLES
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS clans (
+            clan_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT UNIQUE NOT NULL,
+            description TEXT DEFAULT 'A new clan!',
+            leader_id TEXT NOT NULL,
+            points INTEGER DEFAULT 0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+        """)
+        
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS clan_members (
+            user_id TEXT PRIMARY KEY,
+            clan_id INTEGER NOT NULL,
+            role TEXT DEFAULT 'Member',
+            joined_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (clan_id) REFERENCES clans (clan_id) ON DELETE CASCADE
+        )
+        """)
+        
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS clan_wars (
+            war_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            challenger_id INTEGER NOT NULL,
+            defender_id INTEGER NOT NULL,
+            status TEXT DEFAULT 'Pending',
+            winner_id INTEGER,
+            score_challenger INTEGER DEFAULT 0,
+            score_defender INTEGER DEFAULT 0,
+            started_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            ended_at DATETIME,
+            FOREIGN KEY (challenger_id) REFERENCES clans (clan_id),
+            FOREIGN KEY (defender_id) REFERENCES clans (clan_id)
+        )
+        """)
+        
         self.db.commit()
         
         # 🧠 WARM UP CACHE ENGINE: Memory hydration on startup
