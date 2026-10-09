@@ -3,6 +3,7 @@ import discord
 from discord.ext import commands
 import database as sqlite3
 import datetime
+import random
 
 class FunClan(commands.Cog):
     def __init__(self, bot):
@@ -11,7 +12,7 @@ class FunClan(commands.Cog):
     @commands.group(invoke_without_command=True, name="clan", aliases=["clans"])
     async def clan_cmd(self, ctx):
         """Clan module commands. Use help clan for details."""
-        await ctx.send(f"❌ Valid subcommands: `create`, `info`, `join`, `leave`, `disband`, `edit`, `leaderboard`\nExample: `{ctx.prefix}clan info`")
+        await ctx.send(f"❌ Valid subcommands: `create`, `info`, `join`, `leave`, `disband`, `edit`, `leaderboard`, `war`, `transfer`, `admin`, `invite`, `raid`\nExample: `{ctx.prefix}clan info`")
 
     @clan_cmd.command(name="create")
     async def clan_create(self, ctx, *, name: str = None):
@@ -267,6 +268,191 @@ class FunClan(commands.Cog):
         conn.close()
         
         await ctx.send(f"⚔️ **WAR DECLARED!** Aapne **{defender_name}** ke khilaf war declare kar di hai! Abhi status 'Pending' hai (Admins can resolve it or it will be resolved based on points gathered during the war period).")
+
+    @clan_cmd.command(name="transfer")
+    async def clan_transfer(self, ctx, member: discord.Member):
+        """Transfers the ownership (Leader role) to another clan member."""
+        conn = sqlite3.connect("warnings.db")
+        cursor = conn.cursor()
+        
+        cursor.execute("SELECT clan_id, role FROM clan_members WHERE user_id = ?", (str(ctx.author.id),))
+        caller = cursor.fetchone()
+        if not caller or caller[1] != "Leader":
+            conn.close()
+            return await ctx.send("❌ Sirf clan ka Leader hi ownership transfer kar sakta hai!")
+            
+        clan_id = caller[0]
+        
+        cursor.execute("SELECT role FROM clan_members WHERE user_id = ? AND clan_id = ?", (str(member.id), clan_id))
+        target = cursor.fetchone()
+        if not target:
+            conn.close()
+            return await ctx.send(f"❌ {member.mention} aapke clan me nahi hai!")
+            
+        if member.id == ctx.author.id:
+            conn.close()
+            return await ctx.send("❌ Aap khudko hi transfer nahi kar sakte!")
+            
+        # Update roles
+        cursor.execute("UPDATE clan_members SET role = 'Admin' WHERE user_id = ?", (str(ctx.author.id),))
+        cursor.execute("UPDATE clan_members SET role = 'Leader' WHERE user_id = ?", (str(member.id),))
+        cursor.execute("UPDATE clans SET leader_id = ? WHERE clan_id = ?", (str(member.id), clan_id))
+        
+        conn.commit()
+        conn.close()
+        await ctx.send(f"👑 Clan ki ownership successfully {member.mention} ko transfer kar di gayi hai! Ab woh naye Leader hain.")
+
+    @clan_cmd.command(name="admin")
+    async def clan_admin(self, ctx, member: discord.Member):
+        """Promote a member to Admin."""
+        conn = sqlite3.connect("warnings.db")
+        cursor = conn.cursor()
+        
+        cursor.execute("SELECT clan_id, role FROM clan_members WHERE user_id = ?", (str(ctx.author.id),))
+        caller = cursor.fetchone()
+        if not caller or caller[1] != "Leader":
+            conn.close()
+            return await ctx.send("❌ Sirf clan ka Leader hi kisi ko Admin bana sakta hai!")
+            
+        clan_id = caller[0]
+        
+        cursor.execute("SELECT role FROM clan_members WHERE user_id = ? AND clan_id = ?", (str(member.id), clan_id))
+        target = cursor.fetchone()
+        if not target:
+            conn.close()
+            return await ctx.send(f"❌ {member.mention} aapke clan me nahi hai!")
+            
+        if target[0] == "Leader":
+            conn.close()
+            return await ctx.send("❌ Ye pehle se hi Leader hai!")
+            
+        if target[0] == "Admin":
+            conn.close()
+            return await ctx.send(f"❌ {member.mention} pehle se hi Admin hai!")
+            
+        cursor.execute("UPDATE clan_members SET role = 'Admin' WHERE user_id = ?", (str(member.id),))
+        conn.commit()
+        conn.close()
+        await ctx.send(f"🛡️ {member.mention} ko clan ka **Admin** bana diya gaya hai!")
+
+    @clan_cmd.command(name="invite")
+    async def clan_invite(self, ctx, member: discord.Member):
+        """Invite a user to your clan."""
+        conn = sqlite3.connect("warnings.db")
+        cursor = conn.cursor()
+        
+        cursor.execute("SELECT clan_id, role FROM clan_members WHERE user_id = ?", (str(ctx.author.id),))
+        caller = cursor.fetchone()
+        if not caller:
+            conn.close()
+            return await ctx.send("❌ Aap kisi clan me nahi hain.")
+            
+        if caller[1] not in ["Leader", "Admin", "Co-Leader"]:
+            conn.close()
+            return await ctx.send("❌ Sirf Leader ya Admin hi invite kar sakte hain.")
+            
+        cursor.execute("SELECT name FROM clans WHERE clan_id = ?", (caller[0],))
+        clan_name = cursor.fetchone()[0]
+            
+        cursor.execute("SELECT clan_id FROM clan_members WHERE user_id = ?", (str(member.id),))
+        if cursor.fetchone():
+            conn.close()
+            return await ctx.send(f"❌ {member.display_name} pehle se hi kisi clan me hai.")
+            
+        conn.close()
+        
+        embed = discord.Embed(
+            title="💌 Clan Invitation",
+            description=f"{ctx.author.mention} ne aapko **{clan_name}** clan me invite kiya hai!\n\nJoin karne ke liye type karein:\n`{ctx.prefix}clan join {clan_name}`",
+            color=discord.Color.blue()
+        )
+        await ctx.send(content=member.mention, embed=embed)
+
+    @clan_cmd.command(name="raid")
+    @commands.cooldown(1, 7200, commands.BucketType.guild)
+    async def clan_raid(self, ctx, *, target_clan: str):
+        """Raid another clan to steal their points!"""
+        conn = sqlite3.connect("warnings.db")
+        cursor = conn.cursor()
+        
+        cursor.execute("SELECT clan_id, role FROM clan_members WHERE user_id = ?", (str(ctx.author.id),))
+        caller = cursor.fetchone()
+        if not caller:
+            conn.close()
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send("❌ Aap kisi clan me nahi hain.")
+            
+        if caller[1] not in ["Leader", "Admin", "Co-Leader"]:
+            conn.close()
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send("❌ Sirf Leader ya Admin hi raid initiate kar sakte hain.")
+            
+        challenger_id = caller[0]
+        
+        cursor.execute("SELECT name, points FROM clans WHERE clan_id = ?", (challenger_id,))
+        attacker = cursor.fetchone()
+        attacker_name = attacker[0]
+        
+        cursor.execute("SELECT clan_id, name, points FROM clans WHERE name = ?", (target_clan,))
+        target = cursor.fetchone()
+        if not target:
+            conn.close()
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send("❌ Target clan nahi mila! Sahi naam likhein.")
+            
+        defender_id = target[0]
+        defender_name = target[1]
+        defender_points = target[2]
+        
+        if challenger_id == defender_id:
+            conn.close()
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send("❌ Aap apne hi clan pe raid nahi kar sakte!")
+            
+        if defender_points <= 0:
+            conn.close()
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send(f"❌ **{defender_name}** ke paas lootne ke liye points hi nahi hain (0 points).")
+            
+        # 50% chance to win
+        success = random.choice([True, False])
+        
+        if success:
+            # Steal 5% to 15% of their points
+            steal_percentage = random.randint(5, 15) / 100
+            stolen_points = int(defender_points * steal_percentage)
+            if stolen_points == 0:
+                stolen_points = 1
+                
+            cursor.execute("UPDATE clans SET points = points + ? WHERE clan_id = ?", (stolen_points, challenger_id))
+            cursor.execute("UPDATE clans SET points = MAX(0, points - ?) WHERE clan_id = ?", (stolen_points, defender_id))
+            conn.commit()
+            
+            embed = discord.Embed(
+                title="🔥 RAID SUCCESSFUL! 🔥",
+                description=f"**{attacker_name}** ne **{defender_name}** par achanak hamla kar diya!\n\nTarget ko sambhalne ka mauka hi nahi mila aur aapne unke **{stolen_points:,}** points loot liye!",
+                color=discord.Color.green()
+            )
+            await ctx.send(embed=embed)
+        else:
+            # Attacker loses some points
+            attacker_points = attacker[1]
+            lose_percentage = random.randint(5, 10) / 100
+            lost_points = int(attacker_points * lose_percentage)
+            if lost_points == 0:
+                lost_points = 1
+                
+            cursor.execute("UPDATE clans SET points = MAX(0, points - ?) WHERE clan_id = ?", (lost_points, challenger_id))
+            conn.commit()
+            
+            embed = discord.Embed(
+                title="🛡️ RAID FAILED! 🛡️",
+                description=f"**{attacker_name}** ne **{defender_name}** par hamla kiya, lekin unke guards alert the!\n\nRaid fail ho gayi aur aapko **{lost_points:,}** points ka nuksan uthana pada bhagte waqt.",
+                color=discord.Color.red()
+            )
+            await ctx.send(embed=embed)
+            
+        conn.close()
 
     # ------------------ OWNER BYPASS COMMANDS ------------------
     @commands.command(name="clan_force_delete", hidden=True)
